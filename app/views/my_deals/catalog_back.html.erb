@@ -1,0 +1,96 @@
+<%
+category = params[:category]
+scategory = params[:scategory]
+keyWord = params[:keyword]
+cat_type = params[:cat_type]
+%>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="catalog_listing">
+            <script>
+                $(document).ready(function(){
+                    var catagory = '<%= params[:category]%>';
+                    var scatagory = '<%= params[:scategory]%>';
+                    var srkeyWord = '<%= params[:keyword] unless params[:keyword].blank?%>';
+                    var categ_type = '<%= cat_type%>'
+                    $("#catalog_list_accordion").html("<img src='/images/load2.gif'>");
+                    $.ajax({
+                        url: "/my_deals/item_catalog_result?category="+catagory+"&scategory="+scatagory+"&keyword="+srkeyWord,
+                        dataType: 'json',
+                        timeout: 120000,
+                        success: function(json)
+                        {	
+                            if(json.total_count == 0){
+                               $("#catalog_list_accordion").html("<font color='red'>No items found</font>");  
+                            }
+                          else{
+                            var random_source = '<ul data-role="listview" data-inset="false" data-icon="false" data-divider-theme="b" class="ui-listview" >';
+                            
+                            if(catagory == '992' ){ 
+                            $.each(json.item_catalogs, function(i,item){
+                                 random_source +=   '<table style="border: 1px solid rgb(1, 153, 173);   width: 98%;  margin: 1%;"><tbody><tr><td rowspan="2" style="width:10%;"><img src="http://mydeals247.com/system/item_catalog_imgs/'+item.item_catalog.id+'/medium/'+item.item_catalog.item_catalog_img_file_name+'" style="float: left;margin-left: 1%;height:100px;max-width:100px;"></td><td colspan="3" style="color: black;width:80%;">'+item.item_catalog.item_name+'</td><td align="right" style="width:10%;"><a href="postreq_bankloan?cat_id='+catagory+'&scat_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/post_req.png"/></a></td></tr></tbody></table>';            
+                                  });
+                          }
+                           else if(catagory == '906'){ 
+                            $.each(json.item_catalogs, function(i,item){
+                                 random_source +=   '<table style="border: 1px solid rgb(1, 153, 173);   width: 98%;  margin: 1%;"><tbody><tr><td rowspan="2" style="width:10%;"><img src="http://mydeals247.com/system/item_catalog_imgs/'+item.item_catalog.id+'/medium/'+item.item_catalog.item_catalog_img_file_name+'" style="float: left;margin-left: 1%;height:100px;max-width:100px;"></td><td colspan="3" style="color: black;width:80%;">'+item.item_catalog.item_name+'</td><td align="right" style="width:10%;"><a href="postreq_education?cat_id='+catagory+'&scat_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/post_req.png"/></a></td></tr></tbody></table>';            
+                                  });
+                          }
+
+                            else if(catagory == '1010'){ 
+                            $.each(json.item_catalogs, function(i,item){
+                                 random_source +=   '<table style="border: 1px solid rgb(1, 153, 173);   width: 98%;  margin: 1%;"><tbody><tr><td rowspan="2" style="width:10%;"><img src="http://mydeals247.com/system/item_catalog_imgs/'+item.item_catalog.id+'/medium/'+item.item_catalog.item_catalog_img_file_name+'" style="float: left;margin-left: 1%;height:100px;max-width:100px;"></td><td colspan="3" style="color: black;width:80%;">'+item.item_catalog.item_name+'</td><td align="right" style="width:10%;"><a href="postreq_insurance?cat_id='+catagory+'&scat_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/post_req.png"/></a></td></tr></tbody></table>';            
+                                  });
+                          }
+                        else{
+                           $.each(json.item_catalogs, function(i,item){
+                           	     
+                                 // random_source += '<table style="border: 1px solid rgb(1, 153, 173);   width: 98%;  margin: 1%;"><tbody><tr><td rowspan="2" style="width:10%;"><img src="http://mydeals247.com/system/item_catalog_imgs/'+item.item_catalog.id+'/medium/'+item.item_catalog.item_catalog_img_file_name+'"  style="float: left;margin-left: 1%;height:100px;max-width:100px;"></td><td colspan="3" style="color: black;width:80%;">'+item.item_catalog.item_name+'</td><td align="right" style="width:10%;"><a href="catalog_specification?categ_id='+catagory+'&parent_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/view_details.png"/></a><br><a href="postreq_apple?cat_id='+catagory+'&scat_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&item_name='+item.item_catalog.item_name+'&categ_type='+categ_type+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/post_req.png"/></a></td></tr></tbody></table>';            
+                                 random_source += '<table style="border-bottom: 1px dotted black;border-top: 1px dotted black;width:100%"> <tr><td style="padding:5px 10px 10px 5px;border:0;border-right: 1px dotted black;width:20%;"><img src="http://mydeals247.com/system/item_catalog_imgs/'+item.item_catalog.id+'/medium/'+item.item_catalog.item_catalog_img_file_name+'"  style="float: left;margin-left: 1%;max-width:100px;"></td><td style="padding:5px 10px 10px 5px;border:0;border-right: 1px dotted black;width:60%;">'+item.item_catalog.item_name+'</td><td style="padding:5px 10px 10px 5px;border:0;border-right: 1px dotted black;width:20%;"><a href="catalog_specification?categ_id='+catagory+'&parent_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&categ_type='+categ_type+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/view_details.png"/></a><br><br><a href="postreq_apple?cat_id='+catagory+'&scat_id='+scatagory+'&catalog_id='+item.item_catalog.id+'&item_name='+item.item_catalog.item_name+'&categ_type='+categ_type+'&item_name='+item.item_catalog.item_name+'" rel="external"><img src="/images/post_req.png"/></a></td></tr></table> <br>';
+	                    
+                                  });
+                             }
+                            random_source += '</ul>';
+                            $("#catalog_list_accordion").html(random_source); 
+                        }
+                      }  
+                    });
+                });
+            </script>
+            <input type="hidden" name="keyword" id="keyword" value="<%=keyWord %>"/>
+            <input type="hidden" name="category" id="category" value="<%=category %>"/>
+            <input type="hidden" name="scategory" id="scategory" value="<%=scategory %>"/>
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Item List"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Item List"}%>
+			<%end -%>
+			<ul data-role="listview" data-inset="true">
+                                    <li data-role="fieldcontain">
+                                        <fieldset data-role="controlgroup">
+                                            <input type="text" name="search_book" id="search_book" value="" data-clear-btn="true" placeholder="Search keyword...">
+                                        </fieldset>
+                                        </li>
+                                </ul>
+            <div data-role="content" id="catalog_list_accordion">
+            	<fieldset data-role="controlgroup">
+                   <input type="text" name="search_book" id="search_book" value="" data-clear-btn="true" placeholder="Search keyword...">
+                 </fieldset>
+                <ul data-role="listview" data-inset="false" data-icon="false" data-divider-theme="b" >
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>

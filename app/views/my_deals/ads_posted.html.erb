@@ -1,0 +1,64 @@
+<html> 
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="ads_posted">
+        	<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Ad Posted"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Ad Posted"}%>
+			<%end -%>
+            <script>
+                $(document).ready(function() {
+                    var auth_token=localStorage.getItem("auth");
+                    if(auth_token == null)
+		        		window.location.href = "login" 
+                    $.ajax({
+                        url: "/my_deals/ads_posted",
+                        dataType: 'json',
+                        timeout: 5000,
+                        data:{auth_token:auth_token},		  
+                        success: function(json, status) 
+                        {
+                            $.each(json.Ads_Posted, function(i,item)
+                            {
+                                document.getElementById("t1").innerHTML += "<tr><td><font size='-2'>"+this.coupon.name+"</font></td><td><font size='-2'>"+this.coupon.created_at+"</font></td><td><font size='-2'>"+this.coupon.user_price+"</font></td><td><font size='-2'>"+this.coupon.potential_leads+"</font></td><td><font size='-2'>"+this.coupon.status+"</font></td><td><input id="+this.coupon.id+" type='button' value='Detail' class='inputClass'/></td></tr>";
+				 
+                            });
+                        }
+                    });
+        
+                });
+            </script>
+            <div  data-role="header" data-theme="b"> 
+                <a href="#" data-rel="back"  data-icon="back" data-iconpos="notext"></a> 
+                <h1>Mydeals247</h1>  
+            </div>
+            <div align="center" data-role="content"> 
+                <form action="" method="post" id="frm2"> 
+                    <ul data-role="listview" data-inset="true"> 
+                        <li data-role="list-divider">Ads Posted by me</li> 
+                        <li>
+                            <div data-role="fieldcontain" name="content" id="image"> 
+                                <table id="t1" border=1>
+                                    <tr bgcolor='#CCCCCC'><td><font size="-2"><b>Ad Campaign Name</font></td><td><font size="-2"><b>Publish Date</font></td><td><font size="-2"><b>Available Balance </font></td> <td><font size="-2"><b>Potential Leads</font></td> <td><font size="-2"><b>Status</font></td> <td><font size="-2"><b>Action </font></td></tr>
+                                </table>
+                            </div> 
+
+                        </li>
+                    </ul> 
+                </form> 
+            </div>
+        </div>
+    </body>
+</html>        

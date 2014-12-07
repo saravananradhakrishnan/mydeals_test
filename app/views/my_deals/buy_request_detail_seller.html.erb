@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+    </head>
+    <body>
+        <div data-role="page" id="buyer_request_detail" data-theme="b">
+        	<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Buyer Requests"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Buyer Requests"}%>
+			<%end -%>
+        	<script>
+			    $(document).ready(function() {
+			        var id = getUrlVars()["id"];
+			        function getUrlVars() {
+			            var vars = {};
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        var quan = "";
+			        var red_amt = "";
+			        $.ajax({
+			            url: "/my_deals/buyer_request_detail",
+			            dataType: 'json',
+			            timeout: 15000,
+			            data: {id: id, auth_token: auth_token},
+			            success: function(json){
+			            	$('#lable_display').html('');
+			            	var request_detail = json.request_detail
+			            	var req_detail = "";
+			                var parent_category_name = request_detail.user_request.parent_category_name
+			                var sub_category_name = request_detail.user_request.category_name
+			                var ihave_offer = false;
+			                var my_offerId = ""
+			                var my_deals_commision_fee = json.mydeal_fee_percent
+			                if(json.my_offer != null && json.my_offer != ""){
+								ihave_offer = true;
+								my_offerId = json.my_offer.merchant_offer.id
+							}
+							var total_days_req = json.req_total_days;
+							if (total_days_req == null)
+								total_days_req = 0;
+								
+							$('#user_request_travel_type').val(request_detail.user_request.flight_type);
+							$('#user_request_flight_adult').val(request_detail.user_request.flight_adults);
+							$('#user_request_flight_seniors').val(request_detail.user_request.flight_seniors);
+							$('#user_request_flight_children').val(request_detail.user_request.flight_children);
+							$('#transaction_fee').val(my_deals_commision_fee);
+							$('#total_days').val(json.req_total_days);
+							$('#no_of_rooms').val(request_detail.user_request.no_of_rooms);
+							$('#req_number_of_items').val(request_detail.user_request.number_of_items);
+							$('#auth_token').val(auth_token);
+							$('#user_reqID').val(request_detail.user_request.id);
+							req_detail +=  "<h3>Request Detail</h3>";
+			                if(parent_category_name == "Flight Booking"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Item Category: </font><font size='-2'>" +sub_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Item Name: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>No. Of Items:</font><font size='-2'>"+request_detail.user_request.number_of_items+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Shipping Pref: </font><font size='-2'>" + request_detail.user_request.descision_factor +"</td>";
+			                	req_detail +=  "		<td>&nbsp;</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per day: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Car Rental"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Item Name: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>No. Of Items:</font><font size='-2'>"+request_detail.user_request.number_of_items+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Item: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	var pod = request_detail.user_request.pick_up_date.split('T');
+			                	var dod = request_detail.user_request.drop_off_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Pick Up Date: </font><font size='-2'>" + pod[0] +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Drop off Date: </font><font size='-2'>" + dod[0] + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "CAB OR TAXI Booking"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Booking Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Type of vehicle: </font><font size='-2'>" + request_detail.user_request.ac_non_ac + " " + request_detail.user_request.type_of_vehicle+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>No. of Person:</font><font size='-2'>"+request_detail.user_request.adult+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	var pod = request_detail.user_request.cab_start_datetime.split('T');
+			                	var dod = request_detail.user_request.cab_end_datetime.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Pickup Date/Time: </font><font size='-2'>" + pod[0] +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Drop-Off Date/Time: </font><font size='-2'>" + dod[0] + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Starting Point:<br/></font><font size='-2'>" + request_detail.user_request.cab_starting_point +"<br/><font size='-1'>";
+			                	req_detail +=  "			Landmark:<br/></font><font size='-2'>" + request_detail.user_request.landmark +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	if(sub_category_name == "Tour OR Long Distance Package"){
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Travel Details:<br/></font><font size='-2'>" + request_detail.user_request.cab_trip_details +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	}
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Total Bugdet: </font><font size='-2'>Rs. " +request_detail.user_request.grand_total + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>No. of Bags: </font><font size='-2'>"+request_detail.user_request.cab_bags+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Services OR Help Needed"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Service: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	var pod = request_detail.user_request.pick_up_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Start Date:</font><font size='-2'>"+pod[0]+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>" + request_detail.user_request.descision_factor + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Additional Details: </font><font size='-2'>" + request_detail.user_request.item_spec +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Hotel Booking"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><font size='-1'>Hotel Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	var cid = request_detail.user_request.check_in_date.split('T');
+			                	var cod = request_detail.user_request.check_out_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Check-in Date: </font><font size='-2'>" + cid[0] +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Check-out Date:</font><font size='-2'>"+ cod[0] +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>"+request_detail.user_request.descision_factor+"</font></td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Number of Rooms: </font><font size='-2'>" + request_detail.user_request.no_of_rooms +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Adult: </font><font size='-2'>" + request_detail.user_request.adult + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Children: </font><font size='-2'>" + request_detail.user_request.children +"</td>";
+			                	req_detail +=  "		<td>&nbsp;</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Night: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Required Amenities:</font><br/>";
+			                	var req_amenities = "";
+			                	if(json.requested_hotel_amenities != null && json.requested_hotel_amenities != ""){
+									$.each(json.requested_hotel_amenities, function(i, item){
+			                			req_amenities += ", "+item.request_amenity.name
+			                		});
+								}
+								req_detail += req_amenities;
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Two Wheelers" || parent_category_name == "Cars"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Sub Category:: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Year of the model: </font><font size='-2'>" + request_detail.user_request.make_year + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Condition:</font><font size='-2'>"+request_detail.user_request.item_condition+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Color Preference:</font><font size='-2'>"+request_detail.user_request.color_pref+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>" + request_detail.user_request.descision_factor +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Real Estate"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Sub Category:: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	var stDT = request_detail.user_request.from_date.split('T');
+			                	var edDT = request_detail.user_request.end_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Start Date: </font><font size='-2'>" + stDT[0] + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>End Date:</font><font size='-2'>"+edDT[0]+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Number of Bed Room: </font><font size='-2'>" + request_detail.user_request.no_of_bed_rooms + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Sq.Ft:</font><font size='-2'>"+request_detail.user_request.sq_feet+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.price + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Educational Training"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Cource Name: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Course Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.price + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Trainee's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Insurance"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Looking For: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.price + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Bank Loans"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Looking For: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Interest Rate:: </font><font size='-2'>Rs. " + request_detail.user_request.interest_rate + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Tenure: </font><font size='-2'>" + request_detail.user_request.tenure_term + "Years</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Loan Amount: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Car Services"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Service Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Car Brand Name: </font><font size='-2'>" + request_detail.user_request.color_pref + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Car Type: </font><font size='-2'>" + request_detail.user_request.tenure_term + "Years</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Books"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +sub_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Shipping Preference: </font><font size='-2'>"+request_detail.user_request.descision_factor+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Book: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Total Budget: </font><font size='-2'>Rs. "+request_detail.user_request.grand_total+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Number of Book(s): </font><font size='-2'>" +request_detail.user_request.number_of_items + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Book Condition: </font><font size='-2'>"+request_detail.user_request.item_condition+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Near by Area:</font><font size='-2'>"+request_detail.user_request.locality+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr><td colspan='2'><font size='-1'>Requested Book details: </font></br>";
+			                	req_detail +=  "	<div style='width: 20%;float:left'>";
+								req_detail +=  "	<div>";
+								req_detail +=  "	<img id='spn_img' src=" + request_detail.user_request.book_cover_url + " alt='cover' title='cover' width='60' height='80'/>";
+								req_detail +=  "	</div>";
+								req_detail +=  "	</div>";
+								req_detail +=  "	<div style='width: 75%;float:right'>";
+								req_detail +=  "	<h4><b><span>" + request_detail.user_request.item_info + "</span></b></h4>";
+								req_detail +=  "	<h4><span>" + request_detail.user_request.item_spec + "</span></h4>";
+								req_detail +=  "	<h4><b>ISBN Code:</b><span id='spn_isbn'>" + request_detail.user_request.item_code + "</span></h4>";	
+								req_detail +=  "	</div>";
+								req_detail +=  "	</td></tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else{
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Sub Category: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Item Name </font><font size='-2'>" + request_detail.user_request.item_info +"</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Number of Items: </font><font size='-2'>"+request_detail.user_request.number_of_items+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Shipping Prefernece: </font><font size='-2'>" +request_detail.user_request.descision_factor + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Item Condition: </font><font size='-2'>"+request_detail.user_request.item_condition+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Near by Area:</font><font size='-2'>"+request_detail.user_request.locality+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Item:</font><font size='-2'>Rs. " + request_detail.user_request.price +"</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Total Budget: </font><font size='-2'>Rs. "+request_detail.user_request.grand_total+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	if(request_detail.user_request.item_spec != null){
+				                	req_detail +=  "	<tr><td colspan='2'>";
+				                	req_detail +=  "	<div style='width: 20%;float:left'>";
+									req_detail +=  "	<div>";
+									req_detail +=  "	"+request_detail.user_request.item_spec+"";
+									req_detail +=  "	</div>";
+									req_detail +=  "	</td></tr>";
+			                	}
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }
+			                var merchant_offers = "<br/><center><table border=1 width='100%'><tr><td align='center'>Top 5 Merchant Offers</td></tr>";
+			                if(json.top_five_live_offers != null && json.top_five_live_offers != ""){
+								$.each(json.top_five_live_offers, function(i, item){
+									if(item.merchant_offer.id == my_offerId)
+										merchant_offers += "<tr><td align='center'><span onclick='ShowMyOffer("+json.my_offer.merchant_offer.id+");' style='color:blue;cursor:pointer;'>Rs. "+item.merchant_offer.total_price_inr+"</span></td></tr>";
+									else
+		                				merchant_offers += "<tr><td align='center'>Rs. "+item.merchant_offer.total_price_inr+"</td></tr>";
+		                		});
+							}else{
+								merchant_offers += "<tr><td align='center'>Be the first one to Offer!!!</td></tr>";
+							}
+			                merchant_offers += "</table></center>"
+			                var action_btns = '';
+			                action_btns += '            <div class="ui-grid-a" style="margin-top:2%">';
+							action_btns += '				<div class="ui-block-a">';
+							
+							if(ihave_offer)
+								action_btns += '					<a href="#"  onclick="showForm();"><img src="/images/update_my_offer.png" style="width: 100%;"></a>';
+							else
+								action_btns += '					<a href="#" onclick="showForm();"><img src="/images/post_offer.png" style="width: 100%;"></a>';	
+								
+							action_btns += '				</div>';
+							action_btns += '				<div class="ui-block-b">';
+							action_btns += '					<a href="#"   onclick="history.go(-1);"><img src="/images/back.png" style="width: 98%;margin-left:2%"></a>';
+							action_btns += '				</div>';
+							action_btns += '			</div>';	
+			                final_HTML_CONTENT = "<div id='rquest_detail_div'>"+req_detail +""+merchant_offers+""+action_btns+"</div>"
+			                $("#contentLI").append(final_HTML_CONTENT); 
+			                //Create the form element here...
+			                var offer_price = "";
+			                var total_price = "";
+			                var mydeals_commison = 0;
+			                var seller_amt = 0;
+			                var offer_expirytime = 0;
+			                var offer_spec = "";
+			                var offer_img_url = "";
+			                var offered_amenities = [];
+			                var onbehalf_hotel_name = "";
+			                var onbehalf_hotel_contact = "";
+			                var onbehalf_hotel_addr = "";
+			                var company_name = "";
+			                var contact_number = "";
+			                var contact_person = "";
+			                
+			                var mrp  = "0";
+							var condition = "";
+							var color_pref = "";
+							var make_year = "";
+							var city = "";
+							var carbrand = "";
+							var tenure_term = "0";
+							var interest_rate = "0";
+							var warranty = "0";
+							var warranty_tenure = "";
+							var mode_of_shipping = "";
+							var shipping_charge = "0";
+			                var cab_max_km = "";
+			                if(json.my_offer != null && json.my_offer != ""){
+								 offer_price = json.my_offer.merchant_offer.offer_price
+								 total_price = json.my_offer.merchant_offer.total_price_inr
+								 mydeals_commison = ((parseFloat(my_deals_commision_fee) * parseFloat(total_price))/100).toFixed(2);
+								 seller_amt = (parseFloat(total_price) - parseFloat(mydeals_commison)).toFixed(2);
+								 offer_expirytime = json.my_offer.merchant_offer.minimum_offer_time;
+								 offer_spec = json.my_offer.merchant_offer.item_info;
+								 offer_img_url = json.my_offer.merchant_offer.offer_img_root+"/system/buysell_imgs/"+json.my_offer.merchant_offer.id+"/thumb/"+json.my_offer.merchant_offer.buysell_img_file_name;
+								 if(json.my_offer.merchant_offer.offered_amenities != null && json.my_offer.merchant_offer.offered_amenities != ""){
+								 	$.each(json.my_offer.merchant_offer.offered_amenities, function(i, item){
+								 		offered_amenities.push(item.offer_amenity.amenity_id);
+								 	});	
+								 }
+								 onbehalf_hotel_name = json.my_offer.merchant_offer.onbehalf_hotel_name;
+								 onbehalf_hotel_contact = json.my_offer.merchant_offer.onbehalf_hotel_contact;
+								 onbehalf_hotel_addr = json.my_offer.merchant_offer.onbehalf_hotel_addr;
+								 mrp = json.my_offer.merchant_offer.mrp;
+								 condition = json.my_offer.merchant_offer.item_condition;
+								 color_pref = json.my_offer.merchant_offer.color_pref;
+								 make_year = json.my_offer.merchant_offer.make_year;
+								 city = json.my_offer.merchant_offer.city;
+								 carbrand = json.my_offer.merchant_offer.color_pref;
+								 tenure_term = json.my_offer.merchant_offer.tenure_term;
+								 interest_rate = json.my_offer.merchant_offer.interest_rate;
+								 warranty = json.my_offer.merchant_offer.warranty;
+								 warranty_tenure = json.my_offer.merchant_offer.warranty_tenure;
+								 mode_of_shipping = json.my_offer.merchant_offer.mode_of_shipping;
+								 shipping_charge = json.my_offer.merchant_offer.shipping_charge;
+								 cab_max_km = json.my_offer.merchant_offer.cab_max_km;
+							}
+			                var offerexpire_elm = '';
+			                var form_content = '<div id="form_content" style="display:none;">';
+			                if(json.possible_offer_expiry_hrs != null && json.possible_offer_expiry_hrs != ""){
+			                	var markselected = "";
+			                	offerexpire_elm += '<select name="minimum_offer_time" id="minimum_offer_time">'
+								$.each(json.possible_offer_expiry_hrs, function(i, item){
+									if (offer_expirytime == item)
+										markselected = "selected"
+									else
+										markselected = ""
+									if(item != null)
+										offerexpire_elm += '<option value="'+item+'" '+markselected+'>'+item+'</option>';
+		                		});
+		                		offerexpire_elm += '</select>&nbsp;Hours<span id="offer_expiry_msg">(Your offer will expire by this time.)</span>';
+							}
+							form_content += '	<ul data-role="listview" data-inset="true" id="frm_elements" style="border:1px solid rgba(3, 146, 123, 0.6)">';
+							form_content += '		<li class="ui-li ui-li-static ui-body-c"><strong>Post your offer</strong></li>';
+							form_content += '		<li class="ui-li ui-li-static ui-body-c" id="frm_submit_msg_bar"></li>';
+								
+							if (parent_category_name == "<%=$cab_category%>"){
+			                	form_content += '		<li>';
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" id="offer_price" value="'+offer_price+'" onkeypress ="return numberOnly(this, event);" onchange="calculatePrices(\''+parent_category_name+'\');"/>';
+								form_content += '				&nbsp; <span>(Inclusive of all taxes and Driver Bhatta)</span>';
+								form_content += '			</div>';
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								if (parent_category_name == "<%=$cab_package%>"){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="maxkmpd">Maximum KM/Day </label>';
+									form_content += '				<select name="cab_max_km" id="cab_max_km">';
+									form_content += '					<option value="">-- Select --</option>';
+									var kms = ["250","200","150","100","300"];
+									var markselected = "";
+									for (var i=0; i < kms.length; i++) {
+									  if(cab_max_km == kms[i])
+									  	markselected="selected"
+									  else
+									  	markselected = "";		
+									  form_content += '					<option value="'+kms[i]+'" '+markselected+'>'+kms[i]+'</option>';
+									}
+									form_content += '				</select>';							
+									form_content += '			</div>';
+								}
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								if(offer_img_url != ""){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="offerimg">Offered Image </label>';
+									form_content += '				&nbsp;<img src="'+offer_img_url+'" border="0" />';
+									form_content += '			</div>';
+								}
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="vhclimg">Vehicle Image </label>';
+								form_content += '				&nbsp;<input type="file" name="buysell_img" id="buysell_img" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" onkeypress ="return numberOnly(this, event);" name="shipping_charge" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								
+						    }else if(parent_category_name == "Hotel Booking"){
+						    	form_content += '		<li>';
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Net Price including taxes(Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" id="offer_price" onkeypress ="return numberOnly(this, event);" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '				&nbsp; <span>(Per night rate for one room)</span>';
+								form_content += '			</div>';
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<fieldset data-role="controlgroup">';
+								form_content += '				<label for="amenities">Amenities </label>';
+								form_content += '				   <select name="amenity_ids[]" id="amenity_ids" multiple="multiple" data-native-menu="false">';
+								if(json.available_hotel_amenities != null && json.available_hotel_amenities != ""){
+									var markselected = "";
+									$.each(json.available_hotel_amenities, function(i, item){
+										if($.inArray(item.amenity.id, offered_amenities) == -1)
+											markselected = "";
+										else
+											markselected = "selected";	
+			                			form_content += '<option value="'+item.amenity.id+'" '+markselected+'>'+item.amenity.name+'</option>';		
+			                		});
+								}
+								form_content += '				   </select>';
+								form_content += '			</fieldset>';
+								
+								if(json.is_travel_agent == 1){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="hotname">Hotel Name: </label>';
+									form_content += '				<input type="text" id="onbehalf_hotel_name" name="onbehalf_hotel_name" value="'+onbehalf_hotel_name+'"/>';
+									form_content += '			</div>';
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="hotname">Hotel Address: </label>';
+									form_content += '				<textarea rows="2" id="onbehalf_hotel_addr" name="onbehalf_hotel_addr">'+onbehalf_hotel_addr+'</textarea>';
+									form_content += '			</div>';
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="hotname">Hotel Contact Number: </label>';
+									form_content += '				<input type="number" id="onbehalf_hotel_contact" name="onbehalf_hotel_contact" value="'+onbehalf_hotel_contact+'"/>';
+									form_content += '			</div>';
+								}	
+									
+						    }else if(parent_category_name == "Real Estate"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');"  />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div class="ui-bar ui-bar-b">';
+								form_content += '				<h3>Contact Details: </h3>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Company Name</label>';
+								form_content += '				&nbsp;<input type="text" name="company_name" id="company_name" value="'+company_name+'" />';
+								form_content += '			</div>';
+							
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Contact Person </label>';
+								form_content += '				&nbsp;<input type="text" name="contact_person" id="contact_person" value="'+contact_person+'" />';
+								form_content += '			</div>';
+							
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Contact Number </label>';
+								form_content += '				&nbsp;<input type="number" name="contact_number" onkeypress ="return numberOnly(this, event);" id="contact_number" value="'+contact_number+'" />';
+								form_content += '			</div>';
+						}else if(parent_category_name == "Books"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Offer Per Book (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');"  />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Mode of Shipping </label>';
+								form_content += '				<select name="mode_of_shipping" id="mode_of_shipping" onchange="change_mode_ofshipping(this.value);">';
+								form_content += '					<option value="">- Select -</option>';
+								var modeshipping = ["Person to Person","Courier / Shipping"]
+								var mark_selected = "";
+								for (var i=0; i < modeshipping.length; i++) {
+								  if(mode_of_shipping == modeshipping[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+modeshipping[i]+'" '+mark_selected+'>'+modeshipping[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge"  onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="lblcondiiton">Condition </label>';
+								form_content += '				<select name="condition" id="condition">';
+	                            form_content += '					<option value="">- Select -</option>';
+	                            var conditions = ["New","Used"]
+								var mark_selected = "";
+								for (var i=0; i < conditions.length; i++) {
+								  if(condition == conditions[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+conditions[i]+'" '+mark_selected+'>'+conditions[i]+'</option>';
+								}
+	                           	form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Book MRP (Rs.) </label>';
+								form_content += '				&nbsp;<input type="text" name="mrp" id="mrp" value="'+mrp+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+			                }else if(parent_category_name == "Cars"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="lblcondiiton">Condition </label>';
+								form_content += '				<select name="condition" id="condition">';
+	                            form_content += '					<option value="">- Select -</option>';
+	                            var conditions = ["New","Used"]
+								var mark_selected = "";
+								for (var i=0; i < conditions.length; i++) {
+								  if(condition == conditions[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+conditions[i]+'" '+mark_selected+'>'+conditions[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Color </label>';
+								form_content += '				<select name="color_pref" id="color_pref">';
+	                            form_content += '					<option value="">- Select -</option>';
+								var color_prefs = ["Silver","Black","Gray","White","Red","Blue","Beige","Pink","Green","Yellow/Gold","Purple","Other"]
+								var mark_selected = "";
+								for (var i=0; i < color_prefs.length; i++) {
+								  if(color_pref == color_prefs[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+color_prefs[i]+'" '+mark_selected+'>'+color_prefs[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Year of the Model </label>';
+								form_content += '				<select name="make_year" id="make_year">';
+								form_content += '					<option value="">- Select -</option>';
+								var make_years = ["2014","2013","2012","2011","2010","2009","2008","2007","2006","2005","2004","2003","2002","2001","2000","1999","1998","1997","1996","1995","1994","1993","1992"]
+								var mark_selected = "";
+								for (var i=0; i < make_years.length; i++) {
+								  if(make_year == make_years[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+make_years[i]+'" '+mark_selected+'>'+make_years[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+								if(offer_img_url != ""){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="offerimg">Offered Image </label>';
+									form_content += '				&nbsp;<img src="'+offer_img_url+'" border="0" />';
+									form_content += '			</div>';
+								}
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="vhclimg">Vehicle Image </label>';
+								form_content += '				&nbsp;<input type="file" name="buysell_img" id="buysell_img" />';
+								form_content += '			</div>';
+							}else if(parent_category_name == "Two Wheelers"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="lblcondiiton">Condition </label>';
+								form_content += '				<select name="condition" id="condition">';
+	                            form_content += '					<option value="">- Select -</option>';
+	                            var conditions = ["New","Used"]
+								var mark_selected = "";
+								for (var i=0; i < conditions.length; i++) {
+								  if(condition == conditions[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+conditions[i]+'" '+mark_selected+'>'+conditions[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Color </label>';
+								form_content += '				<select name="color_pref" id="color_pref">';
+	                            form_content += '					<option value="">- Select -</option>';
+								var color_prefs = ["Silver","Black","Gray","White","Red","Blue","Beige","Pink","Green","Yellow/Gold","Purple","Other"]
+								var mark_selected = "";
+								for (var i=0; i < color_prefs.length; i++) {
+								  if(color_pref == color_prefs[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+color_prefs[i]+'" '+mark_selected+'>'+color_prefs[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Year of the Model </label>';
+								form_content += '				<select name="make_year" id="make_year">';
+								form_content += '					<option value="">- Select -</option>';
+								var make_years = ["2014","2013","2012","2011","2010","2009","2008","2007","2006","2005","2004","2003","2002","2001","2000","1999","1998","1997","1996","1995","1994","1993","1992"]
+								var mark_selected = "";
+								for (var i=0; i < make_years.length; i++) {
+								  if(make_year == make_years[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+make_years[i]+'" '+mark_selected+'>'+make_years[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+								if(offer_img_url != ""){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="offerimg">Offered Image </label>';
+									form_content += '				&nbsp;<img src="'+offer_img_url+'" border="0" />';
+									form_content += '			</div>';
+								}
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="vhclimg">Vehicle Image </label>';
+								form_content += '				&nbsp;<input type="file" name="buysell_img" id="buysell_img" />';
+								form_content += '			</div>';
+								
+			                }else if(parent_category_name == "Educational Training"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="lblcondiiton">Course Type </label>';
+								form_content += '				<select name="condition" id="condition">';
+	                            form_content += '					<option value="">- Select -</option>';
+	                            var conditions = ["New","Used","Distance Learning"]
+								var mark_selected = "";
+								for (var i=0; i < conditions.length; i++) {
+								  if(condition == conditions[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+conditions[i]+'" '+mark_selected+'>'+conditions[i]+'</option>';
+								}
+	                            form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+								if(offer_img_url != ""){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="offerimg">Offered Image </label>';
+									form_content += '				&nbsp;<img src="'+offer_img_url+'" border="0" />';
+									form_content += '			</div>';
+								}
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="vhclimg">Course Image </label>';
+								form_content += '				&nbsp;<input type="file" name="buysell_img" id="buysell_img" />';
+								form_content += '			</div>';
+			                }else if(parent_category_name == "Car Services"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" id="offer_price"  onkeypress ="return numberOnly(this, event);" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_condition">';
+								form_content += '				<label for="toff">Car Type </label>';
+								form_content += '				&nbsp;<span id="spnCarType">&nbsp;'+condition+'</span>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_city">';
+								form_content += '				<label for="toff">City </label>';
+								form_content += '				&nbsp;<span id="spnCarcity">&nbsp;'+city+'</span>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_city">';
+								form_content += '				<label for="toff">Car Brand Name </label>';
+								form_content += '				&nbsp;<span id="spnCarbrand">&nbsp;'+carbrand+'</span>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+								if(offer_img_url != ""){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="offerimg">Offered Image </label>';
+									form_content += '				&nbsp;<img src="'+offer_img_url+'" border="0" />';
+									form_content += '			</div>';
+								}
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="vhclimg">Vehicle Image </label>';
+								form_content += '				&nbsp;<input type="file" name="buysell_img" id="buysell_img" />';
+								form_content += '			</div>';
+			                }else if(parent_category_name == "<%=$service_category%>"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" id="offer_price" onkeypress ="return numberOnly(this, event);" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge"  onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+			                }else if(parent_category_name == "Bank Loans"){
+			                	form_content += '		<li>';
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_condition">';
+								form_content += '				<label for="toff">Looking For </label>';
+								form_content += '				&nbsp;<span id="spnlookingfor">&nbsp;'+sub_category_name+'</span>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_city">';
+								form_content += '				<label for="toff">Loan Terms </label>';
+								form_content += '				&nbsp;<input type="number" name="tenure_term" onkeypress ="return numberOnly(this, event);" id="tenure_term" value="'+tenure_term+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_city">';
+								form_content += '				<label for="toff">Interest Rate(%) </label>';
+								form_content += '				&nbsp;<input type="number" name="interest_rate" onkeypress ="return numberOnly(this, event);" id="interest_rate" value="'+interest_rate+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+			                }else if(parent_category_name == "Insurance"){
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Best Offer Price (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" id="offer_price" onkeypress ="return numberOnly(this, event);" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_condition">';
+								form_content += '				<label for="toff">Looking For </label>';
+								form_content += '				&nbsp;<span id="spnlookingfor">&nbsp;'+sub_category_name+'</span>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="car_city">';
+								form_content += '				<label for="toff">Insurance Terms </label>';
+								form_content += '				&nbsp;<input type="number" name="tenure_term" onkeypress ="return numberOnly(this, event);" id="tenure_term" value="'+tenure_term+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Additional Details </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+			                }else{
+			                	form_content += '		<li>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offpp">Offer Per Item (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="offer_price" onkeypress ="return numberOnly(this, event);" id="offer_price" value="'+offer_price+'" onchange="calculatePrices(\''+parent_category_name+'\');" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="total_budget_para" style="display:none;">';
+								form_content += '				<label for="toff">Total Offer Price(Rs.) </label>';
+								form_content += '				&nbsp;<span id="total_offer">&nbsp;'+total_price+'</span>';
+								form_content += '				<input type="hidden" id="total_price" name="total_price" value="'+total_price+'">';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Warranty </label>';
+								form_content += '				&nbsp;<input type="number" name="warranty" onkeypress ="return numberOnly(this, event);" id="warranty" value="'+warranty+'" />';
+								form_content += '				&nbsp;<select name="warranty_tenure" id="warranty_tenure">';
+							  	var warenty_tenure = ["Month","Year"]
+								var mark_selected = "";
+								for (var i=0; i < warenty_tenure.length; i++) {
+								  if(warranty_tenure == warenty_tenure[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+warenty_tenure[i]+'" '+mark_selected+'>'+warenty_tenure[i]+'</option>';
+								}
+								
+							  	form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="mdeshipping">Mode of Shipping </label>';
+								form_content += '				<select name="mode_of_shipping" id="mode_of_shipping" onchange="change_mode_ofshipping(this.value);">';
+								form_content += '					<option value="">- Select -</option>';
+							  	var modeshipping = ["Person to Person","Courier / Shipping"]
+								var mark_selected = "";
+								for (var i=0; i < modeshipping.length; i++) {
+								  if(mode_of_shipping == modeshipping[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+modeshipping[i]+'" '+mark_selected+'>'+modeshipping[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" id="shiping_chrge_div" style="display:none;">';
+								form_content += '				<label for="toff">Shipping Charge (Rs.) </label>';
+								form_content += '				&nbsp;<input type="number" name="shipping_charge" onkeypress ="return numberOnly(this, event);" id="shipping_charge" onchange="calculatePrices(\''+parent_category_name+'\');" value="'+shipping_charge+'" />';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain" class="ui-hide-label" id="commision_msg_sec" style="display:none;">';
+								form_content += '			    <fieldset data-role="controlgroup">';
+								form_content += '				   <legend>Transaction credit:</legend>';
+								form_content += '				   <label for="checkbox-agree"><strong>MyDeals247\'s Fee ('+my_deals_commision_fee+'%): Rs. <span id="mydeals_amt">'+mydeals_commison+'</span></strong><br/>Upon successful transaction, Seller will be credited Rs. <span id="seller_amt">'+seller_amt+'</span><span id="shipping_chrge"></span></label>';
+								form_content += '			    </fieldset>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="lblcondiiton">Condition </label>';
+								form_content += '				<select name="condition" id="condition">';
+	                            form_content += '					<option value="">- Select -</option>';
+	                            var conditions = ["New","Used"]
+								var mark_selected = "";
+								for (var i=0; i < conditions.length; i++) {
+								  if(condition == conditions[i])
+								  	mark_selected = "selected"
+								  else
+								  	mark_selected = "";	
+								  form_content += '					<option value="'+conditions[i]+'" '+mark_selected+'>'+conditions[i]+'</option>';
+								}
+								form_content += '				</select>';
+								form_content += '			</div>';
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="offexpin">Offer expires in </label>';
+								form_content += offerexpire_elm;
+								form_content += '			</div>';
+								
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="adddetail">Item Specification </label>';
+								form_content += '				&nbsp;<textarea name="item_info" id="offer_spec" rows="3">'+offer_spec+'</textarea>';
+								form_content += '			</div>';
+								
+								if(offer_img_url != ""){
+									form_content += '			<div data-role="fieldcontain">';
+									form_content += '				<label for="offerimg">Offered Image </label>';
+									form_content += '				&nbsp;<img src="'+offer_img_url+'" border="0" />';
+									form_content += '			</div>';
+								}
+								
+								form_content += '			<div data-role="fieldcontain">';
+								form_content += '				<label for="vhclimg">Specification Image </label>';
+								form_content += '				&nbsp;<input type="file" name="buysell_img" id="buysell_img" />';
+								form_content += '			</div>';
+		                	}
+			                form_content += '			<div data-role="fieldcontain" class="ui-hide-label">';
+							form_content += '			    <fieldset data-role="controlgroup">';
+							form_content += '				   <input type="checkbox" name="term_agreement_decision" id="term_agreement_decision" class="custom" data-role="none" data-theme="b" />';
+							form_content += '				   <label for="checkbox-agree">By checking this box, you are agreeing to the <span id="tnc" style="color:blue">Terms and Conditions</span> and the <span id="pvcplc" style="color:blue">Privacy Policy</span></label>';
+							form_content += '			    </fieldset>';
+							form_content += '			</div>';
+							
+							form_content += '			<div class="ui-grid-a">';
+							form_content += '				<div class="ui-block-a">';
+							form_content += '					<a href="#"  id="post" onclick="save_offer(\''+parent_category_name+'\');"><img src="/images/post.png" style="width: 100%;"></a>';
+							form_content += '				</div>';
+							form_content += '				<div class="ui-block-b">';
+							form_content += '					<a href="#" id="cancel" onclick="showForm();"><img src="/images/cancel.png" style="width: 98%;margin-left:2%;"></a>';
+							form_content += '				</div>';
+							form_content += '			</div>';
+							form_content += '				<input type="hidden" id="parent_catgory_name" name="parent_catgory_name" value="'+parent_category_name+'">';
+							form_content += '				<input type="hidden" id="sub_category_name" name="sub_category_name" value="'+sub_category_name+'">';
+							form_content += '				<input type="hidden" id="currency_code" name="currency_code" value="INR">';
+							form_content += '				<input type="hidden" id="buysell_category_id" name="buysell_category_id" value="'+request_detail.user_request.buysell_category_id+'">';
+							form_content += '		</li>';
+							form_content += '	</ul>';
+			                form_content += '</div>';
+			                
+			                $("#contentLI").append(form_content);	
+			                
+			                if(ihave_offer){
+			                	calculatePrices(parent_category_name);
+			                }
+			                $('[data-role="content"]').trigger('create');
+			            },
+						error : function() {
+							$('#lable_display').html("<font color='red'>Error occured while fetching request detail, Please try again.</font>");
+							return false;
+						}
+			        });
+			    });
+			    function showForm(){
+			    	$("#offer_details").hide();
+			    	$("#contentLI").show();
+			    	$("#rquest_detail_div").toggle("slide");
+			    	$("#form_content").toggle("slide");
+			    }
+			    function calculatePrices(requeted_category){
+			    	if(($("#offer_price").val()) != "" && parseFloat(($("#offer_price").val())) > 0){
+						if(requeted_category.toLowerCase() == 'Flight Booking'.toLowerCase()){
+							var travelType = $("#user_request_travel_type").val();
+							var multiplier = 1;
+							if (travelType == "Round")
+								multiplier = 2;
+							var budgetPerPerson = parseFloat($("#offer_price").val());
+							var adults = parseInt($("#user_request_flight_adult").val());
+							var seniors = parseInt($("#user_request_flight_seniors").val());
+							var children = parseInt($("#user_request_flight_children").val());
+							var no_of_person = adults + seniors + children;
+							var totalBudget = budgetPerPerson * no_of_person * multiplier;
+							$("#total_offer").text(totalBudget);
+							var trn_fee = $("#transaction_fee").val();
+							var merchant_price = totalBudget;
+							var mydeals_price = (parseFloat(trn_fee) * parseFloat(merchant_price)) / 100;
+							$("#mydeals_amt").text(parseFloat(mydeals_price).toFixed(2))
+							if(shipingcharge > 0){
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price + parseFloat(shipingcharge)).toFixed(2));
+								$("#shipping_chrge").text(" (Including Shipping Charges)");
+								$("#total_price").val((parseFloat(totalBudget)+parseFloat(shipingcharge_car)).toFixed(2));
+							}	
+							else{
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price).toFixed(2));
+								$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							}	
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}
+						else if(requeted_category.toLowerCase() == '<%=$cab_category%>'.toLowerCase()){
+							var totaldays = $("#total_days").val();
+							totaldays = parseInt(totaldays) + 1
+							var package_category = '<%=$cab_package%>';
+							if (requeted_category == package_category){
+								var totalBudget = parseInt($("#offer_price").val()) * totaldays
+								$("#total_offer").text(totalBudget + " for "+totaldays+" days");
+							}else{
+								var totalBudget = parseInt($("#offer_price").val())
+								$("#total_offer").text(totalBudget);
+							}
+							
+							var trn_fee = $("#transaction_fee").val();
+							var merchant_price = totalBudget;
+							//var merchant_price_xcluding = totalBudget - parseFloat(merchant_price)
+							var mydeals_price = (parseFloat(trn_fee) * merchant_price) / 100;
+							$("#mydeals_amt").text(parseFloat(mydeals_price).toFixed(2));
+							$("#seller_amt").text(parseFloat(merchant_price)- mydeals_price);
+							$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}
+						else if(requeted_category.toLowerCase() == 'Hotel Booking'.toLowerCase()){
+							var totaldays = $("#total_days").val();
+							var totalBudget = parseInt($("#offer_price").val()) * totaldays * parseInt($("#no_of_rooms").val());
+							$("#total_offer").text(totalBudget);
+							var shipingcharge = $("#shipping_charge").val();
+							var trn_fee = $("#transaction_fee").val();
+							var tax_percent = $("#tax_percent").val();
+							var merchant_price = totalBudget;
+							var merchant_price_xcluding = totalBudget - ((parseFloat(tax_percent) * parseFloat(merchant_price)) / 100)
+							var mydeals_price = (parseFloat(trn_fee) * merchant_price_xcluding) / 100;
+							$("#mydeals_amt").text(parseFloat(mydeals_price).toFixed(2));
+							if(shipingcharge > 0){
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price + parseFloat(shipingcharge)).toFixed(2));
+								$("#shipping_chrge").text(" (Including Shipping Charges)");
+								$("#total_price").val((parseFloat(totalBudget)+parseFloat(shipingcharge_car)).toFixed(2));
+							}	
+							else{
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price + parseFloat(shipingcharge)).toFixed(2));
+								$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							}	
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}else if(requeted_category.toLowerCase() == '<%=$service_category%>'.toLowerCase()){
+							var totalBudget = parseInt($("#offer_price").val());
+							$("#total_offer").text(totalBudget);
+							var trn_fee = $("#transaction_fee").val();
+							var tax_percent = $("#tax_percent").val();
+							var merchant_price = totalBudget;
+							if(tax_percent != undefined)
+								var merchant_price_xcluding = totalBudget - ((parseFloat(tax_percent) * parseFloat(merchant_price)) / 100)
+							else 
+								var merchant_price_xcluding = totalBudget;		
+							var mydeals_price = (parseFloat(trn_fee) * merchant_price_xcluding) / 100;
+							$("#mydeals_amt").text(parseFloat(mydeals_price).toFixed(2));
+							$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price));
+							$("#total_price").val((parseFloat(totalBudget)));
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}
+						else if(requeted_category.toLowerCase() == 'Car rental'.toLowerCase()){
+							var travelDays = $("#total_days").val();
+							var totaloffer = parseFloat($("#offer_price").val()) * travelDays
+							$("#total_offer").text(totaloffer);
+							var shipingcharge_car = $("#shipping_charge").val();
+							var trn_fee_car = $("#transaction_fee").val();
+							var merchant_price_car = totaloffer;
+							var mydeals_price_car = (parseFloat(trn_fee_car) * parseFloat(merchant_price_car)) / 100;
+							$("#mydeals_amt").text(parseFloat(mydeals_price_car).toFixed(2))
+							if(shipingcharge_car > 0){
+								$("#seller_amt").text((parseFloat(merchant_price_car)- mydeals_price_car + parseFloat(shipingcharge_car)).toFixed(2));
+								$("#shipping_chrge").text(" (Including Shipping Charges)");
+								$("#total_price").val((parseFloat(totaloffer)+parseFloat(shipingcharge_car)).toFixed(2));
+							}	
+							else{
+								$("#seller_amt").text((parseFloat(merchant_price_car)- mydeals_price_car + parseFloat(shipingcharge_car)).toFixed(2));
+								$("#total_price").val(parseFloat(totaloffer).toFixed(2));
+							}	
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}
+						else if(requeted_category.toLowerCase() == 'Real Estate'.toLowerCase()){
+							var totaloffer = parseFloat($("#offer_price").val());
+							$("#total_price").val(parseFloat(totaloffer).toFixed(2));
+						}else if(requeted_category.toLowerCase() == 'Cars'.toLowerCase() || requeted_category.toLowerCase() == 'Car Services'.toLowerCase() || requeted_category.toLowerCase() == 'Insurance'.toLowerCase() || requeted_category.toLowerCase() == 'Bank Loans'.toLowerCase() || requeted_category.toLowerCase() == 'Educational Training'.toLowerCase() || requeted_category.toLowerCase() == 'Two Wheelers'.toLowerCase()){
+							var totalBudget = parseFloat($("#offer_price").val())
+							$("#total_offer").text(totalBudget);
+							var trn_fee = $("#transaction_fee").val();
+							var merchant_price = totalBudget;
+							var mydeals_price = (parseFloat(trn_fee) * parseFloat(merchant_price)) / 100;
+							$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							$("#mydeals_amt").text(parseFloat(mydeals_price).toFixed(2))
+							if(parseFloat(shipingcharge) > 0){
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price + parseFloat(shipingcharge)).toFixed(2));
+								$("#shipping_chrge").text(" (Including Shipping Charges)");
+								$("#total_price").val((parseFloat(totalBudget)+ parseFloat(shipingcharge)).toFixed(2));
+							}	
+							else{
+								$("#seller_amt").text((parseFloat(merchant_price) - mydeals_price));
+								$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							}	
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}
+						else{
+							var no_of_items = $("#req_number_of_items").val();
+							var totalBudget = parseFloat($("#offer_price").val()) * no_of_items
+							$("#total_offer").text(totalBudget);
+							var shipingcharge = $("#shipping_charge").val();
+							var trn_fee = $("#transaction_fee").val();
+							var merchant_price = totalBudget;
+							var mydeals_price = (parseFloat(trn_fee) * parseFloat(merchant_price)) / 100;
+							$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							$("#mydeals_amt").text(parseFloat(mydeals_price).toFixed(2))
+							if(parseFloat(shipingcharge) > 0){
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price + parseFloat(shipingcharge)).toFixed(2));
+								$("#shipping_chrge").text(" (Including Shipping Charges)");
+								$("#total_price").val((parseFloat(totalBudget)+ parseFloat(shipingcharge)).toFixed(2));
+							}	
+							else{
+								$("#seller_amt").text((parseFloat(merchant_price)- mydeals_price + parseFloat(shipingcharge)).toFixed(2));
+								$("#total_price").val(parseFloat(totalBudget).toFixed(2));
+							}	
+							$("#commision_msg_sec").show();
+							$("#total_budget_para").show();
+						}
+					}
+			    }
+			    function change_mode_ofshipping(shpmod){
+					if (shpmod =='Courier / Shipping'){
+						$("#shiping_chrge_div").show();
+					}else{
+						$("#shiping_chrge_div").hide();
+						$("#shipping_charge").val(0);
+					}
+			    }
+			    function numberOnly(d, b) {
+					var a;
+					var c;
+					if(window.event) {
+						a = window.event.keyCode
+					} else {
+						if(b) {
+							a = b.which
+						} else {
+							return true
+						}
+					}
+					c = String.fromCharCode(a);
+					if((a == null) || (a == 0) || (a == 8) || (a == 9) || (a == 13) || (a == 27)) {
+						return true
+					} else {
+						if((("0123456789").indexOf(c) > -1)) {
+							return true
+						} else {
+							return false
+						}
+					}
+				}
+				function save_offer(requested_category) {
+					var off_price = document.getElementById("offer_price").value;
+					if (off_price == "") {
+						$("#frm_submit_msg_bar").html('<font color="red">Your Offer Price can\'t be left blank</font>');
+						$("html, body").animate({ scrollTop: 0 }, "slow");
+						return false;
+					} else {
+						if (parseFloat(off_price) <= 0) {
+							$("#frm_submit_msg_bar").html('<font color="red">Offer amount should be greater than 0</font>');
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							return false;
+						}
+					}
+					if (requested_category != "Car Rental" && requested_category != "Hotel Booking" && requested_category != "Real Estate" && requested_category != "Flight Booking" && requested_category != "Cars" && requested_category != "Two Wheelers") {
+						if ($("#mode_of_shipping").val() != undefined && $("#mode_of_shipping").val() == "") {
+							$("#frm_submit_msg_bar").html('<font color="red">Please select mode of shipping for your offer.</font>');
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							return false;
+						}
+					}
+					if (requested_category != "Car Rental" && requested_category != "Hotel Booking" && requested_category != "Real Estate" && requested_category != "Flight Booking" && requested_category != "Cars" && requested_category != "Two Wheelers" && requested_category != "Books") {
+						if ($("#warranty").val() != undefined && $("#warranty").val() == "") {
+							$("#frm_submit_msg_bar").html('<font color="red">Please specify warranty of this product.</font>');
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							return false;
+						}
+						if ($("#warranty_tenure").val() != undefined && $("#warranty_tenure").val() == "") {
+							$("#frm_submit_msg_bar").html('<font color="red">Please specify warranty tenure of this product.</font>');
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							return false;
+						}
+					}
+					if (requested_category.toLowerCase() != 'Real Estate'.toLowerCase()) {
+						var termAccepted = $("#term_agreement_decision").is(":checked");
+						if (!termAccepted) {
+							$("#frm_submit_msg_bar").html('<font color="red">Please accept Terms & Conditions and the policy(s) before you proceed.</font>');
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							return false;
+						}
+						if (requested_category.toLowerCase() == 'Books'.toLowerCase()) {
+							var mrp = document.getElementById("mrp").value;
+							if(mrp == ""){
+								$("#frm_submit_msg_bar").html('<font color="red">Please specify MRP of the Book.</font>');
+								$("html, body").animate({ scrollTop: 0 }, "slow");
+								return false;
+							}else if (parseFloat(mrp) <= 0) {
+								$("#frm_submit_msg_bar").html('<font color="red">Book MRP should be greater than 0</font>');
+								$("html, body").animate({ scrollTop: 0 }, "slow");
+								return false;
+							}
+						}
+						if (requested_category.toLowerCase() != 'Real Estate'.toLowerCase() && requested_category.toLowerCase() != 'Hotel Booking'.toLowerCase() && requested_category.toLowerCase() != 'Flight Booking'.toLowerCase() && requested_category.toLowerCase() != 'Car Rental'.toLowerCase()) {
+							if ($("#condition").val() != undefined && $("#condition").val() == "") {
+								$("#frm_submit_msg_bar").html('<font color="red">Please select the product condition (New/Used) for your offer.</font>');
+								$("html, body").animate({ scrollTop: 0 }, "slow");
+								return false;
+							}
+							if (requested_category != "Hotel Booking" && requested_category != "Car Rental" && requested_category != "Real Estate" && requested_category != "Books") {
+								if ($.trim(document.getElementById("offer_spec").value).length < 10) {
+									$("#frm_submit_msg_bar").html('<font color="red">Please provide a minimum 10 charecters Item Specifications/Additional Details</font>');
+									$("html, body").animate({ scrollTop: 0 }, "slow");
+									return false;
+								}
+							}
+						}
+					}
+					//do the ajax to save offer:
+					$("#frm_submit_msg_bar").html('<font color="green">Please wait...<img src="/images/load2.gif">, while we notify the buyer about this offer.</font>');
+					$("html, body").animate({ scrollTop: 0 }, "slow");
+					$.ajax({
+						type : "POST",
+						url : "/my_deals/save_offer",
+						data : $("#saveOffer_frm").serialize(),
+						dataType : "json",
+						success : function(b) {
+							if(b.success) {
+								document.getElementById('frm_submit_msg_bar').innerHTML = "<font color='green'>"+b.msg+"</font>";
+								window.location = "/my_deals/sellerhome";
+							} else {
+								document.getElementById('frm_submit_msg_bar').innerHTML = "<font color='red'>"+b.msg+"</font>";
+								$("html, body").animate({ scrollTop: 0 }, "slow");
+								return false;
+							}
+						},
+						error : function() {
+							document.getElementById('frm_submit_msg_bar').innerHTML = "<font color='red'>An Error occured while saving this offer, Please try again.</font>";
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							return false;
+						}
+					});
+				}
+				function ShowMyOffer(jsonObj){
+					var auth_token = localStorage.getItem("auth");
+					$('#lable_display').html('<center>Please wait, Loading offer detail... <img src="/images/load2.gif"></center>');
+					$.ajax({
+						url : "/my_deals/offer_details",
+						data : {moid: jsonObj, auth_token: auth_token},
+						dataType : "json",
+						timeout: 15000,
+						success : function(json) {
+							$('#lable_display').html('');
+							var offer_detail = json.offer.merchant_offer
+			                var category_name = offer_detail.category_name
+			                var sub_category_name = offer_detail.sub_category_name
+			                var offer_detailHTM = "";
+			                offer_detailHTM +=  "<h3>Offer Detail</h3>";
+			                offer_detailHTM +=  "<center>";
+			                offer_detailHTM +=  "<table border=1>";
+			                
+			                offer_detailHTM +=  "	<tr>";
+			                if(category_name == "Bank Loans")
+			                	offer_detailHTM +=  "		<td><font size='-1'>Offered Loan Amount: </font>";
+			                else if(category_name == "Insurance")
+			                	offer_detailHTM +=  "		<td><font size='-1'>Offered Insurance Cover: </font>";
+			                else
+			                	offer_detailHTM +=  "		<td><font size='-1'>Offer Price: </font>";
+			                offer_detailHTM +=  "		<font size='-2'>Rs. " + offer_detail.total_price_inr + "</font></td>";
+			                
+			                if(category_name == "Educational Training")
+								offer_detailHTM +=  "<td><font size='-1'>Course Name:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Car Services")
+								offer_detailHTM +=  "<td><font size='-1'>Service Name:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Insurance")
+								offer_detailHTM +=  "<td><font size='-1'>Service Name:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Hotel Booking")
+								offer_detailHTM +=  "<td><font size='-1'>Hotel Type:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Bank Loans")
+								offer_detailHTM +=  "<td><font size='-1'>Loan Tenure:</font>&nbsp;<font size='-2'>"+offer_detail.tenure_term+"&nbsp; Years</font></td>";
+							else if(category_name == "<%=$cab_category%>")
+								offer_detailHTM +=  "<td><font size='-1'>Booking Type:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "<%=$service_category%>"){
+								offer_detailHTM +=  "<td><font size='-1'>Prefered Start Date:</font>&nbsp;<font size='-2'>Same as Buyer requested.</font></td>";
+							}
+							else
+								offer_detailHTM +=  "<td><font size='-1'>Shipping Charge:</font>&nbsp;<font size='-2'>"+offer_detail.shipping_charge+"</font></td>";
+							offer_detailHTM +=  "	</tr>";
+							
+							if (category_name != "Hotel Booking" && category_name != "Real Estate" && category_name != "<%=$service_category%>" && category_name != "<%=$cab_category%>" && category_name != "Flight Booking" && category_name != "Car Rental" && category_name != "Bank Loans" && category_name != "Insurance" && category_name != "Books"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Warranty:</font>&nbsp;<font size='-2'>"+offer_detail.warranty+"&nbsp;"+offer_detail.warranty_tenure+"</font></td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							
+							if (category_name != "Hotel Booking" && category_name != "Real Estate" && category_name != "<%=$cab_category%>" && category_name != "Flight Booking" && category_name != "Car Rental" && category_name != "Bank Loans" && category_name != "Insurance"){   
+							offer_detailHTM +=  "	<tr>";
+								if (category_name == "Educational Training"){
+									offer_detailHTM +=  "<td><font size='-1'>Course Type:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+									offer_detailHTM +=  "<td>&nbsp;</td>";
+								}else if (category_name == "Car Services"){
+									offer_detailHTM +=  "<td><font size='-1'>Car Type:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+									offer_detailHTM +=  "<td><font size='-1'>Car Brand Name:</font>&nbsp;<font size='-2'>"+offer_detail.color_pref+"&nbsp;</font></td>";
+								}else if (category_name == "<%=$service_category%>"){
+									offer_detailHTM +=  "<td><font size='-1'>Service:</font>&nbsp;<font size='-2'>"+sub_category_name+"&nbsp;</font></td>";
+									offer_detailHTM +=  "<td>&nbsp;</td>";
+								}else{
+									offer_detailHTM +=  "<td><font size='-1'>Condition:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+									offer_detailHTM +=  "<td><font size='-1'>Mode Of Shipping:</font>&nbsp;<font size='-2'>"+offer_detail.mode_of_shipping+"&nbsp;</font></td>";
+								}
+								offer_detailHTM +=  "	</tr>"; 
+							}	
+			                if (category_name == "Cars" || category_name == "Two Wheelers"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td><font size='-1'>Year of the Model:</font>&nbsp;<font size='-2'>"+offer_detail.make_year+"&nbsp; Years</font></td>";
+								offer_detailHTM +=  "		<td><font size='-1'>Color:</font>&nbsp;<font size='-2'>"+offer_detail.color_pref+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>"; 
+							}
+			                if (category_name == "Books"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td><font size='-1'>Condition:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+								offer_detailHTM +=  "		<td><font size='-1'>MRP:</font>&nbsp;<font size='-2'>"+offer_detail.mrp+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							if (category_name == "Bank Loans"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td><font size='-1'>Interest Rate:</font>&nbsp;<font size='-2'>"+offer_detail.interest_rate+"&nbsp; %</font></td>";
+								offer_detailHTM +=  "		<td>&nbsp;</td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+			               if (category_name != "Hotel Booking" && category_name != "Car Rental" && category_name != "<%=$cab_category%>" && category_name != "Insurance" && category_name != "Bank Loans" && category_name != "Real Estate" && category_name != "Flight Booking" && category_name != "Cars" && category_name != "Two Wheelers" && category_name != "Educational Training" && category_name != "Car Services"){
+								offer_detailHTM +=  "	<tr>";
+								if (category_name == "<%=$service_category%>")
+									offer_detailHTM +=  "<td colspan='2'><font size='-1'>Service Description from you:</font>&nbsp;<br/>";
+								else
+									offer_detailHTM +=  "<td colspan='2'><font size='-1'>Specification from you:</font>&nbsp;<br/>";
+									if (category_name == "Books"){	
+										offer_detailHTM +=  "<img id='spn_img' src='"+offer_detail.book_cover+"' alt='cover' title='cover'/>";
+										offer_detailHTM +=  "<h4>"+offer_detail.item_title+" &nbsp; <font color='blue'><b>ISBN Code:</b><span id='spn_isbn'>"+offer_detail.item_code+"</font></h4>";
+										offer_detailHTM +=  "<h3><b>Additional Offer(s):</b></h3>";
+										offer_detailHTM +=  "<hr />";
+										offer_detailHTM +=  "<h4><span id='spn_offerInfo'>"+offer_detail.item_info+"</span></h4>";	
+									}else{
+										var offer_img_url = offer_detail.offer_img_root+"/system/buysell_imgs/"+offer_detail.id+"/thumb/"+offer_detail.buysell_img_file_name;
+										if (offer_detail.buysell_img_file_name != null && offer_detail.buysell_img_file_name !="")
+											offer_detailHTM +=  "<img id='spn_img' src='"+offer_img_url+"' alt='cover' title='cover'/>";
+										
+										offer_detailHTM +=  "<h4><span id='spn_offerInfo'>"+offer_detail.item_info+"</span></h4>";	
+									}
+								
+								offer_detailHTM +=  "		</td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							if (category_name == "Cars" || category_name == "Two Wheelers" || category_name == "<%=$cab_category%>" || category_name == "Bank Loans" || category_name == "Insurance" || category_name == "Educational Training" || category_name == "Car Services"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Additional offer details:</font>&nbsp;<br/>";
+								var offer_img_url = offer_detail.offer_img_root+"/system/buysell_imgs/"+offer_detail.id+"/thumb/"+offer_detail.buysell_img_file_name;
+								if (offer_detail.buysell_img_file_name != null && offer_detail.buysell_img_file_name !="")
+									offer_detailHTM +=  "			<img id='spn_img' src='"+offer_img_url+"' alt='cover' title='cover'/>";
+								offer_detailHTM +=  "			<h4><span id='spn_offerInfo'>"+offer_detail.item_info+"</span></h4>";	
+								offer_detailHTM +=  "		</td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							if (category_name == "Hotel Booking"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Amenities:</font>&nbsp;<br/>";
+								offer_detailHTM +=  "		<font size='-2'>";
+								if(offer_detail.offered_amenity_name != null && offer_detail.offered_amenity_name != ""){
+								 	$.each(offer_detail.offered_amenity_name, function(i, item){
+								 		offer_detailHTM +=  ", "+item.offer_amenity.name;
+								 	});	
+								}
+								offer_detailHTM +=  "		</font>";		
+								offer_detailHTM +=  "	</td>";
+								offer_detailHTM +=  "	</tr>";
+								if (offer_detail.is_travel_agent == "1"){
+									offer_detailHTM +=  "	<tr>";
+									offer_detailHTM +=  "		<td><font size='-1'>Hotel Name:</font>&nbsp;<font size='-2'>"+offer_detail.onbehalf_hotel_name+"&nbsp;</font></td>";
+									offer_detailHTM +=  "		<td><font size='-1'>Hotel Address:</font>&nbsp;<font size='-2'>"+offer_detail.onbehalf_hotel_addr+"&nbsp;</font></td>";
+									offer_detailHTM +=  "	</tr>";
+								}
+							}
+							if (category_name == "Real Estate"){
+								offer_detailHTM +=  "	<thead>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<th colspan='2'>Contact Now</th>";
+								offer_detailHTM +=  "	</tr>";
+								offer_detailHTM +=  "	</thead>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Company Name:</font>&nbsp;<font size='-2'>"+offer_detail.company_name+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Contact Person:</font>&nbsp;<font size='-2'>"+offer_detail.contact_person+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Contact Number:</font>&nbsp;<font size='-2'>"+offer_detail.contact_number+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+			                offer_detailHTM +=  "</table>";
+			                offer_detailHTM +=  "</center>";
+			                
+			                var action_btns = '';
+			                action_btns += '            <div class="ui-grid-a" style="margin-top: 2%;">';
+							action_btns += '				<div class="ui-block-a">';
+							action_btns += '					<a href="#" data-role="button"  data-theme="b" onclick="showForm();">Update My Offer</a>';
+							action_btns += '				</div>';
+							action_btns += '				<div class="ui-block-b">';
+							action_btns += '					<a href="#" data-role="button"  data-theme="c" onclick="backsummary();">Back</a>';
+							action_btns += '				</div>';
+							action_btns += '			</div>';	
+							offer_detailHTM += action_btns;
+			                $("#offer_details").html(offer_detailHTM);
+			                $("#contentLI").hide();
+			                $("#offer_details").show();
+			                $('[data-role="content"]').trigger('create');
+						},
+						error : function() {
+							$('#lable_display').html('<center><font color="red">An error occured while loading the offer detail, Please try again.</font></center>');
+							return false;
+						}
+					});
+				}
+				function backsummary(){
+					$("#offer_details").hide();
+					$("#contentLI").show();
+				}
+			</script>
+        	<div align="center" data-role="content">
+				<form action="" method="post" id="saveOffer_frm"  enctype="multipart/form-data">
+					<ul data-role="listview" data-inset="true">
+						<li data-role="list-divider" id="lable_display">
+							<center>Please wait, Loading request detail... <img src="/images/load2.gif"></center>
+						</li>
+						<li id="contentLI"></li>
+						<li id="offer_details"></li>
+					</ul>
+					<input id="user_request_travel_type" type="hidden" value="" />
+					<input id="user_request_flight_adult" type="hidden" value="" />
+					<input id="user_request_flight_seniors" type="hidden" value="" />
+					<input id="user_request_flight_children" type="hidden" value="" />
+					<input id="transaction_fee" name="transaction_fee" type="hidden" value="" />
+					<input id="total_days" type="hidden" value="" />
+					<input id="tax_percent" name="tax_percent" type="hidden" value="0" />
+					<input id="no_of_rooms" type="hidden" value="" />
+					<input id="req_number_of_items" type="hidden" value="" />
+					<input id="auth_token" name="auth_token" type="hidden" value="" />
+					<input id="user_reqID" name="user_reqID" type="hidden" value="" />
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

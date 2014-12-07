@@ -1,0 +1,75 @@
+#personal_details1 p, #personal_details2 p, #personal_details3 p, #personal_details p, #personal_details4 p, #personal_details5 p, #personal_details6 p, #personal_details7 p, #personal_details8 p, #personal_details9 p {
+	float: left;
+	border-bottom: 5px solid green;
+}
+#personal_details label, #personal_details1 label, #personal_details2 label, #personal_details3 label, #personal_details4 label, #personal_details5 label, #personal_details6 label, #personal_details7 label, #personal_details8 label, #personal_details9 label {
+	text-align: left;
+	display: block;
+	margin: 10px 0 10px 100px;
+	width: 50%;
+}
+#personal_details label select, #personal_details1 label select, #personal_details2 label select, #personal_details3 label select, #personal_details4 label select, #personal_details5 label select, #personal_details6 label select, #personal_details7 label select, #personal_details8 label select, #personal_details9 label select {
+	float: right;
+	border: #C0C0C0 1px solid;
+	width: 25%;
+}
+#personal_details label input[type="text"], #personal_details1 label input[type="text"], #personal_details2 label input[type="text"], #personal_details3 label input[type="text"], #personal_details4 label input[type="text"], #personal_details5 label input[type="text"], #personal_details6 label input[type="text"], #personal_details7 label input[type="text"], #personal_details8 label input[type="text"], #personal_details9 label input[type="text"] {
+	float: right;
+	border: #C0C0C0 1px solid
+}
+#education_details1 p, #education_details2 p, #education_details3 p, #education_details p, #education_details4 p, #education_details5 p, #education_details6 p, #education_details7 p, #education_details8 p, #education_details9 p {
+	float: left;
+	border-bottom: 5px solid green;
+}
+#education_details label, #education_details1 label, #education_details2 label, #education_details3 label, #education_details4 label, #education_details5 label, #education_details6 label, #education_details7 label, #education_details8 label, #education_details9 label {
+	text-align: left;
+	display: block;
+	margin: 10px 0 10px 100px;
+	width: 50%;
+}
+#education_details label input[type="text"], #education_details1 label input[type="text"], #education_details2 label input[type="text"], #education_details3 label input[type="text"], #education_details4 label input[type="text"], #education_details5 label input[type="text"], #education_details6 label input[type="text"], #education_details7 label input[type="text"], #education_details8 label input[type="text"], #education_details9 label input[type="text"] {
+	float: right;
+	border: #C0C0C0 1px solid
+}
+#education_details label select, #education_details2 label select, #education_details1 label select, #education_details3 label select, #education_details4 label select, #education_details5 label select, #education_details6 label select, #education_details7 label select, #education_details8 label select, #education_details9 label select {
+	float: right;
+	border: #C0C0C0 1px solid;
+	width: 25%;
+}
+
+#personal_details label textarea, #personal_details1 label textarea, #personal_details2 label textarea, #personal_details3 label textarea, #personal_details4 label textarea, #personal_details5 label textarea, #personal_details6 label textarea, #personal_details7 label textarea, #personal_details8 label textarea, #personal_details9 label textarea {
+	float: right;
+	border: #C0C0C0 1px solid;
+	margin: 0px -102px;
+}
+#job_profile {
+	width: 100%;
+	margin: 5px;
+	padding: 5px;
+	float: left;
+	border: 1px solid #C0C0C0;
+	background: url("/images/form_background.jpg");
+}
+#job_profile .personal_details {
+	float: left;
+	width: 50%;
+}
+#job_profile .profile_img {
+	width: 35%;
+	float: right;
+	vertical-align: top;
+	text-align: right;
+}
+#job_profile .personal_details label {
+	text-align: left;
+	display: block;
+	margin: 10px 0 10px 100px;
+	width: 50%;
+}
+#job_profile .personal_details label input {
+	float: right;
+	border: #C0C0C0 1px solid;
+}
+.hidden {
+	display: none;
+}

@@ -1,0 +1,22 @@
+defaults: &defaults
+  adapter: mysql
+  encoding: utf8
+  username: mydeals_deals247
+  password: deals@247
+  pool: 5
+  timeout: 5000
+     
+development:
+  database: mydeals_india
+  host: localhost
+  <<: *defaults
+
+test:
+  database: mydeals_india
+  host: localhost
+  <<: *defaults
+
+production:
+  database: mydeals_india
+  host: localhost
+  <<: *defaults

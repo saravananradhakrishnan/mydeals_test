@@ -1,0 +1,543 @@
+<html>
+	<head>
+		<title>MyDeals247 </title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/message_skyblue.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="/js/message.js"></script>
+	</head>
+	<body>
+		<div data-role="page" id="job_details" data-theme="b">
+			<style>
+				.dhtmlx-myCss{
+					font-weight:bold !important;
+					color:white !important;
+					background-color:red !important;
+				}
+				</style>
+			<script>
+			    $(document).ready(function() {
+			        var id = getUrlVars()["job_id"];
+			        var mode = getUrlVars()["mode"];
+			        
+			        var que_count = 0;
+			        function getUrlVars() {
+			            var vars = {};
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        $("#auth_token").val(auth_token)
+			        $("#job_posting_id").val(id)
+			        $("#msg_bar").html("<img src='/images/load2.gif'>");
+			        $.ajax({
+			            url: "/my_deals/job_detail",
+			            dataType: 'json',
+			            timeout: 20000,
+			            data: {job_id: id},
+			            success: function(json)
+			            {
+			                var jb_posting = json.job_details.job_posting
+			                var random_source = '';
+			                random_source += '<ul data-role="listview" data-inset="true" id="head_ul">';
+							random_source += '	<li>';
+							
+							random_source += '		<div style="margin:20px 0 0 0px;border: 1px solid rgba(0, 0, 0, 0.26);box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);margin-bottom: 15px;overflow:auto;">';
+							random_source += '			<div style="margin: 10px 0 0 10px;float:left;width: 20%;">';
+							if(jb_posting.employer_image == ''){
+								random_source += '&nbsp;';
+							}else{
+								random_source += '				<img src="'+jb_posting.employer_image+'" style="vertical-align: middle" height="75px" width="75px">';
+							}
+							random_source += '			</div>';
+							random_source += '			<div style="font-size:15px; width: 95%;float: left;margin: 10px 20px; ">';
+							random_source += '				 <strong style="color: #4797c2;font-size: 18px;text-transform: uppercase;">';
+							random_source += '					'+jb_posting.employer_name+'</strong><br>';
+							random_source += '						Looking for <strong style="color: #4797c2;font-size: 18px;font-family: " calibri",="" garamond,="" comic="" sans"="">'+jb_posting.looking_for_job_title+'</strong>';
+							random_source += '						in the <strong style="color: #4797c2;font-size: 18px;font-family: " calibri",="" garamond,="" comic="" sans"="">'+jb_posting.looking_for_job_industry+'</strong> industry<br>';
+							random_source += '						Location(s) : <strong style="color: #4797c2;">';
+							random_source += '						'+jb_posting.job_locations+'</strong><br>';
+							random_source += '				Deadline : <strong style="color: #4797c2;">'+jb_posting.job_deadline+'</strong>';
+							random_source += '			</div>';
+							random_source += '		</div>';
+							
+							random_source += '		<div id="jb_detail_div">';
+							random_source += '		<div style="border: 1px solid rgba(0, 0, 0, 0.26);  box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);  margin-bottom: 15px;">';
+				    		random_source += '			<table width="95%" align="center" style="margin-bottom: 15px;margin-left: 15px;table-layout:fixed;">';
+							random_source += '				<tbody>';
+							random_source += '					<tr>';
+							random_source += '						<td colspan="3" style="min-height: 10px;">&nbsp;</td>';
+							random_source += '					</tr>';
+							random_source += '					<tr style="margin-bottom: 5px;margin-top: 5px;">';
+							random_source += '						<td colspan="3" style="color: white"><strong style="background: grey;border-radius: 10px;padding: 5px 10px 5px 10px;">Job Description</strong></td>';
+							random_source += '					</tr>';
+							random_source += '					<tr style="margin-bottom: 5px;">';
+							random_source += '						<td style="overflow: hidden;text-align:justify;text-overflow:ellipsis;max-width: 95%;width: 95%" valign="top" colspan="3">'+jb_posting.job_description+'';
+			 				random_source += '						</td>';
+							random_source += '					</tr>';
+							random_source += '				</tbody>';
+							random_source += '			</table>';
+							random_source += '		</div>';
+							
+							random_source += '		<div style="border: 1px solid rgba(0, 0, 0, 0.26);  box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);  margin-bottom: 15px;">';
+		     				random_source += '		<table width="95%" align="center" style="margin-bottom: 15px;margin-left: 15px;table-layout:fixed;">';
+							random_source += '		<tbody>';
+							random_source += '			<tr>';
+							random_source += '				<td colspan="3" style="min-height: 10px;">&nbsp;</td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;margin-top: 5px;">';
+							random_source += '				<td colspan="3" style="color: white"><strong style="background: grey;border-radius: 10px;padding: 5px 10px 5px 10px;">Requirements</strong></td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td style="padding: 20px 10px 0px 0px;"><strong>Minimum Experience :</strong></td>';
+							random_source += '				<td style="padding: 20px 10px 0px 5px;">';
+							random_source += '				'+jb_posting.min_exp+' </td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td width="23%" valign="top"><strong>Experience Level :</strong></td>';
+							random_source += '				<td width="75%">'+jb_posting.exp_lvl+'</td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td valign="top"><strong>Required Degree(s) :</strong></td>';
+							random_source += '				<td>';
+							random_source += '					'+jb_posting.required_qualification+'';
+							random_source += '				</td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td><strong>Number of Open Position(s) :</strong></td>';
+							random_source += '				<td>'+jb_posting.no_of_position+'</td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td><strong>Job Type :</strong></td>';
+							random_source += '				<td>'+jb_posting.job_type+'</td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td><strong>Candidate Type :</strong></td>';
+							random_source += '				<td>';
+							random_source += '						'+jb_posting.req_cand_type+'';
+							random_source += '				</td>';
+							random_source += '			</tr>';
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td><strong>Academic Percentage :</strong></td>';
+							random_source += '				<td>'+jb_posting.minimum_academic_perc+'%</td>';
+							random_source += '			</tr>';
+							if(mode != 'apply_dialog'){
+								random_source += '			<tr style="margin-bottom: 5px;">';
+								random_source += '				<td><strong>Salary Range (Annual)</strong></td>';
+								random_source += '				<td>'+jb_posting.salary_range+'</td>';
+								random_source += '			</tr>';
+							}
+							random_source += '			<tr style="margin-bottom: 5px;">';
+							random_source += '				<td><strong>Required Gender :</strong></td>';
+							random_source += '				<td>';
+							random_source += '						'+jb_posting.required_gender+'';
+							random_source += '				</td>';
+							random_source += '			</tr>';
+							random_source += '			</tbody>';
+		    				random_source += '		</table>';
+		    				if(mode == 'apply_dialog'){
+			    				random_source += '      <div class="ui-grid-a" id="nxt_to_skills">';
+								random_source += '			<div class="ui-block-a">';
+								random_source += '				<a href="#" data-role="button"  data-theme="b" onclick="nextStep();">Next</a>';
+								random_source += '			</div>';
+								random_source += '		</div>';
+							}
+							random_source += '		</div>';
+							random_source += '		</div>';
+							if(mode != 'apply_dialog'){
+								random_source += '		<div style="border: 1px solid rgba(0, 0, 0, 0.26);  box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);  margin-bottom: 15px;">';
+								random_source += '		    <table width="95%" align="center" style="margin-bottom: 15px;margin-left: 15px;table-layout:fixed;">';
+								random_source += '		        <tbody>';
+								random_source += '		            <tr>';
+								random_source += '		                <td colspan="3" style="min-height: 10px;">&nbsp;</td>';
+								random_source += '		            </tr>';
+								random_source += '		            <tr style="margin-bottom: 5px;margin-top: 5px;">';
+								random_source += '		                <td colspan="3" style="color: white"><strong style="background: grey;border-radius: 10px;padding: 5px 10px 5px 10px;">Required Skills</strong></td>';
+								random_source += '		            </tr>';
+								random_source += '		            <tr style="margin-bottom: 5px;">';
+								random_source += '		                <td colspan="3">';
+								random_source += '		                <div style="margin-left: 20px;margin-top: 20px;">';
+								var count = 1;
+								$.each(json.job_skills, function(i, jbpost_skill){
+									var item = jbpost_skill.job_posting_skill;
+									if(item.is_required == "1")
+										random_source += '		                    <img src="/images/icons/accept.png" border="0">&nbsp;';
+									else
+										random_source += '		                    <img src="/images/icons/error.png" border="0">&nbsp;';
+										random_source += '		                    '+count+'.&nbsp;';
+										random_source += '		                    '+item.skill_name+' at';
+										if(item.expert_level == "1")
+											random_source += '		                    Beginner';
+										else if(item.expert_level == "2")
+											random_source += '		                    Intermediate';
+										else if(item.expert_level == "3")
+											random_source += '		                    Expert';
+										random_source += '		                    &nbsp;Level with <strong> '+item.min_experience+' </strong> Years of Experience';
+										random_source += '		                    <br>';
+										random_source += '		                    <br>';
+									count += 1;	
+								});	
+								random_source += '		                </div>';
+								random_source += '						</td>';
+								random_source += '		            </tr>';
+								random_source += '		        </tbody>';
+								random_source += '		    </table>';
+								random_source += '		</div>';
+								
+								random_source += '		<div style="border: 1px solid rgba(0, 0, 0, 0.26);  box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);  margin-bottom: 15px;">';
+								random_source += '		    <table width="95%" align="center" style="margin-bottom: 15px;margin-left: 15px;table-layout:fixed;">';
+								random_source += '		        <tbody>';
+								random_source += '		            <tr>';
+								random_source += '		                <td colspan="3" style="min-height: 10px;">&nbsp;</td>';
+								random_source += '		            </tr>';
+								random_source += '		            <tr style="margin-bottom: 5px;margin-top: 5px;">';
+								random_source += '		                <td colspan="3" style="color: white"><strong style="background: grey;border-radius: 10px;padding: 5px 10px 5px 10px;">Questions to Job Seekers</strong></td>';
+								random_source += '		            </tr>';
+								random_source += '		            <tr style="margin-bottom: 5px;margin-top: 5px;">';
+								random_source += '		                <td colspan="3">';
+								random_source += '		                <div style="margin-left: 20px;margin-top: 20px;">';
+								var q_count = 1;
+								$.each(json.job_ques, function(i, jbpost_ques){
+									var q_item = jbpost_ques.job_posting_question;
+									random_source += '		                    '+q_count+'.&nbsp;';
+									random_source += '		                    '+q_item.question+'';
+									random_source += '		                    <br>';
+									q_count += 1;	
+								});	
+								random_source += '		                </div></td>';
+								random_source += '		            </tr>';
+								random_source += '		        </tbody>';
+								random_source += '		    </table>';
+								random_source += '		</div>';
+							}else{
+								random_source += '      <div style="box-shadow: rgba(200, 200, 200, 0.921569) 0px 0px 12px 5px; border: 1px solid rgba(0, 0, 0, 0.258824); overflow: auto; margin-bottom: 15px; table-layout: fixed;display:none;" id="job_posting_skillset">';
+								random_source += '          <table width="100%">';
+								random_source += '              <tbody style="margin-left: 30px;">';
+								random_source += '                  <tr>';
+								random_source += '                      <td width="100%" valign="top" align="left">';
+								random_source += '                      <div align="center" style="background-color:#FE9600;color:#FFFFFF;font-size:14px;padding:5px 0 5px 0;">';
+								random_source += '                          <strong>Please select <span id="max_no_skill"></span> of your best skills below</strong>';
+								random_source += '                      </div>';
+								var count = 0;
+								$.each(json.job_skills, function(i, jbpost_skill){
+									var item = jbpost_skill.job_posting_skill;
+									random_source += '                      <p>';
+									random_source += '                          <input type="checkbox" class="refskills" ref="skillset_check" name="having_skill_ids[]" onclick="checkskills(this);" value="'+item.id+'" style="margin: 0.4%;" data-role="none" data-theme="b">';
+									random_source += '                          &nbsp;<strong>'+item.skill_name+'</strong>';
+									var level = "";
+									if(item.expert_level == "1")
+										level = "Beginner"
+									else if(item.expert_level == "2")
+										level = "Intermediate"
+									else if(item.expert_level == "3")
+										level = "Expert"
+									
+									random_source += '                          with <strong> '+item.min_experience+' </strong> year(s) of experience ('+level+' Level)';
+									random_source += '                      </p>';
+									if(item.is_required == "1")
+										count += 1;
+								});	
+								random_source += '                      <input type="hidden" name="posting_required_skills" id="posting_required_skills" value="'+count+'">';
+								random_source += '                      </td>';
+								random_source += '                  </tr>';
+								if(json.job_ques == ""){
+									random_source += '					<tr>';
+									random_source += '						<td style="width: 200px;">Please Mention your Notice Period:</td>';
+									random_source += '						<td>';
+									random_source += '							<select id="notice_period" name="notice_period">';
+									random_source += '								<option value="Immediately Available">Immediately Available</option>';
+									random_source += '								<option value="1 Week">1 Week</option>';
+									random_source += '								<option value="2 Weeks">2 Weeks</option>';
+									random_source += '								<option value="3 Weeks">3 Weeks</option>';
+									random_source += '								<option value="1 Month">1 Month</option>';
+									random_source += '								<option value="45 Days">45 Days</option>';
+									random_source += '								<option value="2 Months">2 Months</option>';
+									random_source += '								<option value="3 Months">3 Months</option>';
+									random_source += '							</select>';
+									random_source += '						</td>';
+									random_source += '					</tr>';
+								}
+								random_source += '              </tbody>';
+								random_source += '          </table>';
+								if(json.job_ques == ""){
+									random_source += '      <div class="ui-grid-a" id="btns_job_skils">';
+									random_source += '			<div class="ui-block-a" id="apply_btn">';
+									random_source += '				<a href="#" data-role="button"  data-theme="b" onclick="apply_job();">Apply >></a>';
+									random_source += '			</div>';
+									random_source += '			<div class="ui-block-b">';
+									random_source += '				<a href="#" data-role="button"  data-theme="c" onclick="back_to_job_details();">Back</a>';
+									random_source += '			</div>';
+									random_source += '		</div>';
+								}else{
+									random_source += '      <div class="ui-grid-a" id="btns_job_skils">';
+									random_source += '			<div class="ui-block-a">';
+									random_source += '				<a href="#" data-role="button"  data-theme="b" onclick="nextStep_to_apply();">Next</a>';
+									random_source += '			</div>';
+									random_source += '			<div class="ui-block-b">';
+									random_source += '				<a href="#" data-role="button"  data-theme="c" onclick="back_to_job_details();">Back</a>';
+									random_source += '			</div>';
+									random_source += '		</div>';
+								}
+								random_source += '      </div>';
+								if(json.job_ques != ""){
+									random_source += '		<div style="border: 1px solid rgba(0, 0, 0, 0.26);  box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);  margin-bottom: 15px;display:none;" id="job_posting_questions">';
+									random_source += '			<table width="95%" align="center" style="margin-bottom: 15px;margin-left: 15px;table-layout:fixed;">';
+									random_source += '				<tr>';
+									random_source += '					<td valign="top">';
+									random_source += '						<table width="100%">';
+									random_source += '							<tbody style="margin-left: 30px;">';
+									random_source += '								<tr>';
+									random_source += '									<td width="100%" valign="top" align="left" colspan="2">';
+									random_source += '									<div align="center" style="background-color:#FE9600;color:#FFFFFF;font-size:14px;padding:5px 0 5px 0;">';
+									random_source += '										<strong>Please provide answer to below questions</strong>';
+									random_source += '									</div> ';
+									var q_count = 1;
+									var job_que_ids = ""
+									$.each(json.job_ques, function(i, jbpost_ques){
+										var q_item = jbpost_ques.job_posting_question;
+										job_que_ids += "~"+ q_item.id;
+										random_source += '									<div style="margin: 10px 10px;">';
+										random_source += '										&nbsp;<strong>'+q_count+'.&nbsp;'+q_item.question+'</strong><br/>';
+										random_source += '										<textarea name="answer_to_'+q_item.id+'" id="answer_to_'+q_count+'" onkeyup="limitWords(this.id);" style="width: 100%;height:70px; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;"></textarea>';
+										random_source += '									</div>';
+										q_count += 1;	
+									});	
+									random_source += '									<input type="hidden" id="total_job_questions" name="total_job_questions" value="'+(q_count - 1)+'">';
+									random_source += '									<input type="hidden" id="job_que_ids" name="job_que_ids" value="'+job_que_ids+'">';
+									random_source += '									</td>';
+									random_source += '								</tr>';
+									random_source += '								<tr>';
+									random_source += '									<td style="width: 200px;">Please Mention your Notice Period:</td>';
+									random_source += '									<td>';
+									random_source += '										<select id="notice_period" name="notice_period">';
+									random_source += '											<option value="Immediately Available">Immediately Available</option>';
+									random_source += '											<option value="1 Week">1 Week</option>';
+									random_source += '											<option value="2 Weeks">2 Weeks</option>';
+									random_source += '											<option value="3 Weeks">3 Weeks</option>';
+									random_source += '											<option value="1 Month">1 Month</option>';
+									random_source += '											<option value="45 Days">45 Days</option>';
+									random_source += '											<option value="2 Months">2 Months</option>';
+									random_source += '											<option value="3 Months">3 Months</option>';
+									random_source += '										</select>';
+									random_source += '									</td>';
+									random_source += '								</tr>';
+									random_source += '							</tbody>';
+									random_source += '						</table>';
+									random_source += '					</td>';
+									random_source += '				</tr>';
+									random_source += '			</table>';
+									random_source += '      	<div class="ui-grid-a" id="btn_jobques">';
+									random_source += '				<div class="ui-block-a" id="apply_btn">';
+									random_source += '					<a href="#" data-role="button"  data-theme="b" onclick="apply_job();">Apply >></a>';
+									random_source += '				</div>';
+									random_source += '				<div class="ui-block-b">';
+									random_source += '					<a href="#" data-role="button"  data-theme="c" onclick="back_to_skillset_details();">Back</a>';
+									random_source += '				</div>';
+									random_source += '			</div>';
+									random_source += '		</div>';
+								}
+							}
+							random_source += '      	<div style="border: 1px solid rgba(0, 0, 0, 0.26);  box-shadow: 0 0 12px 5px rgba(200, 200, 200, 0.92);  margin-bottom: 15px;display: none;" id="finish_msg">';
+							random_source += '      		<table width="95%" align="center" style="margin-bottom: 15px;margin-left: 15px;table-layout:fixed;">';
+							random_source += '      			<tr>';
+							random_source += '      				<td valign="top">';
+							random_source += '      				<table width="100%">';
+							random_source += '      					<tbody style="margin-left: 30px;">';
+							random_source += '      						<tr>';
+							random_source += '      							<td width="100%" valign="center" align="left"><div align="left" style="font-size:12px;padding:5px 0 5px 0;" id="message_bar"></div></td>';
+							random_source += '      						</tr>';
+							random_source += '      					</tbody>';
+							random_source += '      				</table></td>';
+							random_source += '      			</tr>';
+							random_source += '      		</table>';
+							random_source += '      	</div>';
+							
+							
+							random_source += '      	<div id="finish_btn" style="display:none;">';
+							random_source += '      	<div class="ui-grid-a">';
+							random_source += '				<div class="ui-block-a">';
+							random_source += '					<a href="#" data-role="button"  data-theme="b" onclick="complete_job_apply();">Finish !</a>';
+							random_source += '				</div>';
+							random_source += '			</div>';
+							random_source += '			</div>';
+							
+							random_source += '	</li>';
+							random_source += '</ul>';
+							$("#job_details_div").html(random_source);
+							$('[data-role="content"]').trigger('create');
+							$("#msg_bar").html("");
+					    }
+			        });
+			 	});
+			 	function checkskills(obj){
+ 					var selected_item = $('#posting_required_skills').val();
+					if (obj.checked) {
+						if($('input[ref=skillset_check]:checkbox:checked').length > parseInt(selected_item)){
+							 dhtmlx.message({
+					            title: "Warning",
+					            type: "alert",
+					            text: "Please select "+selected_item+" of your best skills only.",
+					            callback: function() {return false;}
+					    	})
+							obj.checked = false;
+						}
+					}
+				}			
+			 	function limitWords(id) {
+				    var maxWords=100;
+				    var d=document.getElementById(id);
+				    if ( d.value.split(' ').length > maxWords ) {
+				    	dhtmlx.message({
+					            title: "Warning",
+					            type: "alert",
+					            text: "You can enter uptp 200 words",
+					            callback: function() {return false;}
+					    })
+				        t=d.value.substring(0,d.value.lastIndexOf(' '));
+				        d.value=t.substring(0,t.lastIndexOf(' ')+1);
+				    }
+				}
+				function apply_job(job_posting_id, user_id){
+					var number_of_questions = $('#total_job_questions').val();
+					if(number_of_questions == undefined){
+						var selected_item = $('#posting_required_skills').val();
+						if($('input[ref=skillset_check]:checkbox:checked').length < parseInt(selected_item)){
+							dhtmlx.message({
+						            title: "Warning",
+						            type: "alert",
+						            text: "Please select select "+selected_item+" skills to be able to post job application.",
+						            callback: function() {return false;}
+						    })
+							return false;
+						}
+					}else{
+						for (var i=1; i <= number_of_questions; i++) {
+						  var que_answer = $('#answer_to_'+i).val();
+						  if (que_answer == "" ){
+							dhtmlx.alert({text:"Please provide the answer for question #"+i,type:"alert-error"});
+							$('#answer_to_'+i).css("border", "1px solid #DD4B39");
+					    	return false;
+						  }else if (que_answer.split(' ').length < 10 ){
+							dhtmlx.alert({text:"Please provide an answer of minimum 10 words for question #"+i,type:"alert-error"});
+							$('#answer_to_'+i).css("border", "1px solid #DD4B39");
+					    	return false;
+						  }
+						}
+					}
+					var a = '<p><b>Please Wait...</b><img src="/images/icons/loading.gif" height="14"/></p>';
+					$("#apply_btn").html(a);
+					$.ajax({
+						type : "POST",
+						url : "/my_deals/apply_job_post/apply.json",
+						data : $("#skill_match_post").serialize(),
+						dataType : "json",
+						success : function(b) {
+							if(b.success) {
+								$("#apply_btn").hide();
+								$('#finish_btn').toggle( "slide" );
+								a = '<font color="green"><strong>'+b.msg+'</strong></font>';
+								if(number_of_questions == undefined){
+									$("#message_bar").html(a);
+									$('#job_posting_skillset').hide();
+								}else{
+									$("#message_bar").html(a);
+									$('#job_posting_questions').hide();
+								}
+								$('#finish_msg').toggle( "slide" );	
+								$( "#job_details_div" ).scrollTop();
+								return false;
+							} else {
+								$("#apply_btn").hide();
+								$('#finish_btn').toggle( "slide" );
+								a = '<font color="red"><strong>'+b.msg+'</strong></font>';
+								if(number_of_questions == undefined){
+									$("#message_bar").html(a);
+									$('#job_posting_skillset').hide();
+								}else{
+									$("#message_bar").html(a);
+									$('#job_posting_questions').hide();
+								}
+								$('#finish_msg').toggle( "slide" );
+								$( "#job_details_div" ).scrollTop();
+								return false;
+							}
+						},
+						error : function() {
+								$("#apply_btn").hide();
+								$('#finish_btn').toggle( "slide" );
+								a = '<font color="red"><strong>Error while posting job application, Please try again.</strong></font>';
+								if(number_of_questions == undefined){
+									$("#message_bar").html(a);
+									$('#job_posting_skillset').hide();
+								}else{
+									$("#message_bar").html(a);
+									$('#job_posting_questions').hide();
+								}
+								$('#finish_msg').toggle( "slide" );
+								$( "#job_details_div" ).scrollTop();
+								return false;
+						}
+					});
+					return false;
+					
+				}
+				function nextStep(){
+					$('#max_no_skill').text($('#posting_required_skills').val());
+					$('#jb_detail_div').hide();
+					$('#job_posting_skillset').toggle("slide");
+				}
+				function nextStep_to_apply(){
+					var selected_item = $('#posting_required_skills').val();
+					if($('#skill_match_post').find('.refskills:checked').length < parseInt(selected_item)){
+						dhtmlx.message({
+					            title: "Warning",
+					            type: "alert",
+					            text: "Please select "+selected_item+" skills to be able to post job application.",
+					            callback: function() {return false;}
+					    })
+						return false;
+					}
+					$('#job_posting_skillset').hide();
+					$('#job_posting_questions').toggle("slide");
+				}
+				function back_to_job_details(){
+					$('#job_posting_skillset').hide();
+					$('#jb_detail_div').toggle( "slide" );
+				} 
+				function back_to_skillset_details(){
+					$('#job_posting_questions').hide();
+					$('#job_posting_skillset').toggle( "slide" );
+				}
+				function complete_job_apply(){
+					window.location.href = "list_matched_jobs"
+				}	
+				
+			</script>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Apply Job"}%>
+			<%else -%>
+			<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Apply Job"}%>
+			<%end -%>
+			<div align="center" data-role="content" id="high">
+				<ul data-role="listview" data-inset="true">
+					<li id="msg_bar" class="ui-li ui-li-static ui-body-c"></li>
+				</ul>
+				<form id="skill_match_post" id="skill_match_post" method="post">
+					<div id="job_details_div"></div>
+					<input type="hidden" name="job_posting_id" id="job_posting_id" value="">
+					<input type="hidden" name="auth_token" id="auth_token" value="">
+				</form>	
+			</div>
+		</div>
+	</body>
+</html>

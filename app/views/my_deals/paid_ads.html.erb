@@ -1,0 +1,81 @@
+<html>
+	<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+<body>
+	<div data-role="page" id="paid_ads_listing">
+		<script>
+		    $(document).ready(function(){
+		        var auth_token = localStorage.getItem("auth");
+		        if(auth_token == null){
+		            alert("Login Required")
+		        	window.location.href = "login"
+		        }   	 
+		        $("#error").html("<img src='/images/load2.gif'>");
+		        $.ajax({
+		            url: "/my_deals/veiw_all_adv",
+		            dataType: 'json',
+		            timeout: 30000,
+		            data: {auth_token: auth_token},
+		            success: function(json)
+		            {
+		                $("#error").html("");
+		                $.each(json.ads_to_dispaly, function(i, item)
+		                {
+		                    var mobile_verified = item.coupon.mobile_verified;
+		                    var mobile_no = item.coupon.user_mobile;
+		                    var val = item.coupon.name;
+		                    var id = item.coupon.id;
+		                    var desc = item.coupon.description;
+		                    var f_name = item.coupon.ad_detail_field_name
+		                    var paid = item.coupon.user_earning;
+		                    var answer = item.coupon.had_answered;
+		                    if (desc == null)
+		                        desc = "";
+		                    if (f_name == null)
+		                        f_name = "";
+		                    var img = item.coupon.coupon_img_file_name;
+		                    var mydiv = document.getElementById("vmarquee");
+		                    if(answer == false) {
+		                        mydiv.innerHTML += "<a id=" + id + " class='inputClass'><b style='color:grey;'>" + item.coupon.name + "</b><br><b style='color:green;'>Get Paid Rs:" + paid + "</b><br><img src='" + item.coupon.ad_img_root + "/system/coupon_imgs/" + item.coupon.id + "/medium/" + item.coupon.coupon_img_file_name + "' height='100' width='100' style='cursor: pointer;border: 1px solid green;padding: 5px 5px;margin-top: 1%;border-radius: 10px;'></a><hr>";
+		                    }else if (answer == true) {
+		                        mydiv.innerHTML += "<a id=" + id + " class='inputClass'><b style='color:grey;'>" + item.coupon.name + "</b><br><b style='color:red;'>You Answered.!</b><br><img src='" + item.coupon.ad_img_root + "/system/coupon_imgs/" + item.coupon.id + "/medium/" + item.coupon.coupon_img_file_name + "' height='100' width='100' style='cursor: pointer;border: 1px solid green;padding: 5px 5px;margin-top: 1%;border-radius: 10px;'></a><hr>";
+		                    }
+		                    $(document).ready(function() {
+		                        $('.inputClass').each(function() {
+		                            $(this).click(function() {
+		                                if(mobile_verified == "0"){
+		                                    window.location.href = "verify_mnumber?mnumber=" + mobile_no;
+		                                }else{
+    		                                var mid = $(this).attr('id');
+    		                                window.location.href = "ad_detail?id=" + mid;
+		                                }
+		                            });
+		                        });
+		                    });
+		                });
+		            }
+		        });
+		    });
+		</script>
+	    <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Paid ADs"}%>
+		<%else -%>
+			<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Paid ADs"}%>
+		<%end -%>
+		<div data-role="content" align="center" id="vmarquee"> 
+			<div id="error"><img src='/images/load2.gif'></div>
+		</div>
+		</div>
+	</body>
+</html>
+

@@ -1,0 +1,14 @@
+development: &defaults
+  client_id: 151157418289634
+  client_secret: c5ab0b6ff4c8dce8907ab1f3c5fbb76a
+  perms: email,read_stream,user_checkins,publish_stream,offline_access,user_location
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
+
+  
+
+

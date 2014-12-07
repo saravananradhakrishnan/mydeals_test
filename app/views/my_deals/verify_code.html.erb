@@ -1,0 +1,137 @@
+
+<!DOCTYPE html> 
+<html> 
+<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+    	<div data-role="page" id="register"> 
+    	<script>
+ 		 function validateForm(){
+		  var x=document.forms["frm2"]["code"].value;
+		  if (x==null || x==""){
+			  	elementform="Please Enter Security Code";
+				valueis=elementform+'<br>';
+			  	document.getElementById('valerror').focus()
+				 document.getElementById('valerror').innerHTML = valueis;
+				 document.getElementById("valerror").style.display="block";
+			  return false;
+		  }
+		  
+	}
+  </script>  
+    
+<script>
+  
+   $(document).ready(function(){
+	   
+	   
+var msg= getUrlVars()["msg"];
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
+
+var message=unescape(msg.replace(/\+/g, " "));
+
+$('#msg_error').html(message);
+	   
+	   
+   $('#update').click(function(){
+	   if(validateForm()!=false)
+	{
+		
+		  $("#error").html("<img src='/images/load2.gif'>");
+    var code = $('#code').val();
+  var auth_token=localStorage.getItem("auth");
+
+           $.ajax({
+          url: "http://mydeals247.mobi/php/verify_code.php",
+          dataType: 'jsonp',
+          jsonp: 'jsoncallback',
+          timeout: 20000,
+		  data:{code:code,auth_token:auth_token},
+         success: function(json, status)
+          {
+		 if(json.success==true)
+                        {
+					    $("#error").html("");   
+					   		var user_typ=localStorage.getItem("usertyp");
+
+                              if(user_typ=='buysell')
+                              location.href="SellerHome.html";
+                              else
+                              location.href="BuyerHome.html";                            
+                           
+                        }
+		
+		}  
+});
+	}
+});
+   
+});
+  
+  
+  
+</script>  
+ 
+
+    
+    <div  data-role="header" data-theme="b"> 
+	<a href="#" data-rel="back"  data-icon="back"data-iconpos="notext"></a> 
+    <h1>Mydeals247</h1>  
+    </div> 
+   
+    <div align="center" data-role="content"> 
+
+  <form action="" method="post" id="frm2"> 
+  <ul data-role="listview" data-inset="true"> 
+  <li data-role="list-divider">Verify your account</li> 
+  <span id="msg_error"></span>
+  <br>
+   <li id="valerror" style="color:#F00000; display:none;"></li>
+   <li>
+        
+	       <fieldset data-role="controlgroup">
+           Verification Code:
+			<INPUT TYPE="text" NAME="code" id="code"> 
+			<span id="msg_error"></span>
+        </fieldset>     
+	
+			 
+           
+        <div class="ui-grid-a">
+          		<div class="ui-block-a">
+	            <a href="#" data-theme="c" data-role="button" id="update">Verify</a>
+                </div>
+	                
+	      </div>
+     
+    </li>
+    
+  </ul> 
+  
+
+</form> 
+    
+	</div> 
+</div> 
+
+<!---------------- Credit  Page Ends  --------------->
+
+
+</body> 
+</html> 

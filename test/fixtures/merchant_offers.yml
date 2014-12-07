@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  user_request_id: 1
+  user_id: 1
+  merchant_id: 1
+  offer_price: MyString
+  offered_time: 2011-04-29 11:58:41
+
+two:
+  user_request_id: 1
+  user_id: 1
+  merchant_id: 1
+  offer_price: MyString
+  offered_time: 2011-04-29 11:58:41

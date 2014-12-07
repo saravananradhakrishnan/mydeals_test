@@ -1,0 +1,70 @@
+<html> 
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body> 
+        <div data-role="page" id="paid_ads_listing">
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "My Profile"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "My Profile"}%>
+			<%end -%>
+            <div data-role="content" data-theme="c">
+                <ul data-role="listview" data-inset="true"> 
+                    <a href="#" data-role="button" data-theme="b" style="background: rgb(45, 79, 165);  width: 80%;  float: left;  margin-left: 10%;border-radius: 6px;" onClick="showprof();"><img style="float: left;" src="/images/profile.png"/><span style="float: left;margin-left: 2%;color: white;">Profile</span></a>
+                    <a href="#" rel="external" data-role="button" style="background: rgb(45, 79, 165);  width: 80%;  float: left;  margin-left: 10%;border-radius: 6px;" data-theme="b" onClick="call();"><img style="float: left;" src="/images/settings.png"/><span style="float: left;margin-left: 2%;color: white;">Settings</span></a>    
+                    <script>
+                        function showprof()
+                        {
+                            window.location.href="profile";
+                        }
+			
+                        function call()
+                        {
+                            var utype=localStorage.getItem("usertyp");
+                            if(utype=='buysell')
+                                location.href="my_settings";
+                            else
+                                location.href="my_settings";
+	
+                        }
+                    </script>
+                    <a href="change_password" rel="external" style="background: rgb(45, 79, 165);  width: 80%;  float: left;  margin-left: 10%;border-radius: 6px;" data-role="button" data-theme="b"><img style="float: left;" src="/images/change.png"/><span style="float: left;margin-left: 2%;color: white;">Change Password</span></a> 
+                    <a href="#" rel="external" data-role="button" style="background: rgb(45, 79, 165);  width: 80%;  float: left;  margin-left: 10%;border-radius: 6px;"  data-theme="b" onClick="logout();"><img style="float: left;" src="/images/logout.png"/><span style="float: left;margin-left: 2%;color: white;">Logout</span></a>       
+                    <script>
+                        function logout()
+                        {
+                            var auth_token = localStorage.getItem("auth");
+                            $.ajax({
+                                url: "/my_deals/logoutservice",
+                                dataType: 'json',
+                                timeout: 5000,
+                                async: false, 
+                                data: {auth_token: auth_token},
+                                success: function(json)
+                                {
+                                    localStorage.setItem("auth", "");
+                                    localStorage.setItem("username", "");
+                                    localStorage.setItem("usertyp", "");
+                                    localStorage.setItem("userid", "");
+                                    window.location.href = "/"
+                                }
+                            });
+                            
+                        }
+			
+                    </script>
+                       
+            </div>
+        </div>
+    </body>
+</html>

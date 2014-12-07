@@ -1,0 +1,25 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  user_id: 1
+  user_request_id: 1
+  merchant_offer_id: 1
+  merchant_id: 1
+  bought_price: 1.5
+  security_code: MyString
+  purchase_code: MyString
+  verified: MyString
+  trn_completed: false
+  status: false
+
+two:
+  user_id: 1
+  user_request_id: 1
+  merchant_offer_id: 1
+  merchant_id: 1
+  bought_price: 1.5
+  security_code: MyString
+  purchase_code: MyString
+  verified: MyString
+  trn_completed: false
+  status: false

@@ -1,0 +1,161 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+        <script type="text/javascript">
+		 $(function() {
+				/* For zebra striping */
+		        $("table tr:nth-child(odd)").addClass("odd-row");
+				/* For cell text alignment */
+				$("table td:first-child, table th:first-child").addClass("first");
+				/* For removing the last border */
+				$("table td:last-child, table th:last-child").addClass("last");
+		});
+		</script>
+    </head>
+    <body>
+        <div data-role="page" id="buyer_request_list">
+        	<style>
+    		#buyer_details{
+    			width: 100%;
+                overflow-y: hidden;
+                float: left;
+    		}
+		    #buyer_details::-webkit-scrollbar {
+		            height: 5px;
+            }
+             #buyer_details::-webkit-scrollbar-track {
+					    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+					    border-radius: 10px;
+					    border:1px grey solid;
+					    border-radius:10px;
+
+            }
+ 
+			#buyer_details::-webkit-scrollbar-thumb {
+			    border-radius: 10px;
+			    -webkit-box-shadow: inset 0 0 6px green; 
+			}
+			
+			table {
+			overflow:hidden;
+			border:1px solid #d3d3d3;
+			background:rgba(255,255,255,0.1);
+			width:100%;
+			margin:5% auto 0;
+			-moz-border-radius:5px; /* FF1+ */
+			-webkit-border-radius:5px; /* Saf3-4 */
+			border-radius:5px;
+			-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+			-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+		}
+		
+	th, td {padding:5px 10px 5px 10px; text-align:center; }
+	
+	th {padding-top:22px; text-shadow: 1px 1px 1px #fff; background:#e8eaeb;}
+	
+	td {border: none;}
+	
+	tr.odd-row td {background:#f6f6f6;}
+	
+	td.first, th.first {text-align:left}
+	
+	td.last {border-right:none;}
+	
+	/*
+	Background gradients are completely unnecessary but a neat effect.
+	*/
+	
+	td {
+		background: -moz-linear-gradient(100% 25% 90deg, #fefefe, #f9f9f9);
+		background: -webkit-gradient(linear, 0% 0%, 0% 5%, from(#D1D1D1), to(rgba(255,255,255,0.2)));
+	}
+	
+	tr.odd-row td {
+		background: -moz-linear-gradient(100% 25% 90deg, #f6f6f6, #f1f1f1);
+		background: -webkit-gradient(linear, 0% 0%, 0% 25%, from(#8A0B00), to(#8A0B00));
+	}
+	
+	th {
+		background: -moz-linear-gradient(100% 20% 90deg, #e8eaeb, #ededed);
+		background: -webkit-gradient(linear, 0% 0%, 0% 20%, from(#ededed), to(#e8eaeb));
+	}
+	
+
+    	</style>
+            <script>
+                $(document).ready(function()
+                {
+                    var user = window.localStorage.getItem("username");
+                    var auth_token = localStorage.getItem("auth");
+                    if(auth_token == null)
+		        		window.location.href = "login" 
+                    $("#error").html("<img src='/images/load2.gif'>");
+                    $.ajax({
+                        url: "/my_deals/buyer_request_me",
+                        dataType: 'json',
+                        timeout: 20000,
+                        data:{auth_token:auth_token},
+                        success: function(json)
+                        {				
+                            $("#error").html("");
+                            $.each(json.user_requests, function(i,item){
+                                var locality = item.user_request.locality;
+                                if(locality==null || locality=="")
+                                    locality="-";
+                                var low_ofr = item.user_request.lowest_offer;
+                                if(low_ofr==null || low_ofr=="")
+                                    low_ofr="-";
+                                document.getElementById("content").innerHTML +=  "<tr style='height:9px;' align='center'><td><font size='-2'>" +item.user_request.category_name+ "</font></td><td><font size='-2'>"+item.user_request.item_info+" (near by "+locality+")</font></td><td><font size='-2'>" + item.user_request.grand_total + "</font></td><td><font size='-2'>" + low_ofr + "</font></td><td><input id="+item.user_request.id+" type='image' src='/images/view_details.png' class='inputClass'/> </td></tr><b>";
+                                $(document).ready(function() {
+                                    $('.inputClass').each(function() {
+                                        $(this).click(function(){
+                                            var id = $(this).attr('id');
+                                            window.location.href = '/my_deals/buy_request_detail_buyer?id='+id;
+                                        });
+                                    });
+                                });
+                            }); 
+                        }
+                    });
+                });
+            </script>
+             <input type="hidden" name="SCategory" id="catalog_id" value="<%=session[:uType]%>"/>
+             <input type="hidden" name="SCategory" id="catalog_id" value="<%=session[:user_type]%>"/>
+          <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Seller Offer(s)"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Seller Offer(s)"}%>
+			<%end -%>
+			<div data-role="content">
+			<div data-role="collapsible-set" data-theme="b" id="buyer_details" data-content-theme="b">
+                <div data-role="collapsible">
+                    <h3>seller Offers for my request(s)</h3>
+                    <div id="error" style="text-align: center;"></div>
+                    <div class='inset'>
+                        <table id="content" border=1 style="width: 100%;overflow-y: hidden;float: left;">
+                            <tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">
+                                <td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Category </font></td>
+                                <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Item Name </font></td> 
+                                <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Budget </font></td> 
+                                <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Lowest Offer </font></td> 
+                                <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Action </font></td></font> 
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+           </div> 
+        </div>
+    </body>
+</html>
+

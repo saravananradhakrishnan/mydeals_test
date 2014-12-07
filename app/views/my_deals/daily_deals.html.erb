@@ -1,0 +1,183 @@
+
+<html> 
+     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+<body> 
+    <div data-role="page" id="register">
+        <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Purchase Records - Daily Deal"}%>
+		<%else -%>
+			<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Purchase Records - Daily Deal"}%>
+		<%end -%>
+        <div align="center" data-role="content"> 
+            <form action="" method="post" id="frm2"> 
+                <ul data-role="listview" data-inset="true"> 
+                    <li data-role="list-divider">Daily Deal(s) Purchase Record(Voucher Code)</li> 
+                    <li> 
+                        <fieldset data-role="controlgroup">
+                            <INPUT TYPE="text" NAME="c" id="iname" placeholder="Voucher/Invoice Code*"> 
+                            <span id="iname_error"></span>
+                        </fieldset>
+                        <fieldset data-role="controlgroup">
+                            <div class="ui-block-a">
+                                <a href="#" data-theme="c" data-role="button" onClick="post();">Submit</a>
+                            </div>
+                        </fieldset>        
+                    </li>
+            </form> 
+            <form action="" method="post" id="frm2">
+                <div data-role="collapsible">
+                    <h2>Search</h2>
+                    <ul data-role="listview" data-inset="true">
+                        <li> 
+                            <div data-role="fieldcontain">
+                                <fieldset data-role="controlgroup">  
+                                    <INPUT TYPE="text" placeholder="Enter Deal Name" id="dname">
+                                    <span id="rcity_error"></span> 
+                                </fieldset>
+                                <fieldset data-role="controlgroup">
+
+                                    <input type="text" readonly id="from" placeholder="Deal Start Date*" />
+                                    <span id="datepicker_error"></span>
+                                </fieldset>
+                                <fieldset data-role="controlgroup">
+                                    <input type="text" readonly id="to" placeholder="Deal End Date*" />
+                                    <span id="datepicker_error"></span>
+                                </fieldset>
+
+                                <fieldset data-role="controlgroup">
+                                    <select name="select-choice-category" id="dtype">
+                                        <option value="">-- Select --</option>
+                                        <option value="false">Coupon Redemption</option>
+                                        <option value="true">Product Shipment</option>
+                                    </select>
+                                </fieldset>
+
+                                <fieldset data-role="controlgroup">
+                                    <select name="select-choice-scategory" id="select-choice-scategory">
+                                        <option value="">-- Select --</option>
+                                        <option value="1">Apparels</option>
+                                        <option value="40">Bakery and Sweets</option>
+                                        <option value="54">Bank Loans</option>
+                                        <option value="39">Books &amp; Magazines</option>
+                                        <option value="2">Cell Phones, Offers &amp; More</option>
+                                        <option value="44">City Attractions and Getaways </option>
+                                        <option value="59">Computer Services</option>
+                                        <option value="50">Educational Institutes</option>
+                                        <option value="53">Footwear </option>
+                                        <option value="55">Furniture</option>
+                                        <option value="8">Innovative Concepts</option>
+                                        <option value="12">Insurance and more</option>
+                                        <option value="49">Jewellery</option>
+                                        <option value="43">Movies &amp; Entertainment</option>
+                                        <option value="56">Perfumes</option>
+                                        <option value="58">Personal Care</option>
+                                        <option value="38">Pubs &amp; Lounges</option>
+                                        <option value="45">Real Estate</option>
+                                        <option value="41">Travel Packages</option>
+                                    </select>
+                                </fieldset>
+                            </div></li>
+                        <div class="ui-grid-a">
+                            <div class="ui-block-a">
+                                <a href="#" data-theme="c" data-role="button" id="go">Go</a>
+                            </div>
+                            <div class="ui-block-b">
+                                <a href="sellerhome" data-role="button" data-theme="b" rel="external">Cancel</a>
+                            </div>
+                        </div>
+
+                    </ul> 
+                </div>
+            </form>
+            <form action="" method="post" id="frm2"> 
+                <ul data-role="listview" data-inset="true"> 
+                    <li data-role="list-divider">Deal(s) Sold</li> 
+                    <li> 
+                        <fieldset data-role="controlgroup">
+                            <span id="iname_error"></span>
+                            <table id="content" border=1 cellpadding="0px" cellspacing="0px">
+                                <tr bgcolor="#CCCCCC" height="10px"><td><font size="-1"><b>Deal ID </font></td><td><b><font size="-1">Price</font></td> <td><b><font size="-1">Discount </font></td> <td><b><font size="-1">Payment Status</font></td> </tr>
+                            </table>
+                        </fieldset>
+                    </li>
+                </ul> 
+            </form>
+        </div>
+         <script>
+            $(document).ready(function(){
+                var auth_token=localStorage.getItem("auth");
+                if(auth_token == null)
+		        	window.location.href = "login" 
+                $.ajax({
+                    url: "http://mydeals247.mobi/php/seller_sold_deals.php",
+                    dataType: 'jsonp',
+                    jsonp: 'jsoncallback',
+                    timeout: 5000,
+                    data:{auth_token:auth_token},
+                    success: function(json, status)
+                    {		 		
+                        $.each(json.sold_deals, function(i,item){
+                            var status=this.bought_deal.seller_payment_status;
+                            if(status==null)
+                                status="";									
+                            document.getElementById("content").innerHTML += "<tr><td><font size='-1'>" +this.bought_deal.deal_id+ "</font></td><td><font size='-1'>" + this.bought_deal.bought_price + "</font></td><td><font size='-1'>" + this.bought_deal.discount +"%</td><td><font size='-1'>"+status+"</td></tr>";
+                        });
+                    }  
+                });
+			  
+                $('#go').click(function(){
+                    var from = $('#from').val();
+                    var to = $('#to').val();
+                    var dtype = $('#dtype').val();
+                    var categ_id = $('#select-choice-category').val();
+                    $.ajax({
+                        url: "http://mydeals247.mobi/php/search_sold_deals.php",
+                        dataType: 'jsonp',
+                        jsonp: 'jsoncallback',
+                        timeout: 5000,
+                        data:{dname:dname,from:from,to:to,dtype:dtype,categ_id:categ_id,auth_token:auth_token},
+                        success: function(json, status)
+                        {	
+                            $.each(json.sold_deals, function(i,item){
+                                var status=this.bought_deal.seller_payment_status;
+                                if(status==null)
+                                    status="";
+			  
+                                document.getElementById("content").innerHTML += "<tr><td><font size='-1'>" +this.bought_deal.deal_id+ "</font></td><td><font size='-1'>" + this.bought_deal.bought_price + "</font></td><td><font size='-1'>" + this.bought_deal.discount +"%</td><td><font size='-1'>"+status+"</td></tr>";
+                            });
+                        }
+                    });
+                });		  
+            });
+    
+        </script>
+        <script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#from").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                    onSelect: function(selected) {
+                        $("#to").datepicker("option","minDate", selected)
+                    }
+                });
+                $("#to").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                    onSelect: function(selected) {
+                        $("#from").datepicker("option","maxDate", selected)
+                    }
+                });
+	
+            });
+        </script> 
+    </div> 
+</body> 
+</html> 

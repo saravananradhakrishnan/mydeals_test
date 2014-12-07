@@ -1,0 +1,201 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="buyer_requst">
+            <script>
+                $(document).ready(function()
+                {      
+                    var auth_token = localStorage.getItem("auth");
+					if(auth_token == null)
+		        	 window.location.href = "login" 
+                    $.ajax({
+                        url: "/my_deals/buyer_request",
+                        dataType: 'json',
+                        timeout: 20000,
+                        data:{auth_token:auth_token},
+                        success: function(json, status)
+                        {	
+                            if(json.my_offered_requests == ""){
+                                document.getElementById("t2").innerHTML +="<tr><td colspan='6'><font color='red' size='-2'>You have not offered for any Buy Request yet!</font></td></tr>";
+                            }else{			
+                                $.each(json.my_offered_requests, function(i){	
+                                    document.getElementById("t2").innerHTML +="<tr><td><font size='-2'>"+this.user_request.item_info+"</font></td><td><font size='-2'>"+this.user_request.city+"</font></td><td><font size='-2'>"+this.user_request.category_name+"</font></td><td><font size='-2'>"+this.user_request.price+"</font></td><td><font size='-2'>"+this.user_request.my_offer_rank+"</font></td><td><input id="+this.user_request.id+" type='button' value='Detail' class='inputClass'/></td></tr>";
+                                    $(document).ready(function() {
+                                        $('.inputClass').each(function() {
+                                            $(this).click(function(){
+                                                var id = $(this).attr('id');
+                                                window.location.href = 'my_deals/buyer_request_detail_buyer?id='+id;
+                                            });
+                                        });
+                                    });
+						
+                                });
+                            }						
+
+                            if(json.requests_in_other_cities == ""){
+                                document.getElementById("content1").innerHTML +="<font color='red' size='-2'>There are no live requests at this time.<br/> Please try visiting after sometime!!!</font>";
+                            }else{
+                                $.each(json.requests_in_other_cities, function(i){
+                                    $(document).load("Content-Type:application/json; charset=UTF-8");
+                                    document.getElementById("content1").innerHTML += "<b>"+this.user_request.city + ", "+ this.user_request.country+"("+this.user_request.count+") </b><input id="+this.user_request.city+" type='button' value='Show' class='inputClass'/><br><br>";
+                                    $(document).ready(function() {
+                                        $('.inputClass').each(function() {
+                                            $(this).click(function(){
+                                                var city = $(this).attr('id');
+                                                alert("Button id: "+city);
+                                                alert("moving to the details");
+                                                document.getElementById("t_city").innerHTML += "<h3>Buyer Request in " + city + "</h3>";
+
+                                                document.getElementById('content1').style.display="none";
+                                                document.getElementById('t_data').style.display="block";
+                                                $.ajax({
+                                                    url: "/my_deals/buyer_request_city",
+                                                    dataType: 'json',
+                                                    timeout: 20000,
+                                                    data:{city:city,auth_token:auth_token},
+                                                    success: function(json, status)
+                                                    {		
+                                                        $.each(json.requests_in_other_cities, function(i){	
+                                                            document.getElementById("t1").innerHTML +="<tr><td><font size='-2'>"+this.user_request.item_info+"</font></td><td><font size='-2'>"+this.user_request.category_name+"</font></td><td><font size='-2'>"+this.user_request.price+"</font></td><td><font size='-2'>"+this.user_request.my_offer_rank+"</font></td><td><input id="+this.user_request.id+" type='button' value='Detail' class='inputClass'/></td></tr>";
+                                                            $(document).ready(function() {
+                                                                $('.inputClass').each(function() {
+                                                                    $(this).click(function(){
+                                                                        var id = $(this).attr('id');
+                                                                        window.location.href = '/my_deals/buyer_request_detail_buyer?id='+id;
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    });
+									
+                                });
+								 
+                            }			 
+                        }
+                    });
+			       
+                    $.ajax({
+                        url: "my_deals/buyer_process",
+                        dataType: 'json',
+                        timeout: 20000,
+                        success: function(json, status)
+                        {
+                            $.each(json, function(i,item)
+                            {
+                                var val = item.buysell_category.name;
+                                var id=item.buysell_category.id;
+                                var opt = document.createElement("option");
+                                opt.text = val;
+                                opt.value = id;
+                            });
+                        }
+                    });
+                    $('#go').click(function(){
+                        var city=$('#rcity').val();
+                        var scat_id = $('#select-choice-scategory').val();
+                        var auth_token = localStorage.getItem("auth");
+                        document.getElementById("_search_result").innerHTML = "<img src='images/load2.gif'/>";
+                        $('#_result_div').show();
+  
+                        $.ajax({
+                            url: "my_deals/buyer_request_city",
+                            dataType: 'json',
+                            timeout: 20000,
+                            data:{city:city,auth_token:auth_token},
+                            success: function(json, status)
+                            {		
+                                document.getElementById("_search_result").innerHTML ="";
+                                document.getElementById("_search_result").innerHTML += "<tr bgcolor='#CCCCCC'><td><font size='-2'><b>Item Name</font></td><td><font size='-2'><b>Category</font></td> <td><font size='-2'><b>Bid Price</font></td> <td><font size='-2'><b>Your Offer</font></td> <td><font size='-2'><b>Action</font></td> </tr>";
+                                $.each(json.requests_in_other_cities, function(i){	
+                                    document.getElementById("_search_result").innerHTML += "<tr><td><font size='-2'>"+this.user_request.item_info+"</font></td><td><font size='-2'>"+this.user_request.category_name+"</font></td><td><font size='-2'>"+this.user_request.price+"</font></td><td><font size='-2'>"+this.user_request.my_offer_rank+"</font></td><td><input id="+this.user_request.id+" type='button' value='Detail' class='searchinputClass'/></td></tr>";	
+                                    $(document).ready(function() {
+                                        $('.searchinputClass').each(function() {
+                                            $(this).click(function(){
+                                                var id = $(this).attr('id');
+                                                window.location.href = 'buyer_request_detail_buyer.html?id='+id;
+                                            });
+                                        });
+                                    });
+						
+                                });
+                            }
+                        });
+                    });
+                });
+            </script>
+            <script type="text/javascript">
+                function initialize() {
+                    var options = {
+                        types: ['(cities)'],
+                        componentRestrictions: {country: "IN"}
+                    };
+
+                    var input = document.getElementById('rcity');
+                    var autocomplete = new google.maps.places.Autocomplete(input, options); // To get the city name
+                }
+                google.maps.event.addDomListener(window, 'load', initialize);
+            </script>
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Seller Home"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Seller Home"}%>
+			<%end -%>
+        </div>
+        <div data-role="collapsible-set" data-theme="b" data-content-theme="b">
+            <div data-role="collapsible">
+                <h3>Search request(s) by City</h3>
+                <div class='inset'>
+                    <ul data-role="listview">
+                        <INPUT TYPE="search" placeholder="search by city" id="rcity"><span id="rcity_error"></span>  &nbsp;
+                        <a href="#" data-theme="b" data-role="button" id="go">Go</a>
+                        <div data-role="fieldcontain" id="_result_div" style="display:none;">
+                            <table id="_search_result" border=1>
+                            </table>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="collapsible">
+                <h3>My Offered Request(s)</h3>
+                <div class='inset'>
+                    <ul data-role="listview">
+                        <div style="max-height:400px; max-width:380px; overflow-y:auto" align="center">
+                            <table id="t2" border=1>
+                                <tr bgcolor='#CCCCCC'><td style="padding: 5px 10px 5px 10px;"><font size="-2">Item Name </font></td><td style="padding: 5px 10px 5px 10px;"><font size="-2">City</font></td><td style="padding: 5px 10px 5px 10px;"><font size="-2">Category </font></td> <td style="padding: 5px 10px 5px 10px;"><font size="-2">Bid Price </font></td> <td style="padding: 5px 10px 5px 10px;"><font size="-2">Your Offer </font></td> <td style="padding: 5px 10px 5px 10px;"><font size="-2">Action </font></td></tr>
+                                <tr><td style="padding: 2px 2px 2px 2px;"><font size="-2">Micromax A110 Canvas 2 </font></td><td style="padding: 2px 2px 2px 2px;"><font size="-2">Bangalore</font></td><td style="padding: 2px 2px 2px 2px;"><font size="-2">Micromax </font></td> <td style="padding: 2px 2px 2px 2px;"><font size="-2">3000 </font></td> <td style="padding: 2px 2px 2px 2px;"><font size="-2">11100.0 (2ndRank) </font></td> <td style="padding: 2px 2px 2px 2px;"><font size="-2"><a href="buyer_request_detail_buyer.html"><input id="details" type='button' value='Detail' class='inputClass'/> </a></font></td></tr>
+
+                            </table>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="collapsible">
+                <h3>Buyer Request(s)</h3>
+                <div class='inset'>
+                    <ul data-role="listview">
+                        <div name="content1" id="content1"> 
+                        </div>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </body>
+</html>
+
+

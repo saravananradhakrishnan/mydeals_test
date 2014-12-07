@@ -1,0 +1,212 @@
+
+<html> 
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="book_catalog_from">
+            <script>
+                function change()
+                {
+                    document.getElementById("myButton1").value="Close Curtain"; 
+                }
+            </script>
+            <script>
+                function validate()
+                {
+                    var valueis = '';
+                    var x=document.forms["frm1"]["select-choice-scategory"].value;
+                    if (x==null || x=="" || x=="Select")
+                    {
+                        elementform="Please select a category to search";
+                        valueis=elementform+'<br>';
+                        document.getElementById('select-choice-scategory').focus()
+                        document.getElementById('valerror1').innerHTML = valueis;
+                        document.getElementById("valerror1").style.display="block";
+                        return false;
+                    }
+                    var x=document.forms["frm1"]["search"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please enter search string";
+                        valueis=elementform+'<br>';
+                        document.getElementById('select-choice-scategory').focus()
+                        document.getElementById('valerror1').innerHTML = valueis;
+                        document.getElementById("valerror1").style.display="block";
+				 
+                        return false;
+                    }
+                }
+            </script>
+            <script>
+                $(document).ready(function(){
+                    var auth_token = localStorage.getItem("auth");
+                    if(auth_token == null)
+		        		window.location.href = "login" 
+                    $.ajax({
+                        url: "/my_deals/show_book_catelog",
+                        dataType: 'json',
+                        timeout: 20000,
+                        data:{auth_token:auth_token},
+                        success: function(json)
+                        {				
+                            for (var i = 0; i < json.book_catalog.length; i++) {
+                                var book = json.book_catalog[i];
+                                var desc=book.merchant_books_library.book_description;
+                                var author=book.merchant_books_library.book_author;
+                                var publish=book.merchant_books_library.book_pulisher;
+			  
+                                if(desc==null)
+                                {
+                                    desc="";
+                                }
+                                if(author==null)
+                                {
+                                    author="";
+                                }
+                                if(publish==null)
+                                {
+                                    publish="";
+                                }		
+
+                                document.getElementById("content1").innerHTML += "<tr bgcolor='#FFFFFF' style='color:#6089b2'><td><font size='-2'><img src='" + book.merchant_books_library.book_cover_URL+ "'><br>"+book.merchant_books_library.book_ISBN+"</font></td><td ><font size='-2'>" + book.merchant_books_library.book_title + "</font></td><td><font size='-2'>" + desc + "</td><td> <font size='-2'>" + author + "</td><td><font size='-2'>"+publish+"</td></tr>";
+			  
+                            }
+                        }
+                    });
+                    $('#go').click(function(){
+	  
+                        if(validate() != false){
+                            document.getElementById("catalog").innerHTML ="";
+                            var q=  document.getElementById("search").value;
+                            var cat=document.getElementById("select-choice-scategory").value;
+                            var isbn;
+                            var URL = 'https://www.googleapis.com/books/v1/volumes?q='+ cat+':'+q +'&key=AIzaSyB4oEtbPLPimav6DLBu5O2XMCsfHrG80ZA';
+                            $.ajax({
+                                type: 'GET',
+                                url: URL,
+                                dataType: 'jsonp',
+                                success: function(data, status ){
+                                    document.getElementById('valerror1').innerHTML ="";
+                                    document.getElementById("content").innerHTML ="";
+                                    for (var i = 0; i < data.items.length; i++) {
+                                        var item = data.items[i];
+                                        $.each(item.volumeInfo.industryIdentifiers, function(d, s){
+                                            isbn=s.identifier;
+                                        })
+                                        if(isbn!="")
+                                        {
+                                            var subtitle=item.volumeInfo.subtitle;
+                                            if(subtitle==null || subtitle=='undefined')
+                                                subtitle=""
+                                            document.getElementById("content").innerHTML += "<table><tr><td><img src='" + item.volumeInfo.imageLinks.thumbnail + "'></td><td><font size='-2'>Title :</font><font size='-2'> " + item.volumeInfo.title + "</font><br><font size='-2'>Subtitle: </font><font size='-2'> " + subtitle  + "</font><br><font size='-2'>Author :</font> <font size='-2'>" + item.volumeInfo.authors + "</font><br><font size='-2'>ISBN:</font><font size='-2'> "+isbn+"</font></td><td><input id="+item.id+" type='button' value='Add' class='inputClass'/></td></tr></table><br><br>";
+                                            $(document).ready(function() {
+                                                $('.inputClass').each(function() {
+                                                    $(this).click(function(){
+                                                        var id = $(this).attr('id');
+                                                        $.ajax({
+                                                            type: 'GET',
+                                                            url: URL,
+                                                            dataType: 'jsonp',
+                                                            success: function( data, status ){
+                                                                for (var i = 0; i < data.items.length; i++) {
+                                                                    var item = data.items[i];
+                                                                    if(id==item.id)
+                                                                    {
+                                                                        document.getElementById("content").innerHTML = "<table><tr><td><img src='" + item.volumeInfo.imageLinks.thumbnail + "'></td><td>Title : " + item.volumeInfo.title + "<br>Subtitle : " + item.volumeInfo.subtitle
+                                                                            + "<br>Author : " + item.volumeInfo.authors + "<br>ISBN: "+isbn+" </td><td><input id="+item.id+" type='button' value='Add' class='inputClass'/></td</tr></table>"
+                                                                            + "<br>" + "<br>";
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+	  
+                                                    });
+                                                });
+                                            });	
+
+                                        }
+                                        isbn="";
+                                    }
+                                },
+                                error: function() {
+                                }
+				
+                            });
+                        }
+                    });
+
+                });
+
+            </script>
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "My Book Catalog"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "My Book Catalog"}%>
+			<%end -%>
+            <div align="center" data-role="content"> 
+
+                <form action="" method="post" id="frm1"> 
+                    <ul data-role="listview" data-inset="true"> 
+                        <li id="valerror1" style="color:#F00; display:none;"></li>
+                        <li> 
+                            <fieldset data-role="controlgroup">
+                                Search/Add book into your Catalog:
+                                <select name="select-choice-scategory" id="select-choice-scategory" >
+                                    <option>Select by category</option>
+                                    <option value="Author">Author</option>
+                                    <option value="Publisher">Publisher</option>
+                                    <option value="ISBN Code">ISBN Code</option>
+                                    <option value="Subject">Subject</option>
+                                    <option value="Title">Title</option>
+                                </select>
+                            </fieldset>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <label for="rcity"><strong></strong></label> 
+                                        <INPUT TYPE="search" placeholder="search" id="search" style="border: 1px solid orange;"> 
+                                        <span id="searchs_error"></span> 
+                                    </td>
+                                    <td>
+                                        <div class="ui-block-a">
+                                            <input type="button" name="go" id="go" style="background: rgb(87, 87, 87);" value="GO" data-theme="b">
+                                        </div>
+                                    </td></tr></table>
+                            <br>
+                        <center>
+                            <div name="content" id="content" style="max-height:200px; max-width:300px; overflow-y:auto;color:black">
+
+                            </div>
+
+                        </center>			<br>
+                        <br>
+                        <hr>
+                        <br>
+                        <br>
+                        <div name="catalog" id="catalog" >
+
+                            <table id="content1" border=1 cellpadding="0px" cellspacing="0px">
+                                <tr bgcolor='#6089b2' style='color:#FFFFFF'><td> </td><td><font size="-1">Title </font></td> <td><font size="-1">Description </font></td> <td><font size="-1">Author </font></td> <td><font size="-1">Publisher </font></td> </tr>
+                            </table>
+                        </div>
+                        </li>
+                    </ul> 
+                </form> 
+            </div> 
+
+        </div>
+    </body>
+</html>
+<style>
+    .book{width:100px; height:100px;}
+</style>

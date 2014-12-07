@@ -1,0 +1,20 @@
+<div data-role="panel" id="mypanel" data-theme="b">
+    <ul data-role="listview">
+        <li class="buyers-home active" ><img style="float: left;margin: 6% 2%;" src="/images/buyerhome.png"/><a style="color:#FFFFFF;" href="/my_deals/buyerhome" rel="external">Buyer Home</a></li>
+        <li  class="volume-deals"><img style="float: left;margin: 6% 2%;" src="/images/volume_deal2.png"/><a style="color:#FFFFFF;" href="/my_deals/volume_deals_list" rel="external">Volume Deals</a></li>
+        <li  class="paid-ads"><img style="float: left;margin: 6% 2%;" src="/images/paidads.png"/><a style="color:#FFFFFF;" href="/my_deals/paid_ads" rel="external">Paid Ads</a></li>
+        <li class="buyers-home active"><img style="float: left;margin: 6% 2%;" src="/images/seller_offer.png"/><a style="color:#FFFFFF;" href="/my_deals/buyer_request_list" rel="external">Seller Offers</a></li>
+        <li class="buyers-home active"><img style="float: left;margin: 6% 2%;" src="/images/order_history.png"/><a style="color:#FFFFFF;" href="/my_deals/mytransaction_buyer" rel="external">Order History</a></li>
+        <li  class="account-statement"><img style="float: left;margin: 6% 2%;" src="/images/account.png"/><a style="color:#FFFFFF;" href="/my_deals/account_statement" rel="external">Account Statement</a></li>
+        <li  class="mobile-recharge"><img style="float: left;margin: 6% 2%;" src="/images/mobile_rech.png"/><a style="color:#FFFFFF;" href="/my_deals/mobile_recharge" rel="external">Mobile Recharge</a></li>
+        <li  class="jobs"><img style="float: left;margin: 6% 2%;" src="/images/jobs2.png"/><a style="color:#FFFFFF;" href="/my_deals/employee_home">JOBs</a></li>
+        <%if session[:uType] == "buysell" || session[:uType] == "seller"%>
+        	<li  class="jobs"><img style="float: left;margin: 6% 2%;" src="/images/profile.png"/><a style="color:#FFFFFF;" href="/my_deals/sellerhome" rel="external">Me as Seller</a></li>
+        <%end -%>
+        <li class="buyers-home active"><img style="float: left;margin: 6% 2%;" src="/images/profile.png"/><a style="color:#FFFFFF;" href="/my_deals/profiles" rel="external">Profile</a></li>
+    </ul>
+</div>
+<div data-role="header" data-position="fixed" data-tap-toggle="false" data-theme='b'>
+	<a href="#mypanel" data-ajax="false"><i class='icon-align-justify'></i></a>
+	<h1><%=header%></Volume></h1>
+</div>

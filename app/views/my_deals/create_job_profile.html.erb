@@ -1,0 +1,1724 @@
+<html>
+	<head>
+		<title>MyDeals247 </title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/message_skyblue.css" />
+		<link rel="stylesheet" href="/css/jobs.css" />
+		<link rel="stylesheet" href="/css/job_profile_form.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="/js/message.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+		<div data-role="page" id="createUpdateJobProfile" data-theme="b">
+			<script>
+			var exp_global_counter = 0;
+			var edu_global_counter = 0;
+			var certification_global_counter = 0;
+			var skill_global_counter = 0;
+			var qualification_lvls = null;
+			var avl_industries = null;
+			var exp_lvls = null;
+			var has_job_profile = false;
+			    $(document).ready(function() {
+			        var id = getUrlVars()["id"];
+			        var que_count = 0;
+			        function getUrlVars() {
+			            var vars = [];
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        $("#user_id").val(id)
+			        $("#auth_token").val(auth_token)
+			        $.ajax({
+			            url: "/my_deals/candidate_profile",
+			            async: false,
+			            dataType: 'json',
+			            timeout: 120000,
+			            data: {auth_token: auth_token},
+			            success: function(json)
+			            {
+			                //alert(json.user.user.uid);
+			                $("#user_uid").val(json.user.user.uid);
+			                qualification_lvls = json.qualification_levels;
+							exp_lvls = json.exp_levels;
+							avl_industries = json.job_industries;
+							if(json.job_profile != null){
+			                	
+			                		
+			                		$("#job_profile_id").val(json.job_profile.job_profile.id)
+			                		has_job_profile = true;
+			                		var basic_detail_ul = add_basic_details_ul(json.job_profile.job_profile.f_Name, json.job_profile.job_profile.l_Name,  json.job_profile.job_profile.cur_city, json.job_profile.job_profile.video_url, json.job_profile.job_profile.language_known, json.job_profile.job_profile.gender, json.job_profile.job_profile.is_experienced);
+			                		$("#jobcontent_div").append(basic_detail_ul);
+			                		//add professional details
+			                		var job_industries = json.job_industries
+			                		
+			                		var sel_job_titles=[];
+			                		$.each(json.job_titles, function(i, item){
+			                			sel_job_titles.push(item.job_profile_functional_pref.functional_area_id);
+			                		});
+			                		
+			                		var sel_job_industry = json.job_titles[0].job_profile_functional_pref.parent_id;
+			                		var job_titles = getJob_titles(sel_job_industry);
+			                		var experience_levels = json.exp_levels;
+			                		var sel_exp_level = json.job_profile.job_profile.experience_level_id;
+			                		var total_exp_years=[];;
+			                		for (var i=0; i<26; i++){
+			                			var pushValue = i;
+								  		total_exp_years.push(pushValue);
+								  	}
+			                		
+			                		var total_experience = json.job_profile.job_profile.total_experience;
+			                		sel_total_exp_year = parseInt((parseInt(total_experience) / 12))
+			                		sel_total_exp_month = parseInt((parseInt(total_experience) % 12))
+								  	
+								  	var location1 = "",location2 = "",location3 = "";
+								  	$.each(json.job_locations, function(i, item){
+			                			if (i == 0){
+			                				location1 = item.job_profile_location_pref.city
+			                				if (item.job_profile_location_pref.state !="")
+			                					location1 += ", "+item.job_profile_location_pref.state;
+			                				if (item.job_profile_location_pref.country !="")
+			                					location1 += ", "+item.job_profile_location_pref.country
+			                			}	 
+			                			if (i == 1){
+			                				location2 = item.job_profile_location_pref.city
+			                				if (item.job_profile_location_pref.state !="")
+			                					location2 += ", "+item.job_profile_location_pref.state;
+			                				if (item.job_profile_location_pref.country !="")
+			                					location2 += ", "+item.job_profile_location_pref.country
+			                			}	
+			                			if (i == 2){
+			                				location3 = item.job_profile_location_pref.city
+			                				if (item.job_profile_location_pref.state !="")
+			                					location3 += ", "+item.job_profile_location_pref.state;
+			                				if (item.job_profile_location_pref.country !="")
+			                					location3 += ", "+item.job_profile_location_pref.country
+			                			}		 	
+			                		});
+			                		var total_exp_months=[];
+			                		for (var i=0; i<13; i++){
+			                			var pushValue = i;
+								  		total_exp_months.push(pushValue);
+								  	}
+			                		
+									var desired_job_types = [];
+									desired_job_types.push("Full-time");
+									desired_job_types.push("Part-Time");
+									desired_job_types.push("Freelancer");
+									desired_job_types.push("Internship");
+									desired_job_types.push("Night-Shift Job");
+									desired_job_types.push("Weekend Job");
+									desired_job_types.push("Charity Work");
+									var sel_desired_job_type = json.job_profile.job_profile.desired_job_type;
+									
+									var cur_salary_lakhs=[];
+			                		for (var i=0; i<52; i++){
+			                			var pushValue = i;
+								  		cur_salary_lakhs.push(pushValue);
+								  	}
+									var current_salary = json.job_profile.job_profile.current_salary;
+									var numcur_salary_lakhs = parseFloat((parseFloat(current_salary) / 100000)).toFixed(2)
+									var cur_salary_split = numcur_salary_lakhs.toString().split(".");
+									var sel_cur_salary_lakh = ""
+									var sel_cur_salary_th = ""
+									if (cur_salary_split.length > 0){
+										sel_cur_salary_lakh	= cur_salary_split[0];
+										sel_cur_salary_th = cur_salary_split[1];
+									}
+									var cur_salary_th=[];
+			                		for (var i=0; i<=95; i+=5){
+			                			var pushValue = i;
+								  		cur_salary_th.push(pushValue);
+								  	}
+									
+			                		
+			                		var exp_salary_lakhs = cur_salary_lakhs;
+			                		var exp_salary_th = cur_salary_th;
+			                		
+			                		var expecte_salary = json.job_profile.job_profile.expected_salary;
+									var numexp_salary_lakhs = parseFloat((parseFloat(expecte_salary) / 100000)).toFixed(2)
+									var exp_salary_split = numexp_salary_lakhs.toString().split(".");
+									var sel_exp_salary_lakh = ""
+									var sel_exp_salary_th = ""
+									if (exp_salary_split.length > 0){
+										sel_exp_salary_lakh	= exp_salary_split[0];
+										sel_exp_salary_th = exp_salary_split[1];
+									}
+			                		var professional_detail_ul = add_professional_details(job_industries, sel_job_industry, job_titles, sel_job_titles, experience_levels, sel_exp_level, total_exp_years, sel_total_exp_year,location1, location2, location3, total_exp_months, sel_total_exp_month, desired_job_types, sel_desired_job_type, cur_salary_lakhs, sel_cur_salary_lakh, cur_salary_th, sel_cur_salary_th, exp_salary_lakhs, sel_exp_salary_lakh, exp_salary_th, sel_exp_salary_th, json.job_profile.job_profile.is_experienced);
+			                		$("#jobcontent_div").append(professional_detail_ul);
+			                		var experience_aummary_ul = add_experience_details(json.job_profile.job_profile.company_name, json.job_profile.job_profile.cur_company_title, json.job_profile.job_profile.cur_company_from_month, json.job_profile.job_profile.cur_company_to_month, json.job_profile.job_profile.cur_company_from_year, json.job_profile.job_profile.cur_company_to_year, json.job_profile.job_profile.cur_company_description, json.past_experience, json.job_profile.job_profile.is_experienced);
+			                		$("#jobcontent_div").append(experience_aummary_ul);
+			                		var education_summary = add_education_details(json.job_profile.job_profile.qualification_level, json.job_profile.job_profile.edu_description, json.job_profile.job_profile.institute_name, json.job_profile.job_profile.course_type, json.job_profile.job_profile.edu_frm_year, json.job_profile.job_profile.edu_to_year, json.job_profile.job_profile.percentage, json.past_educations, json.education_pref, json.avl_degrees, json.avl_splization);
+			                		$("#jobcontent_div").append(education_summary);
+			                		var skill_summaary = add_skills_details(json.job_skills);
+			                		$("#jobcontent_div").append(skill_summaary);
+			                		var certification_summaary = add_certification_details(json.job_award);
+			                		$("#jobcontent_div").append(certification_summaary);
+			                		var resume_summaary = add_resume_section(json.job_profile, json.user.user.id, json.user.user.fname, '');
+                                    $("#jobcontent_div").append(resume_summaary);
+                                    var btn_element = ''
+                                    btn_element += '<div style="text-align: center;width: 100%;margin-top: 2%;float: left;" id="submit_btn_profile">';
+                                    btn_element += '        <input type="submit" style="margin:0 0 10px 0px;background-color:#FFFFFF;font-weight:bold;border-color:#FE9600;cursor:pointer;cursor:hand;" value="Update Profile" name="">';
+                                    btn_element += '</div>';
+			                		$("#jobcontent_div").append(btn_element);
+			                		$('[data-role="content"]').trigger('create');
+			                		//add the city listioner
+			                		var options = {
+										types : ['(cities)'],
+				                        componentRestrictions: {country: "IN"}
+									};
+		                			var ac = new google.maps.places.Autocomplete(document.getElementById('cur_city'), options);
+									google.maps.event.addListener(ac, 'place_changed', function () {
+								    	var placeLocation = this.getPlace();
+								  	});
+								  	var pref_loc1 = new google.maps.places.Autocomplete(document.getElementById('prefered_city1'), options);
+									google.maps.event.addListener(pref_loc1, 'place_changed', function () {
+								    	var placeLocation = this.getPlace();
+								  	});
+								  	var pref_loc2 = new google.maps.places.Autocomplete(document.getElementById('prefered_city2'), options);
+									google.maps.event.addListener(pref_loc2, 'place_changed', function () {
+								    	var placeLocation = this.getPlace();
+								  	});
+								  	var pref_loc3 = new google.maps.places.Autocomplete(document.getElementById('prefered_city3'), options);
+									google.maps.event.addListener(pref_loc3, 'place_changed', function () {
+								    	var placeLocation = this.getPlace();
+								  	});
+								  	//Add langueage known autocomplete
+								  	var availableTags = ["Hindi", "Bengali", "Telugu", "Tamil", "Kannada", "English", "Marathi", "Urdhu", "Gujarathi", "Malayalam", "Oriya", "Punjabi", "Assamme", "Nepali", "Konanki", "Dogri", "French", "Spanish", "German", "Chinese", "Tulu"];
+									function split(val) {
+										return val.split(/,\s*/);
+									}
+									function extractLast(term) {
+										return split(term).pop();
+									}
+									$("#profile_language_known")
+									.bind("keydown", function(event) {
+										if (event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.active) {
+											event.preventDefault();
+										}
+									}).autocomplete({
+										minLength : 0,
+										source : function(request, response) {
+											response($.ui.autocomplete.filter(availableTags, extractLast(request.term)));
+										},
+										focus : function() {
+											return false;
+										},
+										select : function(event, ui) {
+											var terms = split(this.value);
+											terms.pop();
+											terms.push(ui.item.value);
+											terms.push("");
+											this.value = terms.join(", ");
+											return false;
+										}
+									});
+									//Language known auto-complete ended...
+			                }else{
+			                    //TODO: do else part.
+			                    $("#job_profile_id").val("")
+                                has_job_profile = true;
+                                var basic_detail_ul = add_basic_details_ul('', '',  '', '', '', '', 0);
+                                $("#jobcontent_div").append(basic_detail_ul);
+                                //add professional details
+                                var job_industries = json.job_industries
+                                var experience_levels = json.exp_levels;
+                                var total_exp_years=[];;
+                                for (var i=0; i<26; i++){
+                                    var pushValue = i;
+                                    total_exp_years.push(pushValue);
+                                }
+                                var location1 = "",location2 = "",location3 = "";
+                                var total_exp_months=[];
+                                for (var i=0; i<13; i++){
+                                    var pushValue = i;
+                                    total_exp_months.push(pushValue);
+                                }
+                                
+                                var desired_job_types = [];
+                                desired_job_types.push("Full-time");
+                                desired_job_types.push("Part-Time");
+                                desired_job_types.push("Freelancer");
+                                desired_job_types.push("Internship");
+                                desired_job_types.push("Night-Shift Job");
+                                desired_job_types.push("Weekend Job");
+                                desired_job_types.push("Charity Work");
+                                
+                                var cur_salary_lakhs=[];
+                                for (var i=0; i<52; i++){
+                                    var pushValue = i;
+                                    cur_salary_lakhs.push(pushValue);
+                                }
+                                var cur_salary_th=[];
+                                for (var i=0; i<=95; i+=5){
+                                    var pushValue = i;
+                                    cur_salary_th.push(pushValue);
+                                }
+                                
+                                
+                                var exp_salary_lakhs = cur_salary_lakhs;
+                                var exp_salary_th = cur_salary_th;
+                                
+                                
+                                var professional_detail_ul = add_professional_details(job_industries, '', null, '', experience_levels, '', total_exp_years, '', '', '', '', total_exp_months, '', desired_job_types, '', cur_salary_lakhs, '', cur_salary_th, '', exp_salary_lakhs, '', exp_salary_th, '', 0);
+                                $("#jobcontent_div").append(professional_detail_ul);
+                                var experience_aummary_ul = add_experience_details('', '', '', '', '', '', '', null, 0);
+                                $("#jobcontent_div").append(experience_aummary_ul);
+                                var education_summary = add_education_details('', '', '', '', '', '', '', null, null, json.avl_degrees, json.avl_splization);
+                                $("#jobcontent_div").append(education_summary);
+                                var skill_summaary = add_skills_details(null);
+                                $("#jobcontent_div").append(skill_summaary);
+                                var certification_summaary = add_certification_details(null);
+                                $("#jobcontent_div").append(certification_summaary);
+                                var resume_summaary = add_resume_section(null, '', json.user.user.fname, json.user.user.public_url_code);
+                                $("#jobcontent_div").append(resume_summaary);
+                                var btn_element = ''
+                                btn_element += '<div style="text-align: center;width: 100%;float: left;margin-top: 2%;" id="submit_btn_profile">';
+                                btn_element += '        <input type="submit" style="margin:0 0 10px 0px;background-color:#FFFFFF;font-weight:bold;border-color:#FE9600;cursor:pointer;cursor:hand;" value="Update Profile" name="">';
+                                btn_element += '</div>';
+                                $("#jobcontent_div").append(btn_element);
+                                $('[data-role="content"]').trigger('create');
+                                //add the city listioner
+                                var options = {
+                                    types : ['(cities)'],
+                                    componentRestrictions: {country: "IN"}
+                                };
+                                var ac = new google.maps.places.Autocomplete(document.getElementById('cur_city'), options);
+                                google.maps.event.addListener(ac, 'place_changed', function () {
+                                    var placeLocation = this.getPlace();
+                                });
+                                var pref_loc1 = new google.maps.places.Autocomplete(document.getElementById('prefered_city1'), options);
+                                google.maps.event.addListener(pref_loc1, 'place_changed', function () {
+                                    var placeLocation = this.getPlace();
+                                });
+                                var pref_loc2 = new google.maps.places.Autocomplete(document.getElementById('prefered_city2'), options);
+                                google.maps.event.addListener(pref_loc2, 'place_changed', function () {
+                                    var placeLocation = this.getPlace();
+                                });
+                                var pref_loc3 = new google.maps.places.Autocomplete(document.getElementById('prefered_city3'), options);
+                                google.maps.event.addListener(pref_loc3, 'place_changed', function () {
+                                    var placeLocation = this.getPlace();
+                                });
+                                //Add langueage known autocomplete
+                                var availableTags = ["Hindi", "Bengali", "Telugu", "Tamil", "Kannada", "English", "Marathi", "Urdhu", "Gujarathi", "Malayalam", "Oriya", "Punjabi", "Assamme", "Nepali", "Konanki", "Dogri", "French", "Spanish", "German", "Chinese", "Tulu"];
+                                function split(val) {
+                                    return val.split(/,\s*/);
+                                }
+                                function extractLast(term) {
+                                    return split(term).pop();
+                                }
+                                $("#profile_language_known")
+                                .bind("keydown", function(event) {
+                                    if (event.keyCode === $.ui.keyCode.TAB && $(this).data("ui-autocomplete").menu.active) {
+                                        event.preventDefault();
+                                    }
+                                }).autocomplete({
+                                    minLength : 0,
+                                    source : function(request, response) {
+                                        response($.ui.autocomplete.filter(availableTags, extractLast(request.term)));
+                                    },
+                                    focus : function() {
+                                        return false;
+                                    },
+                                    select : function(event, ui) {
+                                        var terms = split(this.value);
+                                        terms.pop();
+                                        terms.push(ui.item.value);
+                                        terms.push("");
+                                        this.value = terms.join(", ");
+                                        return false;
+                                    }
+                                });
+			                }
+			            }
+			        });
+				function add_basic_details_ul(fname, lname, city, video_url, languageKnown, gender, isExperienced){
+				var ulSTR = '<ul data-role="listview" data-inset="true" id="basic_details">';
+					ulSTR += '		<li class="ui-li ui-li-static ui-body-c"><strong>Personal Details</strong></li>';
+					ulSTR += '		<li>';
+					ulSTR += '			<fieldset data-role="controlgroup">';
+		            ulSTR += '                <input type="text" name="fname" id="f_Name" placeholder="First Name *" value="'+fname+'" />'; 
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '            <fieldset data-role="controlgroup">';			
+		            ulSTR += '                <input type="text" name="lname" id="l_Name" placeholder="Last Name*" value="'+lname+'" />';
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '            <fieldset data-role="controlgroup">';
+		            ulSTR += '                <input type="text" name="cur_city" id="cur_city" placeholder="Your Current City*" value="'+city+'" />';
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '            <fieldset data-role="controlgroup">';
+		            ulSTR += '                <input type="text" name="video_url" id="profile_video_url" placeholder="Your YouTube Video ID*" value="'+video_url+'" />';
+		            ulSTR += '                <span id="yTubeMsg"></span>';
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '            <fieldset data-role="controlgroup">';			
+		            ulSTR += '                <input type="text" name="language_known" id="profile_language_known" placeholder="Language Known *" value="'+languageKnown+'" />';
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '            <fieldset data-role="controlgroup">';
+		            ulSTR += '                <label><strong>Gender</strong></label>';
+		            ulSTR += '                <input type="radio" name="gender" id="male" value="Male" data-role="none" data-theme="b"'; 
+		            if(gender == "Male")
+			            ulSTR += '					checked';
+			            ulSTR += '					/>';
+						ulSTR += '				Male';
+						ulSTR += '				<input type="radio" name="gender" id="female" value="Female" data-role="none" data-theme="b"';
+					if(gender == "Female")
+			            ulSTR += '					checked';
+			            ulSTR += '					/>';
+					ulSTR += '				Female';
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '            <fieldset data-role="controlgroup">';
+		            ulSTR += '                <label><strong>I am &nbsp;&nbsp;&nbsp;&nbsp;</strong></label>';
+		            
+		            ulSTR += '                <input type="radio" id="job_status" name="is_experienced" value="0" checked data-role="none" data-theme="b"';
+					if (isExperienced == 0 || isExperienced == "")
+					   	ulSTR += '					checked';
+			            ulSTR += '					/>';
+					ulSTR += '				Fresher';
+					ulSTR += '				<input type="radio" id="job_status" name="is_experienced" value="1" data-role="none" data-theme="b"';
+					if (isExperienced == 1)
+					   	ulSTR += '					checked';
+			            ulSTR += '					/>';
+					ulSTR += '				Experienced';
+		            ulSTR += '            </fieldset>';
+		            ulSTR += '		</li>';
+					ulSTR += '    </ul>';
+					return ulSTR;
+				}
+				function add_professional_details(job_industries, sel_job_industry, job_titles, sel_job_titles, experience_levels, sel_exp_level, total_exp_years, sel_total_exp_year,location1, location2, location3, total_exp_months, sel_total_exp_month, desired_job_types, sel_desired_job_type, cur_salary_lakhs, sel_cur_salary_lakh, cur_salary_th, sel_cur_salary_th, exp_salary_lakhs, sel_exp_salary_lakh, exp_salary_th, sel_exp_salary_th, is_experienced){
+				var ulSTR = '<ul data-role="listview" data-inset="true" id="professional_details">';
+				ulSTR += '		<li class="ui-li ui-li-static ui-body-c"><strong>Professional Details</strong></li>';
+				ulSTR += '		<li>';
+				ulSTR += '			<fieldset data-role="controlgroup">';
+	            ulSTR += '                 <select id="job_industry" name="job_industry" onchange="set_job_titles(this);">';
+	            ulSTR += '                	<option value="">- Desired Job Industry -</option>';
+	            
+	            $.each(job_industries, function(i, item){
+        			var selected = ""
+        			if(item.functional_area.id == sel_job_industry)
+						selected = "selected"
+					ulSTR += '                	<option value="'+item.functional_area.id+'" '+selected+'>'+item.functional_area.name+'</option>';	
+        		});
+	            
+	            ulSTR += '                </select>';
+	            ulSTR += '            </fieldset>';
+	            var display = "none";
+	            if(sel_job_industry != ""){
+	            	display = "block"
+	            }
+	            ulSTR += '            <fieldset data-role="controlgroup" style="display:'+display+'" class="jb_fArea">';		
+	            ulSTR += '                <select id="job_titles" name="functional_areas[]" multiple="multiple" data-native-menu="false">';
+	            ulSTR += '                	<option value="">-Desired Job Title(s)-</option>';
+	            if(job_titles != null){
+    	            $.each(job_titles, function(i, item) {
+    					var selected = ""
+    					if($.inArray( item.functional_area.id, sel_job_titles ) != -1)
+    						selected = "selected"
+    					ulSTR += '                	<option value="'+item.functional_area.id+'" '+selected+'>'+item.functional_area.name+'</option>';
+    				});
+				}
+	            ulSTR += '                </select>';
+	            ulSTR += '                <span>(You can choose up to 5 relevant Job Titles)</span>';
+	            ulSTR += '            </fieldset>';
+	           
+	            ulSTR += '             <fieldset data-role="controlgroup">';
+	            ulSTR += '                <select id="experience_level" name="experience_level">';
+	            ulSTR += '                	<option value="">- Your experience Level -</option>';
+	            $.each( experience_levels, function(i, item) {
+					var selected = ""
+					if(sel_exp_level == item.experience_level.id)
+						selected = "selected"
+					ulSTR += '                	<option value="'+item.experience_level.id+'" '+selected+'>'+item.experience_level.name+'</option>';
+				});
+	            
+	            ulSTR += '                </select>';
+	            ulSTR += '            </fieldset>';
+	            ulSTR += '            <fieldset data-role="controlgroup">';
+	            ulSTR += '                <label><strong>Total Experience</strong></label>';
+	            ulSTR += '                <select id="experience_year" name="total_experience_year">';
+	            ulSTR += '                	<option value="">- Years -</option>';
+	            for (var i=0; i < total_exp_years.length; i++) {
+	              var selected = ""
+	              if(total_exp_years[i] == sel_total_exp_year)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+total_exp_years[i]+'" '+selected+'>'+total_exp_years[i]+' Years</option>';
+				  
+				}
+	            ulSTR += '                </select>';
+	            ulSTR += '                <select id="experience_month" name="total_experience_month">';
+	            ulSTR += '                	<option value="">- Month -</option>';
+	            for (var i=0; i < total_exp_months.length; i++) {
+	              var selected = ""
+	              if(total_exp_months[i] == sel_total_exp_month)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+total_exp_months[i]+'" '+selected+'>'+total_exp_months[i]+' Months</option>';
+				  
+				}
+	            ulSTR += '                </select>';	 
+	            ulSTR += '            </fieldset>';
+	            ulSTR += '            <fieldset data-role="controlgroup">';
+	            ulSTR += '            	<label><strong>Prefered Locations:</strong></label>';
+	            ulSTR += '                <input type="text" placeholder="First Prefered Job Location" name="prefered_city1" id="prefered_city1" value="'+location1+'" />';
+	            ulSTR += '                <input type="text" placeholder="Second Prefered Job Location" name="prefered_city2" id="prefered_city2" value="'+location2+'" />';
+	            ulSTR += '                <input type="text" placeholder="Third Prefered Job Location" name="prefered_city3" id="prefered_city3" value="'+location3+'" />';
+	            ulSTR += '            </fieldset>';
+	            ulSTR += '            <fieldset data-role="controlgroup">';
+	            ulSTR += '                <select id="desired_job_type" name="desired_job_type">';
+	            ulSTR += '                	<option value="">- Desired Job Type -</option>';
+	            for (var i=0; i < desired_job_types.length; i++) {
+	              var selected = ""
+	              if(desired_job_types[i] == sel_desired_job_type)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+desired_job_types[i]+'" '+selected+'>'+desired_job_types[i]+'</option>';
+				  
+				}
+	            ulSTR += '                </select>';	 
+	            ulSTR += '            </fieldset>';
+	            
+	            if(is_experienced == "0")
+	               display = 'style="display:none;"'
+	            
+	            ulSTR += '            <fieldset data-role="controlgroup" class="exper_portion" '+display+'>';
+	            ulSTR += '                <label><strong>Current Salary</strong></label>';
+	            ulSTR += '                <select id="curSAL_L" name="id_curSalaryL">';
+	            ulSTR += '                 	<option value="">- Lakhs -</option>';
+	            for (var i=0; i < cur_salary_lakhs.length; i++) {
+	              var selected = ""
+	              if(cur_salary_lakhs[i] == sel_cur_salary_lakh)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+cur_salary_lakhs[i]+'00000" '+selected+'>'+cur_salary_lakhs[i]+' Lakhs</option>';
+				  
+				}
+	            ulSTR += '                </select>';
+	            ulSTR += '                <select id="curSAL_K" name="id_curSalaryK">';
+	            ulSTR += '                	<option value="">- Thousands -</option>';
+	            for (var i=0; i < cur_salary_th.length; i++) {
+	              var selected = ""
+	              if(cur_salary_th[i] == sel_cur_salary_th)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+cur_salary_th[i]+'000" '+selected+'>'+cur_salary_th[i]+' K</option>';
+				  
+				}
+	            ulSTR += '                </select>';	 
+	            ulSTR += '            </fieldset>';
+	            
+	            ulSTR += '            <fieldset data-role="controlgroup">';
+	            ulSTR += '                <label><strong>Expected Salary</strong></label>';
+	            ulSTR += '                <select id="expSAL_L" name="id_exSalaryL">';
+	            ulSTR += '                	<option value="">- Lakhs -</option>';
+	            for (var i=0; i < exp_salary_lakhs.length; i++) {
+	              var selected = ""
+	              if(exp_salary_lakhs[i] == sel_exp_salary_lakh)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+exp_salary_lakhs[i]+'00000" '+selected+'>'+exp_salary_lakhs[i]+' Lakhs</option>';
+				  
+				}
+	            ulSTR += '                </select>';
+	            ulSTR += '                <select id="expSAL_K" name="id_exSalaryK">';
+	            ulSTR += '                	<option value="">- Thousands -</option>';
+	            for (var i=0; i < exp_salary_th.length; i++) {
+	              var selected = ""
+	              if(exp_salary_th[i] == sel_exp_salary_th)
+	              	selected = "selected"
+				  ulSTR += '                	<option value="'+exp_salary_th[i]+'000" '+selected+'>'+exp_salary_th[i]+' K</option>';
+				  
+				}
+	            ulSTR += '                </select>';	 
+	            ulSTR += '            </fieldset>';
+	           ulSTR += '		</li>';
+				ulSTR += '    </ul>';
+				return ulSTR;
+				}
+			   });
+			   function add_experience_details(cur_company_name, cur_title, time_period_from_month, time_period_to_month, time_period_from_year, time_period_to_year, cur_job_description, past_exp_json, is_experience){
+			   	var display = "";
+			   	if(is_experience == "0")
+			   	 display = "display:none;"
+			   	var ulSTR = ''
+				ulSTR += '			<div style="float: left;width: 100%;'+display+'" id="experienced_summary_portion" class="exper_portion">';
+				ulSTR += '              <div style="color: black;font-size: 20px;margin: 2% 3%;;float:left">';
+				ulSTR += '					<strong>Experience Summary</strong>';
+				ulSTR += '				</div>';
+				ulSTR += '				<div class="professional_details">';
+				ulSTR += '					<div class="personal">';
+				ulSTR += '						<center><table width="95%" border="0" id="experienced_portion" style="margin:5px; 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;">';
+				var expereince_content = '';
+				expereince_content += '<tbody>';
+				expereince_content += '<tr>';
+				
+				expereince_content += '	<td><span style="margin-left:10px">Company Name</span>';
+				expereince_content += '	<input type="text" placeholder="Enter current company name" name="company_name" id="current_comp_name" value="'+cur_company_name+'" />';
+				expereince_content += '	</td>';
+				expereince_content += '</tr>';
+				expereince_content += '<tr>';
+				expereince_content += '	<td> <span style="margin-left:10px">Title</span>';
+				expereince_content += '	<input type="text" placeholder="Enter current job title" name="cur_company_title" id="current_comp_title" value="'+cur_title+'" />';
+				expereince_content += '	</td>';
+				expereince_content += '</tr>';
+				
+				expereince_content += '<tr>';
+				expereince_content += '	<td> <span style="margin-left:10px">Time Period</span>';
+				
+				expereince_content += '<select name="cur_company_from_month" id="cur_company_from_month">';
+				expereince_content += '<option value="">- Month -</option>';
+				
+				var frmmonths_arr = [];
+				frmmonths_arr.push("JAN");
+				frmmonths_arr.push("FEB");
+				frmmonths_arr.push("MAR");
+				frmmonths_arr.push("APR");
+				frmmonths_arr.push("MAY");
+				frmmonths_arr.push("JUN");
+				frmmonths_arr.push("JUL");
+				frmmonths_arr.push("AUG");
+				frmmonths_arr.push("SEP");
+				frmmonths_arr.push("OCT");
+				frmmonths_arr.push("NOV");
+				frmmonths_arr.push("DEC");
+				for (var i=0; i < frmmonths_arr.length; i++) {
+	              var selected = ""
+	              if(frmmonths_arr[i] == time_period_from_month)
+	              	selected = "selected"
+				  expereince_content += '                	<option value="'+frmmonths_arr[i]+'" '+selected+'>'+frmmonths_arr[i]+'</option>';
+				  
+				}
+				expereince_content += '</select>&nbsp;';
+				expereince_content += '<input type="text" style="width:80px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="cur_company_from_year" id="cur_company_from_year" value="'+time_period_from_year+'" />';
+				
+				expereince_content += '<strong>&nbsp;- To -&nbsp;</strong>';
+				expereince_content += '<select name="cur_company_to_month" id="cur_company_to_month" onchange="to_month_change();">';
+				var tomonths_arr = [];
+				tomonths_arr.push("Till Date");
+				tomonths_arr.push("JAN");
+				tomonths_arr.push("FEB");
+				tomonths_arr.push("MAR");
+				tomonths_arr.push("APR");
+				tomonths_arr.push("MAY");
+				tomonths_arr.push("JUN");
+				tomonths_arr.push("JUL");
+				tomonths_arr.push("AUG");
+				tomonths_arr.push("SEP");
+				tomonths_arr.push("OCT");
+				tomonths_arr.push("NOV");
+				tomonths_arr.push("DEC");
+				for (var i=0; i < tomonths_arr.length; i++) {
+	              var selected = ""
+	              if(tomonths_arr[i] == time_period_to_month)
+	              	selected = "selected"
+				  expereince_content += '	<option value="'+tomonths_arr[i]+'" '+selected+'>'+tomonths_arr[i]+'</option>';
+				  
+				}
+				expereince_content += '</select>&nbsp;';
+				if(time_period_to_month == "Till Date")
+					expereince_content += '<input type="text" style="width:80px;display:none;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="cur_company_to_year" id="cur_company_to_year" value="'+time_period_to_month+'" />';
+				else
+					expereince_content += '<input type="text" style="width:80px;" placeholder="YYYY"  onkeypress ="return numberOnly(this, event);" maxlength="4" name="cur_company_to_year" id="cur_company_to_year" value="'+time_period_to_month+'" />';
+				expereince_content += '	</td>';
+				expereince_content += '</tr>';
+				expereince_content += '<tr>';
+				expereince_content += '	<td> <span style="margin-left:10px">Description</span>';
+				expereince_content += '	<textarea id="cur_company_description" name="cur_company_description" style="height:80px;" placeholder="Here\'s where you can write a short summary of your job that gives an idea of your responsibilities, skills, and experience. You might write a short paragraph, a list, or both. (upto 150 words...)">'+cur_job_description+'</textarea>';
+				expereince_content += '	</td>';
+				expereince_content += '</tr>';
+				
+				expereince_content += '</tbody>';
+				expereince_content += '';
+				ulSTR += expereince_content;
+				ulSTR += '						 </table></center>';
+				ulSTR += '						<div id="additionExp_portion">';
+				var exp_nos = "";
+				var count = 1;
+				if(past_exp_json != "" && past_exp_json != "null" && past_exp_json != null){
+					$.each(past_exp_json, function(i, pastexp){
+						var past_experience = pastexp.job_profile_experience
+				        ulSTR += '											<div id="past_experience_div_'+count+'">';
+						ulSTR += '												<center>';
+						ulSTR += '													<table width="95%" border="0" style="margin:0 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="past_experience_tbl_'+count+'">';
+						ulSTR += '														<tbody>';
+						ulSTR += '															<tr>';
+						ulSTR += '																<td colspan="3"><img src="/images/icons/fancy_close.png" title="Remove This Experience" style="float: left;margin-left: 97%;width: 20px;cursor:pointer;" class="close-reveal-modal" onclick="remove_experience('+count+')"></td>';
+						ulSTR += '															</tr>';
+						ulSTR += '															<tr>';
+						
+						ulSTR += '																<td> <span style="margin-top:10px;"> Company Name </span>';
+						ulSTR += '																<input type="text" style="width:240px;" placeholder="Enter current company name" name="past_company_name_'+count+'" id="past_company_name_'+count+'" value="'+past_experience.company+'" />';
+						ulSTR += '																</td>';
+						ulSTR += '															</tr>';
+						ulSTR += '															<tr>';
+						ulSTR += '																<td> <span style="margin-top:10px;"> Title</span>';
+						ulSTR += '																	<input type="text" style="width:240px;" placeholder="job title" name="past_job_title_'+count+'" id="past_job_title_'+count+'" value="'+past_experience.job_title+'" />';
+						ulSTR += '																</td>';
+						ulSTR += '															</tr>';
+						ulSTR += '															</tr>';
+						ulSTR += '															<tr>';
+						ulSTR += '																<td> <span style="margin-top:10px;"> Time Period </span>';
+						ulSTR += '																<select name="past_company_from_month_'+count+'" id="past_company_from_month_'+count+'">';
+						ulSTR += '																	<option value="" selected="selected">- Month -</option>';
+						var pastexp_frmmonths_arr = [];
+						pastexp_frmmonths_arr.push("JAN");
+						pastexp_frmmonths_arr.push("FEB");
+						pastexp_frmmonths_arr.push("MAR");
+						pastexp_frmmonths_arr.push("APR");
+						pastexp_frmmonths_arr.push("MAY");
+						pastexp_frmmonths_arr.push("JUN");
+						pastexp_frmmonths_arr.push("JUL");
+						pastexp_frmmonths_arr.push("AUG");
+						pastexp_frmmonths_arr.push("SEP");
+						pastexp_frmmonths_arr.push("OCT");
+						pastexp_frmmonths_arr.push("NOV");
+						pastexp_frmmonths_arr.push("DEC");
+						for (var i=0; i < pastexp_frmmonths_arr.length; i++) {
+			              var selected = ""
+			              if(pastexp_frmmonths_arr[i] == past_experience.month_from)
+			              	selected = "selected"
+						  ulSTR += '                	<option value="'+pastexp_frmmonths_arr[i]+'" '+selected+'>'+pastexp_frmmonths_arr[i]+'</option>';
+						  
+						}
+						ulSTR += '																</select>&nbsp;';
+						ulSTR += '																<input type="text" style="width:80px;" placeholder="YYYY"  onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_company_from_year_'+count+'" id="past_company_from_year_'+count+'" value="'+past_experience.year_from+'" />';
+						ulSTR += '																<strong>&nbsp;- To -&nbsp;</strong>';
+						ulSTR += '																<select name="past_company_to_month_'+count+'" id="past_company_to_month_'+count+'">';
+						ulSTR += '																	<option value="" selected="selected">- Month -</option>';
+						for (var i=0; i < pastexp_frmmonths_arr.length; i++) {
+			              var selected = ""
+			              if(pastexp_frmmonths_arr[i] == past_experience.month_to)
+			              	selected = "selected"
+						  ulSTR += '                	<option value="'+pastexp_frmmonths_arr[i]+'" '+selected+'>'+pastexp_frmmonths_arr[i]+'</option>';
+						  
+						}
+						ulSTR += '																</select>&nbsp;';
+						ulSTR += '																<input type="text" style="width:80px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_company_to_year_'+count+'" id="past_company_to_year_'+count+'" value="'+past_experience.year_to+'" />';
+						ulSTR += '																</td>';
+						ulSTR += '															</tr>';
+						ulSTR += '															<tr>';
+						ulSTR += '																<td> <span style="margin-top:10px;"> Description</span>';
+						ulSTR += '																	<textarea id="past_company_description_'+count+'" name="past_company_description_'+count+'" style="height:80px;" placeholder="Here\'s where you can write a short summary of your job that gives an idea of your responsibilities, skills, and experience. You might write a short paragraph, a list, or both. (upto 150 words...)">'+past_experience.job_description+'</textarea>';
+						ulSTR += '																</td>';
+						ulSTR += '															</tr>';
+						ulSTR += '														</tbody>';
+						ulSTR += '													</table>';
+						ulSTR += '												</center>';
+						ulSTR += '											</div>';
+						exp_nos += ","+count.toString();
+						count += 1;
+						exp_global_counter += 1;
+						ulSTR += '								</div>';     			
+				    });
+				}
+				ulSTR += '								<input type="button" value="+ Add More Experiences" id="add_past_experience_btn" style="background: darkgreen;color: white;font-size: 12px;" onclick="add_past_experince();">';
+				ulSTR += '								<input type="hidden" name="experience_ids" id="experience_ids" value="'+exp_nos+'">';
+				ulSTR += '							</div>';
+				ulSTR += '						</div>';
+				ulSTR += '					</div>';
+			   return ulSTR;
+			   }
+			   function add_past_experince(){
+				var id = exp_global_counter + 1;
+				var past_expereince_content = '<div id="past_experience_div_'+id+'"><center><table width="95%" border="0" style="margin:0 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="past_experience_tbl_'+id+'">';
+				past_expereince_content += '<tbody>';
+				past_expereince_content += '<tr>';
+				past_expereince_content += '	<td colspan="3">';
+				past_expereince_content += '	<img src="/images/icons/fancy_close.png" title="Remove This Experience" style="float: left;margin-left: 97%;width: 10px;cursor:pointer;" class="close-reveal-modal" onclick="remove_experience('+id+')">';
+				past_expereince_content += '	</td>';
+				past_expereince_content += '</tr>';
+				past_expereince_content += '<tr>';
+				
+				past_expereince_content += '	<td> <span style="margin-left:10px"> Company Name </span>';
+				past_expereince_content += '	<input type="text"  placeholder="Enter current company name" name="past_company_name_'+id+'" id="past_company_name_'+id+'" value="" />';
+				past_expereince_content += '	</td>';
+				past_expereince_content += '</tr>';
+				past_expereince_content += '<tr>';
+				past_expereince_content += '	<td> <span style="margin-left:10px"> Title</span>';
+				past_expereince_content += '	<input type="text"  placeholder="job title" name="past_job_title_'+id+'" id="past_job_title_'+id+'" value="" />';
+				past_expereince_content += '	</td>';
+				past_expereince_content += '</tr>';
+				past_expereince_content += '</tr>';
+				past_expereince_content += '<tr>';
+				past_expereince_content += '	<td> <span style="margin-left:10px">Time Period </span>';
+				
+				past_expereince_content += '<select name="past_company_from_month_'+id+'" id="past_company_from_month_'+id+'">';
+				past_expereince_content += '<option value="" selected="selected">- Month -</option>';
+				past_expereince_content += '<option value="JAN">JAN</option>';
+				past_expereince_content += '<option value="FEB">FEB</option>';
+				past_expereince_content += '<option value="MAR">MAR</option>';
+				past_expereince_content += '<option value="APR">APR</option>';
+				past_expereince_content += '<option value="MAY">MAY</option>';
+				past_expereince_content += '<option value="JUN">JUN</option>';
+				past_expereince_content += '<option value="JUL">JUL</option>';
+				past_expereince_content += '<option value="AUG">AUG</option>';
+				past_expereince_content += '<option value="SEP">SEP</option>';
+				past_expereince_content += '<option value="OCT">OCT</option>';
+				past_expereince_content += '<option value="NOV">NOV</option>';
+				past_expereince_content += '<option value="DEC">DEC</option>';
+				past_expereince_content += '</select>&nbsp;';
+				past_expereince_content += '<input type="text" style="width:80px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_company_from_year_'+id+'" id="past_company_from_year_'+id+'" value="" />';
+				
+				past_expereince_content += '<strong>&nbsp;- To -&nbsp;</strong>';
+				
+				past_expereince_content += '<select name="past_company_to_month_'+id+'" id="past_company_to_month_'+id+'">';
+				past_expereince_content += '<option value="" selected="selected">- Month -</option>';
+				past_expereince_content += '<option value="JAN">JAN</option>';
+				past_expereince_content += '<option value="FEB">FEB</option>';
+				past_expereince_content += '<option value="MAR">MAR</option>';
+				past_expereince_content += '<option value="APR">APR</option>';
+				past_expereince_content += '<option value="MAY">MAY</option>';
+				past_expereince_content += '<option value="JUN">JUN</option>';
+				past_expereince_content += '<option value="JUL">JUL</option>';
+				past_expereince_content += '<option value="AUG">AUG</option>';
+				past_expereince_content += '<option value="SEP">SEP</option>';
+				past_expereince_content += '<option value="OCT">OCT</option>';
+				past_expereince_content += '<option value="NOV">NOV</option>';
+				past_expereince_content += '<option value="DEC">DEC</option>';
+				past_expereince_content += '</select>&nbsp;';
+				past_expereince_content += '<input type="text" style="width:80px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_company_to_year_'+id+'" id="past_company_to_year_'+id+'" value="" />';
+				past_expereince_content += '	</td>';
+				past_expereince_content += '</tr>';
+				past_expereince_content += '	<td> <span style="margin-left:10px"> Description</span>';
+				past_expereince_content += '	<textarea id="past_company_description_'+id+'" name="past_company_description_'+id+'" style="height:80px;" placeholder="Here\'s where you can write a short summary of your job that gives an idea of your responsibilities, skills, and experience. You might write a short paragraph, a list, or both.(upto 150 words)"></textarea>';
+				past_expereince_content += '	</td>';
+				past_expereince_content += '</tr>';
+				
+				past_expereince_content += '</tbody>';
+				past_expereince_content += '</table>';
+				past_expereince_content += '</center>';
+				past_expereince_content += '</div>';
+				$("#additionExp_portion").append(past_expereince_content);
+				$("#experience_ids").val($("#experience_ids").val() + ","+id);
+				exp_global_counter += 1;
+				$('[data-role="content"]').trigger('create');
+			}
+			function to_month_change(){
+				var cur_comp_to_month = $("#cur_company_to_month").val();
+				if(cur_comp_to_month == "Till Date"){
+					$("#cur_company_to_year").hide();	
+				}else{
+					$("#cur_company_to_year").show();
+				}
+			}
+			function remove_experience(id){
+				$('#past_experience_div_'+id).remove();
+				var curexpIDs = $("#experience_ids").val();
+				curexpIDs = curexpIDs.replace(','+id+'', '');
+				$("#experience_ids").val(curexpIDs);
+			}
+			function remove_education(id){
+				$('#past_education_div_'+id).remove();
+				var curIDs = $("#education_ids").val();
+				curIDs = curIDs.replace(','+id+'', '');
+				$("#education_ids").val(curIDs);
+			}
+			function remove_certification(id){
+				$('#past_certification_div_'+id).remove();
+				var curcertIDs = $("#certification_ids").val();
+				curcertIDs = curcertIDs.replace(','+id+'', '');
+				$("#certification_ids").val(curcertIDs);
+			}
+			function remove_skill(id){
+				$('#skill_row_'+id).remove();
+				var curskillIDs = $("#skill_ids").val();
+				curskillIDs = curskillIDs.replace(','+id+'', '');
+				$("#skill_ids").val(curskillIDs);
+			}
+			function add_skill(){
+				var id = skill_global_counter + 1;
+				var skill_content = '';
+				skill_content += '<tr id="skill_row_'+id+'">';
+				skill_content += '<td><span style="margin-left:10px">Key Skill</span><input type="text" name="profile_skill_'+id+'" id="profile_skill_'+id+'" placeholder="Your skill .." style="width:180px;margin-bottom:5px;">&nbsp;&nbsp;';
+					skill_content += '<select name="profile_rating_'+id+'" id="profile_rating_'+id+'">';
+						skill_content += '<option value="">- Honest Rating -</option>';
+						skill_content += '<option value="1">1</option>';
+						skill_content += '<option value="2">2</option>';
+						skill_content += '<option value="3">3</option>';
+						skill_content += '<option value="4">4</option>';
+						skill_content += '<option value="5">5</option>';
+						skill_content += '<option value="6">6</option>';
+						skill_content += '<option value="7">7</option>';
+						skill_content += '<option value="8">8</option>';
+						skill_content += '<option value="9">9</option>';
+						skill_content += '<option value="10">10</option>';
+					skill_content += '</select>';
+				skill_content += '&nbsp;&nbsp;<img src="/images/icons/delete.png" title="Remove This Skill" style="width: 15px;cursor:pointer;vertical-align: middle;" onclick="remove_skill('+id+');" />';
+				skill_content += '</td>';
+				skill_content += '</tr>';
+				$("#skill_tbl_portion").append(skill_content);
+				//document.getElementById('skill_tbl_portion').innerHTML += skill_content;
+				$("#skill_ids").val($("#skill_ids").val() + ","+id);
+				skill_global_counter += 1;
+				$('[data-role="content"]').trigger('create');
+			
+			}
+			function add_certification(id){
+				var id = certification_global_counter + 1;
+				var certificaton_content = '<div id="past_certification_div_'+id+'"><center><table width="95%" border="0" style="margin:0 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="past_certification_tbl_'+id+'">';
+				certificaton_content += '<tbody>';
+				certificaton_content += '<tr>';
+				certificaton_content += '	<td colspan="3">';
+				certificaton_content += '	<img src="/images/icons/fancy_close.png" title="Remove This Certification" style="float: left;margin-left: 97%;width: 10px;cursor:pointer;" class="close-reveal-modal" onclick="remove_certification('+id+')">';
+				certificaton_content += '	</td>';
+				certificaton_content += '</tr>';
+				
+				certificaton_content += '<tr>';
+				certificaton_content += '	<td><span style="margin-left:10px">Certification Title</span>';
+				certificaton_content += '	<input type="text" style="width:240px;" placeholder="Title ..." name="certi_title_'+id+'" id="certi_title_'+id+'" value="" />';
+				certificaton_content += '	</td>';
+				certificaton_content += '</tr>';
+				
+				certificaton_content += '<tr>';
+				certificaton_content += '	<td><span style="margin-left:10px">Description</span>';
+				certificaton_content += '	<input type="text" style="width:240px;" maxlength="40" placeholder="Summary ..." name="certi_desc_'+id+'" id="certi_desc_'+id+'" value="" />';
+				certificaton_content += '	</td>';
+				certificaton_content += '</tr>';
+				
+				certificaton_content += '<tr>';
+				certificaton_content += '	<td><span style="margin-left:10px">Year</span>';
+				certificaton_content += '	<input type="text" style="width:240px;" placeholder="YYYY" name="certi_year_'+id+'" id="certi_year_'+id+'" value="" onkeypress ="return numberOnly(this, event);" maxlength="4" />';
+				certificaton_content += '	</td>';
+				certificaton_content += '</tr>';
+				
+				certificaton_content += '</tbody>';
+				certificaton_content += '</table>';
+				certificaton_content += '</center>';
+				certificaton_content += '</div>';
+				$("#certification_portion").append(certificaton_content);
+				//document.getElementById('certification_portion').innerHTML += certificaton_content;
+				$("#certification_ids").val($("#certification_ids").val() + ","+id);
+				certification_global_counter += 1;
+				$('[data-role="content"]').trigger('create');
+			
+			}
+			function add_past_education(id){
+				var id = edu_global_counter + 1;
+				var past_education_content = '<div id="past_education_div_'+id+'"><center><table width="95%" border="0" style="margin:0 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="past_education_tbl_'+id+'">';
+				past_education_content += '<tbody>';
+				past_education_content += '<tr>';
+				past_education_content += '	<td colspan="3">';
+				past_education_content += '	<img src="/images/icons/fancy_close.png" title="Remove This Education" style="float: left;margin-left: 97%;width: 10px;cursor:pointer;" class="close-reveal-modal" onclick="remove_education('+id+')">';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				past_education_content += '<tr>';
+				
+				past_education_content += '	<td><span style="margin-left: 10px;">Qualification Level</span>';
+				past_education_content += '	<select id="past_edu_qualification_level_'+id+'" name="past_edu_qualification_level_'+id+'">';
+				past_education_content += '	<option value="">- Select Qualification -</option>';
+				
+				if(qualification_lvls != "" && qualification_lvls != "null" && qualification_lvls != null){
+					$.each(qualification_lvls, function(i, q_lvls){
+						qualification_level = q_lvls.qualification_level;
+						past_education_content += '	<option value="'+qualification_level.id+'">'+qualification_level.name+'</option>';		
+					});
+				}
+				past_education_content += '	</select>';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				past_education_content += '<tr>';
+				
+				past_education_content += '	<td><span style="margin-left: 10px;">Degree</span>';
+				past_education_content += '	<input type="text" style="width:240px;" placeholder="Your Degree ..." name="past_edu_degree_'+id+'" id="past_edu_degree_'+id+'" value="" />';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				
+				past_education_content += '<tr>';
+				past_education_content += '	<td><span style="margin-left: 10px;">Institute Name</span>';
+				past_education_content += '	<input type="text" style="width:240px;" placeholder="Institute ..." name="past_edu_institute_'+id+'" id="past_edu_institute_'+id+'" value="" />';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				
+				past_education_content += '<tr>';
+				past_education_content += '	<td><span style="margin-left: 10px;">Course type</span>';
+				past_education_content += '	<select name="past_edu_course_type_'+id+'" id="past_edu_course_type_'+id+'">';
+				past_education_content += '		<option value="">- Select Course Type -</option>';
+				past_education_content += '		<option value="Full-Time">Full-Time</option>';
+				past_education_content += '		<option value="Part-Time">Part-Time</option>';
+				past_education_content += '		<option value="Distance-Education">Distance-Education</option>';
+				past_education_content += '	</select>';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				
+				past_education_content += '<tr>';
+				past_education_content += '	<td><span style="margin-left: 10px;">Time Period</span>';
+				past_education_content += '<input type="text" style="width:160px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_edu_from_year_'+id+'" id="past_edu_from_year_'+id+'" value="" />';
+				past_education_content += '<strong>&nbsp;- To -&nbsp;</strong>';
+				past_education_content += '<input type="text" style="width:160px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_edu_to_year_'+id+'" id="past_edu_to_year_'+id+'" value="" />';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				
+				past_education_content += '<tr>';
+			    past_education_content += '	<td><span style="margin-left: 10px;">Description</span>';
+				past_education_content += '	<textarea id="past_edu_description_'+id+'" name="past_edu_description_'+id+'" style="height:80px;" placeholder="Here\'s where you can write a short summary of your education including degrees, specific classes, and activities. You might write a short paragraph, use bullet points, or both. (upto 150 words ...)"></textarea>';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				
+				past_education_content += '<tr>';
+				past_education_content += '	<td><span style="margin-left: 10px;">% of Marks</span>';
+				past_education_content += '	<input type="text" style="width:240px;" placeholder="Marks in Percentage" name="past_edu_marks_perc_'+id+'" id="past_edu_marks_perc_'+id+'" value="" />';
+				past_education_content += '	</td>';
+				past_education_content += '</tr>';
+				
+				past_education_content += '</tbody>';
+				past_education_content += '</table>';
+				past_education_content += '</center>';
+				past_education_content += '</div>';
+				$("#additionEdu_portion").append(past_education_content);
+				//document.getElementById('additionEdu_portion').innerHTML += past_education_content;
+				$("#education_ids").val($("#education_ids").val() + ","+id);
+				edu_global_counter += 1;
+				$('[data-role="content"]').trigger('create');
+			}
+			function add_education_details(cur_qualification_lvl, edu_description, institute_name, course_type, time_period_from_year, time_period_to_year, marks_percentage, past_edu_json, education_pref_json, avl_degrees, avl_splization){
+			   	var ulSTR = '';
+                ulSTR += '          				<div style="width:100%;float:left">';
+                ulSTR += '                                  <div style="color: black;font-size: 20px;margin: 1% 3%;float:left">';
+                ulSTR += '                              <strong>Education Details</strong>';
+                ulSTR += '                          </div>';
+                ulSTR += '                          <div id="personal_details" style="float: left;width: 100%;">';
+                ulSTR += '                          <center><table width="95%" border="0" style="margin:5px 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;">';
+                ulSTR += '                              <tbody>';
+                ulSTR += '                                  <tr>';
+              
+                ulSTR += '                                      <td><span style="margin-left: 10px;">Highest Qualification Level</span>';
+                ulSTR += '                                      <select id="qualification_level" name="qualification_level" onchange="set_degree_for_qualification(this)">';
+                ulSTR += '                                              <option value="">- Select Highest Qualification -</option>';
+                if(qualification_lvls != "" && qualification_lvls != "null" && qualification_lvls != null){
+                    var be_selected = ""
+                    $.each(qualification_lvls, function(i, q_lvls){
+                        qualification_level = q_lvls.qualification_level;
+                        if(cur_qualification_lvl == qualification_level.id.toString())
+                            be_selected = "selected"
+                        else
+                           be_selected = "" 
+                        ulSTR += ' <option value="'+qualification_level.id+'" '+be_selected+'>'+qualification_level.name+'</option>';      
+                    });
+                }
+                ulSTR += '                                      </select>';
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                var display = ""
+                if(education_pref_json == null || education_pref_json == "null"){
+                    display = "none"
+                }
+                ulSTR += '                                  <tr id="highest_degree" style="display:'+display+'">';
+               
+                ulSTR += '                                      <td><span style="margin-left: 10px;">Your Highest Degree</span>';
+                ulSTR += '                                          <div id="quali_degrees">';
+                ulSTR += '                                              <select id="job_degrees" name="education_specialization[]" multiple="multiple" data-native-menu="false" onchange="set_specialization_for_qualification(this)">';
+                ulSTR += '                                              <option value="">-Choose Degrees(s)-</option>';
+                var sel_degrees=[];
+                var sel_splization=[];
+                    if(education_pref_json != null){
+                        $.each(education_pref_json, function(i, item){
+                            if(item.job_profile_education_pref.is_degree)
+                                sel_degrees.push(item.job_profile_education_pref.education_specialization_id);
+                            else
+                                sel_splization.push(item.job_profile_education_pref.education_specialization_id);
+                        });
+                    }
+                if(avl_degrees !=null){    
+                    $.each(avl_degrees, function(i, item) {
+                        var selected = ""
+                        if($.inArray( item.education_specialization.id, sel_degrees ) != -1)
+                            selected = "selected"
+                        else
+                           selected = "" 
+                        ulSTR += '                  <option value="'+item.education_specialization.id+'" '+selected+'>'+item.education_specialization.name+'</option>';
+                    });
+                }
+                ulSTR += '                </select>';
+                ulSTR += '                <span>(You can choose up to 5 relevant degrees)</span>';
+                ulSTR += '                </div>';
+                
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                                  <tr id="job_quali_degrees" style="display:'+display+'">';
+               
+                ulSTR += '                                      <td> <span style="margin-left: 10px;">Education Specializations</span>';
+                ulSTR += '                                          <div id="quali_specialization">';
+                ulSTR += '                                              <select id="job_splization" name="education_specialization[]" multiple="multiple" data-native-menu="false">';
+                ulSTR += '                                              <option value="">-Choose Specializations(s)-</option>';
+                if(avl_splization != null){
+                    $.each(avl_splization, function(i, item) {
+                        var selected = ""
+                        if($.inArray( item.education_specialization.id, sel_splization ) != -1)
+                            selected = "selected"
+                        else
+                            selected = "" 
+                        ulSTR += '                  <option value="'+item.education_specialization.id+'" '+selected+'>'+item.education_specialization.name+'</option>';
+                    });
+                }
+                ulSTR += '                </select>';
+                ulSTR += '                <span>(You can choose up to 5 relevant specializations)</span>';
+                ulSTR += '                                          </div>';
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                                  <tr>';
+              
+                ulSTR += '                                      <td> <span style="margin-left: 10px;">Institute Name</span>';
+                ulSTR += '                                      <input type="text" placeholder="Enter Institute Name" style="width:240px;margin-bottom:5px;" name="institute_name" id="institute_name" value="'+institute_name+'">';
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                                  <tr>';
+             
+                ulSTR += '                                      <td> <span style="margin-left: 10px;">Course Type</span>';
+                ulSTR += '                                      <select style="width:244px;margin-bottom:5px;" name="course_type" id="course_type">';
+                ulSTR += '                                          <option value="">- Select Course Type -</option>';
+                var course_type_arr = [];
+                course_type_arr.push("Full-Time");
+                course_type_arr.push("Part-Time");
+                course_type_arr.push("Distance-Education");
+                for (var i=0; i < course_type_arr.length; i++) {
+                  var selected = ""
+                  if(course_type_arr[i] == course_type)
+                    selected = "selected"
+                  else
+                    selected = ""  
+                  ulSTR += '                    <option value="'+course_type_arr[i]+'" '+selected+'>'+course_type_arr[i]+'</option>';
+                  
+                }
+                ulSTR += '                                      </select></td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                                  <tr>';
+             
+                ulSTR += '                                      <td><span style="margin-left: 10px;">Time Period</span>';
+                ulSTR += '                                          <input type="text" style="width:80px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="edu_frm_year" id="edu_frm_year" value="'+time_period_from_year+'" />';
+                ulSTR += '                                          <strong>&nbsp;- To -&nbsp;</strong>';
+                ulSTR += '                                          <input type="text" style="width:80px;" placeholder="YYYY"  onkeypress ="return numberOnly(this, event);" maxlength="4" name="edu_to_year" id="edu_to_year" value="'+time_period_to_year+'" />';
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                                  <tr>';
+             
+                ulSTR += '                                      <td><span style="margin-left: 10px;">Description</span>';
+                if(edu_description == null)
+                    edu_description = "";
+                ulSTR += '                                      <textarea id="edu_description" name="edu_description" style="height:80px;" placeholder="Here\'s where you can write a short summary of your education including degrees, specific classes, and activities. You might write a short paragraph, use bullet points, or both. (upto 150 words...)">'+edu_description+'</textarea>';
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                                  <tr>';
+            
+                ulSTR += '                                      <td><span style="margin-left: 10px;">% of Marks</span>';
+                ulSTR += '                                      <input type="text" style="width:240px;margin-bottom:5px;" name="percentage" id="marks_percentage" maxlength="2" placeholder="Marks in Percentage" value="'+marks_percentage+'" onkeyup="this.value=this.value.replace(/[^\d]/,\'\')">';
+                ulSTR += '                                      </td>';
+                ulSTR += '                                  </tr>';
+                ulSTR += '                              </tbody>';
+                ulSTR += '                          </table>';
+                ulSTR += '                          </center>';
+                ulSTR += '                          <div id="additionEdu_portion">';
+                var edu_nos = "";
+                var count_edu = 1;
+                if(past_edu_json != "" && past_edu_json != "null" && past_edu_json != null){
+                    $.each(past_edu_json, function(i, pastedu){
+                        var past_education = pastedu.job_profile_education
+                        ulSTR += '                                  <div id="past_education_div_'+count_edu+'">';
+                        ulSTR += '                                  <center>';
+                        ulSTR += '                                      <table width="95%" border="0" style="margin:0 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="past_education_tbl_'+count_edu+'">';
+                        ulSTR += '                                          <tbody>';
+                        ulSTR += '                                              <tr>';
+                        ulSTR += '                                                  <td colspan="3"><img src="/images/icons/fancy_close.png" title="Remove This Education" style="float: left;margin-left: 93%;width: 20px;cursor:pointer;" class="close-reveal-modal" onclick="remove_education('+count_edu+')"></td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                        
+                        ulSTR += '                                                  <td><span style="margin-left: 10px;">Qualification Level</span>';
+                        ulSTR += '                                                  <select id="past_edu_qualification_level_'+count_edu+'" name="past_edu_qualification_level_'+count_edu+'">';
+                        ulSTR += '                                                          <option value="">- Select Qualification -</option>';
+                        if(qualification_lvls != "" && qualification_lvls != "null" && qualification_lvls != null){
+                            var be_selected = ""
+                            $.each(qualification_lvls, function(i, q_lvls){
+                                qualification_level = q_lvls.qualification_level;
+                                if(past_education.qulification_level_id == qualification_level.id)
+                                    be_selected = "selected"
+                                else
+                                    be_selected = ""
+                                ulSTR += '                                 <option value="'+qualification_level.id+'" '+be_selected+'>'+qualification_level.name+'</option>';      
+                            });
+                        }
+                        ulSTR += '                                                  </select></td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                        
+                        ulSTR += '                                                <td><span style="margin-left: 10px;">Degree</span>';
+                        ulSTR += '                                                  <input type="text" style="width:240px;" placeholder="Your Degree ..." name="past_edu_degree_'+count_edu+'" id="past_edu_degree_'+count_edu+'" value="'+past_education.degree+'" />';
+                        ulSTR += '                                                  </td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                       
+                        ulSTR += '                                                  <td><span style="margin-left: 10px;">Institute Name</span>';
+                        ulSTR += '                                                  <input type="text" style="width:240px;" placeholder="Your Degree ..." name="past_edu_institute_'+count_edu+'" id="past_edu_institute_'+count_edu+'" value="'+past_education.institute+'" />';
+                        ulSTR += '                                                  </td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                       
+                        ulSTR += '                                                  <td><span style="margin-left: 10px;">Course type</span>';
+                        ulSTR += '                                                  <select style="width:244px;margin-bottom:5px;" name="past_edu_course_type_'+count_edu+'" id="past_edu_course_type_'+count_edu+'">';
+                        ulSTR += '                                                      <option value="">- Select Course Type -</option>';
+                        for (var i=0; i < course_type_arr.length; i++) {
+                          var selected = ""
+                          if(course_type_arr[i] == past_education.course_type)
+                            selected = "selected"
+                          ulSTR += '                    <option value="'+course_type_arr[i]+'" '+selected+'>'+course_type_arr[i]+'</option>';
+                          
+                        }
+                        ulSTR += '                                                  </select></td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                     
+                        ulSTR += '                                                  <td><span style="margin-left: 10px;">Time Period</span>';
+                        ulSTR += '                                                  <input type="text" style="width:160px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_edu_from_year_'+count_edu+'" id="past_edu_from_year_'+count_edu+'" value="'+past_education.year_from+'" />';
+                        ulSTR += '                                                  <strong>&nbsp;- To -&nbsp;</strong>';
+                        ulSTR += '                                                  <input type="text" style="width:160px;" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="past_edu_to_year_'+count_edu+'" id="past_edu_to_year_'+count_edu+'" value="'+past_education.year_to+'" />';
+                        ulSTR += '                                                  </td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                 
+                        var past_edu_description = ""
+                        if(past_education.edu_description != null)
+                            past_edu_description = past_education.edu_description
+                            
+                        ulSTR += '                                                  <td><span style="margin-left: 10px;">Description</span><textarea id="past_edu_description_'+count_edu+'" name="past_edu_description_'+count_edu+'" style="height:80px;" placeholder="Here\'s where you can write a short summary of your education including degrees, specific classes, and activities. You might write a short paragraph, use bullet points, or both. (upto 150 words...)">'+past_edu_description+'</textarea></td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                              <tr>';
+                       
+                        ulSTR += '                                                  <td><span style="margin-left: 10px;">% of Marks</span>';
+                        ulSTR += '                                                  <input type="text" style="width:240px;" placeholder="Marks in Percentage" name="past_edu_marks_perc_'+count_edu+'" id="past_edu_marks_perc_'+count_edu+'" value="'+past_education.marks_perc+'" />';
+                        ulSTR += '                                                  </td>';
+                        ulSTR += '                                              </tr>';
+                        ulSTR += '                                          </tbody>';
+                        ulSTR += '                                      </table>';
+                        ulSTR += '                                  </center>';
+                        ulSTR += '                                  </div>';
+                        edu_nos += ","+count_edu.toString();
+                        count_edu += 1;
+                     });
+                  }
+                ulSTR += '                          </div>';
+                ulSTR += '                          <input type="button" value="+ Add More Educations" id="add_past_education_btn" style="background: darkgreen;color: white;font-size: 12px;" onclick="add_past_education();">';
+                ulSTR += '                          <input type="hidden" name="education_ids" id="education_ids" value="'+edu_nos+'">';
+                ulSTR += '                          </div>';
+                ulSTR += '                      </div>';
+			   	return ulSTR;
+			   }
+			   function add_skills_details(profile_skills_json){
+                var ulSTR = '';
+                ulSTR += '                          <div style="width:100%;float:left">';
+                ulSTR += '                                  <div style="color: black;font-size: 20px;margin: 2% 5%;text-align:left;width:100%;">';
+                ulSTR += '                              <strong>Skills</strong>';
+                ulSTR += '                          </div>';
+                ulSTR += '                          <div class="professional_details">';
+                ulSTR += '                              <div class="personal">';
+                ulSTR += '                                  <div id="skill_portion">';
+                ulSTR += '                                      <center>';
+                ulSTR += '                                      <table width="95%" border="0" style="margin:5px 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="skill_tbl_portion">';
+                var skill_nos = "";
+                var skill_count = 1;
+                var rating_arr = [];
+                rating_arr.push("1");
+                rating_arr.push("2");
+                rating_arr.push("3");
+                rating_arr.push("4");
+                rating_arr.push("5");
+                rating_arr.push("6");
+                rating_arr.push("7");
+                rating_arr.push("8");
+                rating_arr.push("9");
+                rating_arr.push("10");
+                if(profile_skills_json != "" && profile_skills_json != "null" && profile_skills_json != null){
+                    $.each(profile_skills_json, function(i, jb_skill){
+                        var profile_skill = jb_skill.job_profile_skill
+                        var rating_options = '';
+                        for (var i=0; i < rating_arr.length; i++) {
+                          var selected = ""
+                          if(rating_arr[i] == profile_skill.expert_level.toString())
+                            selected = "selected"
+                          else
+                            selected = ""
+                          rating_options += '                    <option value="'+rating_arr[i]+'" '+selected+'>'+rating_arr[i]+'</option>';
+                          
+                        }
+                        if (skill_count == 1){
+                            ulSTR += '                                                      <tr>';
+                            
+                            ulSTR += '                                                          <td><span style="margin-left:10px">Key Skill</span><input type="text" name="profile_skill_'+skill_count+'" id="profile_skill_'+skill_count+'" placeholder="Your skill .." style="width:180px;margin-bottom:5px;" value="'+profile_skill.skill_name+'">&nbsp;';
+                            ulSTR += '                                                              <select name="profile_rating_'+skill_count+'" id="profile_rating_'+skill_count+'">';
+                            ulSTR += '                                                                  <option value="">- Honest Rating -</option>';
+                            ulSTR += rating_options;
+                            ulSTR += '                                                              </select>';
+                            ulSTR += '                                                          </td>';
+                            ulSTR += '                                                      </tr>';
+                        }else{
+                            ulSTR += '                                                      <tr id="skill_row_'+skill_count+'">';
+                            ulSTR += '                                                          <td><span style="margin-left:10px">Key Skill</span><input type="text" name="profile_skill_'+skill_count+'" id="profile_skill_'+skill_count+'" placeholder="Your skill .." style="width:180px;margin-bottom:5px;" value="'+profile_skill.skill_name+'">&nbsp;&nbsp;';
+                            ulSTR += '                                                              <select name="profile_rating_'+skill_count+'" id="profile_rating_'+skill_count+'">';
+                            ulSTR += rating_options;
+                            ulSTR += '                                                              </select>';
+                            ulSTR += '                                                          &nbsp;&nbsp;<img src="/images/icons/delete.png" title="Remove This Skill" style="width: 15px;cursor:pointer;vertical-align: middle;" onclick="remove_skill('+skill_count+');" />';
+                            ulSTR += '                                                          </td>';
+                            ulSTR += '                                                     </tr>';
+                        }
+                        skill_nos += ","+skill_count.toString();
+                        skill_count += 1;
+                        skill_global_counter += 1;
+                    });
+                }else{
+                    skill_nos = ",1";
+                    ulSTR += '                                          <tr>';
+                    ulSTR += '                                              <td><span style="margin-left:10px">Key Skill</span><input type="text" name="profile_skill_1" id="profile_skill_1" placeholder="Your skill .." style="width:180px;margin-bottom:5px;">&nbsp;';
+                    ulSTR += '                                                  <select name="profile_rating_1" id="profile_rating_1">';
+                    ulSTR += '                                                      <option value="">- Honest Rating -</option>';
+                    for (var i=0; i < rating_arr.length; i++) {
+                      ulSTR += '                    <option value="'+rating_arr[i]+'">'+rating_arr[i]+'</option>';
+                    }
+                    ulSTR += '                                                  </select>';
+                    ulSTR += '                                              </td>';
+                    ulSTR += '                                          </tr>';
+                    skill_global_counter += 1;
+                }
+                ulSTR += '                                      </table>';
+                ulSTR += '                                      </center>';     
+                ulSTR += '                                  </div>';
+                ulSTR += '                                  <input type="hidden" name="skill_ids" id="skill_ids" value="'+skill_nos+'">';
+                ulSTR += '                                  <input type="button" value="+ Add More Skills" id="add_more_skill_btn" style="background: darkgreen;color: white;font-size: 12px;" onclick="add_skill();">';
+                ulSTR += '                              </div>';
+                ulSTR += '                          </div>';
+                ulSTR += '                      </div>';
+                ulSTR += '      </li>';
+                ulSTR += '    </ul>';
+                return ulSTR;
+               }
+               function add_certification_details(profile_cert_json){
+                var ulSTR = '';
+                ulSTR += '                          <div style="width:100%;float:left">';
+                ulSTR += '                                  <div style="color: black;font-size: 20px;margin: 2% 3%;float:left">';
+                ulSTR += '                             <strong> Certification(s)</strong>';
+                ulSTR += '                          </div>';
+                ulSTR += '                              <div class="professional_details">';
+                ulSTR += '                                  <div class="personal">';
+                ulSTR += '                                      <div id="certification_portion">';
+                var award_nos = "";
+                var award_count = 1;
+                if(profile_cert_json != "" && profile_cert_json != "null" && profile_cert_json != null){
+                    $.each(profile_cert_json, function(i, jb_certs){
+                        var jbCertificaiton = jb_certs.job_profile_award;
+                        ulSTR += '                                                  <div id="past_certification_div_'+award_count+'">';
+                        ulSTR += '                                                          <center>';
+                        ulSTR += '                                                              <table width="95%" border="0" style="margin:0 0 10px; 25px;border-collapse:separate;border: solid #ccc 1px;border-radius: 10px;" id="past_certification_tbl_'+award_count+'">';
+                        ulSTR += '                                                                  <tbody>';
+                        ulSTR += '                                                                      <tr>';
+                        ulSTR += '                                                                          <td colspan="3"><img src="/images/icons/fancy_close.png" title="Remove This Certification" style="float: left;margin-left: 97%;width: 20px;cursor:pointer;" class="close-reveal-modal" onclick="remove_certification('+award_count+')"></td>';
+                        ulSTR += '                                                                      </tr>';
+                        ulSTR += '                                                                      <tr>';
+                       
+                        ulSTR += '                                                                          <td><span style="margin-left:10px">Certification Title</span>';
+                        ulSTR += '                                                                          <input type="text" style="width:240px;" placeholder="Title ..." name="certi_title_'+award_count+'" id="certi_title_'+award_count+'" value="'+jbCertificaiton.award_title+'" />';
+                        ulSTR += '                                                                          </td>';
+                        ulSTR += '                                                                      </tr>';
+                        ulSTR += '                                                                      <tr>';
+            
+                        ulSTR += '                                                                          <td><span style="margin-left:10px">Description</span>';
+                        ulSTR += '                                                                          <input type="text" style="width:240px;" maxlength="40" placeholder="Summary ..." name="certi_desc_'+award_count+'" id="certi_desc_'+award_count+'" value="'+jbCertificaiton.award_description+'" />';
+                        ulSTR += '                                                                          </td>';
+                        ulSTR += '                                                                      </tr>';
+                        ulSTR += '                                                                      <tr>';
+   
+                        ulSTR += '                                                                          <td><span style="margin-left:10px">Year</span>';
+                        ulSTR += '                                                                          <input type="text" style="width:240px;" maxlength="40" placeholder="YYYY" onkeypress ="return numberOnly(this, event);" maxlength="4" name="certi_year_'+award_count+'" id="certi_year_'+award_count+'" value="'+jbCertificaiton.year_from+'" />';
+                        ulSTR += '                                                                          </td>';
+                        ulSTR += '                                                                      </tr>';
+                        ulSTR += '                                                                  </tbody>';
+                        ulSTR += '                                                              </table>';
+                        ulSTR += '                                                          </center>';
+                        ulSTR += '                                                      </div>';
+                        award_nos += ","+award_count.toString();
+                        award_count += 1;
+                        certification_global_counter += 1;
+                    });
+                }
+                ulSTR += '                                      </div>';
+                ulSTR += '                                  </div>';
+                ulSTR += '                                  </br>';
+                ulSTR += '                                  <div style="margin-top: 2%;float:left">';
+                ulSTR += '                                      <input type="hidden" name="certification_ids" id="certification_ids" value="'+award_nos+'">';
+                ulSTR += '                                      <input type="button" value="+ Add My Cerifications" id="add_past_experience_btn" style="background: darkgreen;color: white;font-size: 12px;" onclick="add_certification();">';
+                ulSTR += '                          </div>';
+                ulSTR += '                              </div>';
+                ulSTR += '                          </div>';
+                
+                return ulSTR;
+               }
+               function add_resume_section(job_profile, user_id, username, url_code){
+                var ulSTR = '';
+                ulSTR += '                          <div style="width:100%;float:left">';
+                ulSTR += '                                  <div style="color: black;font-size: 20px;margin: 2% 3%;text-align:left;width:100%">';
+                ulSTR += '                                      <strong>Resume</strong>';
+                ulSTR += '                                  </div>';
+                ulSTR += '                                  <div id="personal_details">';
+                ulSTR += '                                      <table width="95%" border="0" style="border: 1px solid grey;border-radius: 10px;">';
+                ulSTR += '                                          <tbody>';
+                
+                if(job_profile != null){
+                    jb_profile = job_profile.job_profile;
+                    rnd_num = jb_profile.public_url;
+                }else{
+                    rnd_num = url_code;
+                    jb_profile = null;
+                }
+                
+                /*
+                ulSTR += '                                              <tr>';
+                ulSTR += '                                                  <td style="width: 200px;" valign="top">';
+                ulSTR += '                                                  <div style="margin:0 0 5px 10px;">';
+                var res_document = "";
+                var ext = "";
+                var rnd_num = "";
+                jb_profile = job_profile.job_profile;
+                if(job_profile != "" && job_profile != "null" && job_profile != null){
+                    ulSTR += '                                                          Update Resume';
+                    rnd_num = jb_profile.public_url;
+                    res_document = jb_profile.resume_doc;
+                    var last_index = res_document.lastIndexOf('.');
+                    ext = res_document.substring(last_index, res_document.length)
+                    if (ext == ".doc" || ext == ".docx" || ext == ".rtf")
+                        img = "word_icon.jpg";
+                    else if(ext == ".pdf")
+                        img = "pdf.gif";
+                    else
+                        img = "unknown.jpg";
+                }else{
+                    ulSTR += '                                                          Upload Resume';
+                    rnd_num = stringGen(4);
+                }    
+                ulSTR += '                                                  </div></td>';
+                ulSTR += '                                                  <td valign="top">';
+                ulSTR += '                                                  <div align="center">';
+                ulSTR += '                                                      <strong>&nbsp;</strong>';
+                ulSTR += '                                                  </div></td>';
+                ulSTR += '                                                  <td align="left">';
+                if(res_document !=""){ 
+                    ulSTR += '                                                      <br/><a style="cursor: pointer" href="http://mydeals247.com/jobs/download_resume/download?file_name='+res_document+'&uuid='+user_id+'"><img src="/images/icons/'+img+'" style="vertical-align:middle;height: 20px;width: 20px;">&nbsp;&nbsp;<u><font color="blue"><strong>'+jb_profile.f_Name+'_resume</font></u></strong></a>';
+                    ulSTR += '                                                      <input type="hidden" id="resume_doc" name="resume_doc" value="'+res_document+'">';
+                }
+                ulSTR += '                                                  <input type="file" data-ajax="false" name="upload[resume_doc]" id="upload_datafile">';
+                ulSTR += '                                                  <div style="font-size:12px;color:#999999; margin:0 62px 5px 0px;">';
+                ulSTR += '                                                      (.pdf, .doc, .docx and .rtf files only.)';
+                ulSTR += '                                                  </div>';
+                ulSTR += '                                                  </td>';
+                ulSTR += '                                              </tr>';
+                */
+                ulSTR += '                                              <tr>';
+                ulSTR += '                                                  <td><span style="margin-left:10px;font-size:12px;">Choose your Resume URL</span><br/><span style="margin-left:10px;font-size:12px;">http://mydeals247.com/profile/<span id="url_f_name">'+username+'</span>-<input type="text" style="width:80px;" name="public_url" id="public_url" maxlength="4" placeholder="A 4 digit code" value="'+rnd_num+'"></span>';
+                ulSTR += '                                                      <br/><span id="url_code_error"></span>';
+                ulSTR += '                                                  </td>';
+                ulSTR += '                                              </tr>';
+                ulSTR += '                                              <tr>';
+                ulSTR += '                                                  <td>';
+                ulSTR += '                                                  <span style="margin-left:10px;">';
+                if(job_profile != "" && job_profile != "null" && job_profile != null){
+                    ulSTR += '                                                          Update Profile Picture';
+                }else{
+                    ulSTR += '                                                          Profile Picture Resume';
+                }    
+                ulSTR += '                                                  </span>';
+                
+                if(jb_profile != null){
+                    if(jb_profile.profile_image != null && jb_profile.profile_image != undefined){ 
+                        ulSTR += '                                              <span class="mdprofile_100" style="background-image: url(\''+jb_profile.profile_image+'\')"></span>';
+                    }
+                }
+                ulSTR += '                                                  <br/><input type="file" name="pupload[profile_pic]" id="upload_profile_pic"></br>';
+                ulSTR += '                                                  </td>';
+                ulSTR += '                                              </tr>';
+                ulSTR += '                                          </tbody>';
+                ulSTR += '                                      </table>';
+                ulSTR += '                                  </div>';
+                ulSTR += '                              </div>';
+                return ulSTR;
+               }
+               function stringGen(len)
+                {
+                    var text = " ";
+                
+                    var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                
+                    for( var i=0; i < len; i++ )
+                        text += charset.charAt(Math.floor(Math.random() * charset.length));
+                
+                    return text;
+                }
+                function getJob_titles(industry_id){
+                    var job_titles = null;
+                    $.ajax({
+                        url: "/my_deals/getJob_titles",
+                        async: false,
+                        dataType: 'json',
+                        timeout: 120000,
+                        data: {parent_id: industry_id},
+                        success: function(json){
+                            job_titles = json.job_industries;
+                        }   
+                    });
+                    return job_titles;
+               }
+                function set_job_titles(obj){
+                    var job_industry_json = getJob_titles(obj.value);
+                    var optionStr = '';
+                    if(job_industry_json != undefined && job_industry_json != null && job_industry_json != "null"){ 
+                        $.each(job_industry_json, function(i, jb_title){
+                            optionStr += '<option value="'+jb_title.functional_area.id+'">'+jb_title.functional_area.name+'</option>';
+                        });    
+                    }
+                    $("#job_titles").empty().append(optionStr);
+                    $("#job_titles").selectmenu("refresh");
+                    $(".jb_fArea").show();
+                    
+                }
+                function set_degree_for_qualification(obj){
+                    $("#highest_degree").hide();
+                    $("#job_quali_degrees").hide();
+                    var job_degrees = null;
+                    $.ajax({
+                        url: "/my_deals/getJob_degrees",
+                        async: false,
+                        dataType: 'json',
+                        timeout: 120000,
+                        data: {q_id: obj.value},
+                        success: function(json){
+                            job_degrees = json.job_degrees;
+                        }   
+                    });
+                    var job_degree_json = job_degrees;
+                    var optionStr = '';
+                    if(job_degree_json != undefined && job_degree_json != null && job_degree_json != "null"){ 
+                        $.each(job_degree_json, function(i, jb_degrees){
+                            optionStr += '<option value="'+jb_degrees.education_specialization.id+'">'+jb_degrees.education_specialization.name+'</option>';
+                        });    
+                    }
+                    $("#job_degrees").empty().append(optionStr);
+                    $("#job_degrees").selectmenu("refresh");
+                    $("#highest_degree").show();
+                }
+                function set_specialization_for_qualification(obj){
+                    $("#job_quali_degrees").hide();
+                    var job_splization = null;
+                    $.ajax({
+                        url: "/my_deals/getJob_splization",
+                        async: false,
+                        dataType: 'json',
+                        timeout: 120000,
+                        data: {parent_id: obj.value},
+                        success: function(json){
+                            job_splization = json.job_splization;
+                        }   
+                    });
+                    var job_splization_json = job_splization;
+                    var optionStr = '';
+                    if(job_splization_json != undefined && job_splization_json != null && job_splization_json != "null"){ 
+                        $.each(job_splization_json, function(i, jb_splization){
+                            optionStr += '<option value="'+jb_splization.education_specialization.id+'">'+jb_splization.education_specialization.name+'</option>';
+                        });    
+                    }
+                    $("#job_splization").empty().append(optionStr);
+                    $("#job_splization").selectmenu("refresh");
+                    $("#job_quali_degrees").show();
+                }
+                $(document).ready(function() {
+                    $("#cretaeJobProfile").submit(function() {
+                        var fname = $('#fname').val();
+                        var lname = $('#lname').val();
+                        var city = $('#city').val();
+                        var job_industry = $('#job_industry').val();
+                        var expected_salaryL = $('#id_exSalaryL').val();
+                        var expected_salaryK = $('#id_exSalaryK').val();
+                        var job_title = $('#job_titles').val();
+                        var experience_year = $('#experience_year').val();
+                        var experience_month = $('#experience_month').val();
+                        var prefered_city1 = $('#prefered_city1').val();
+                        var prefered_city2 = $('#prefered_city2').val();
+                        var prefered_city3 = $('#prefered_city3').val();
+                        var desired_job_type = $('#desired_job_type').val();
+                        var qualification_level = $('#qualification_level').val();
+                        var edu_splization = $('#job_splization').val();
+                        var highest_degree = $('#job_degrees').val();
+                        var job_status = $('input[id=job_status]:checked', '#cretaeJobProfile').val();
+                        var course_type = $('#course_type').val();
+                        var marks_percentage = $('#marks_percentage').val();
+                        var exp_level = $('#exp_level').val();
+                        var current_comp_name = $('#current_comp_name').val();
+                        var cur_company_year = $('#cur_company_year').val();
+                        var cur_company_month = $('#cur_company_month').val();
+                        var current_salaryL = $('#id_curSalaryL').val();
+                        var current_salaryK = $('#id_curSalaryK').val();
+                        var upload_resume = $('#upload_datafile').val();
+                        var ext = $('#upload_datafile').val().split('.').pop().toLowerCase();
+                        var existing_resume = $('#resume_doc').val();
+                        var youtube_result = $('#yTubeResult').val();
+                        var profile_URL = $('#profile_video_url').val();
+                        var month = parseInt(experience_month);
+                        
+                        if(fname == "" && lname == ""){
+                            dhtmlx.alert({text:"Please specify your first name or last name.",type:"alert-error"});
+                            return false;
+                        }else if(city == ""){
+                            dhtmlx.alert({text:"Please type initial charecters and select your current city form the list.",type:"alert-error"});
+                            return false;
+                        }else if(profile_URL != "" && (youtube_result == "invalid" || youtube_result == "")){
+                            dhtmlx.alert({text:"Please provide a valid youtube video ID. You can leave it blank if you don't have one.",type:"alert-error"});
+                            return false;
+                        }else if(job_industry == ""){
+                            dhtmlx.alert({text:"Please specify your desired job industry.",type:"alert-error"});
+                            return false;
+                        }else if(job_title == "" || job_title == null){
+                            dhtmlx.alert({text:"Please select at least one job title.",type:"alert-error"});
+                            return false;
+                        }else if(expected_salaryL == "-1" && expected_salaryK == "-1"){
+                            dhtmlx.alert({text:"Please specify your expected salary.",type:"alert-error"});
+                            return false;
+                        }
+                        else if(prefered_city1 == "" && prefered_city2 == "" && prefered_city3 == ""){
+                            dhtmlx.alert({text:"Please specify at least one prefered location.",type:"alert-error"});
+                            return false;
+                        }else if(desired_job_type == ""){
+                            dhtmlx.alert({text:"Please specify your desired job type",type:"alert-error"});
+                            return false;
+                        }else if(qualification_level == ""){
+                            dhtmlx.alert({text:"Please specify your quaification level",type:"alert-error"});
+                            return false;
+                        }else if (highest_degree == "" || highest_degree == null || highest_degree == undefined){
+                            //alert("highest degree check...")
+                            dhtmlx.alert({text:"Please select at least one qualification degree for your profile.",type:"alert-error"});
+                            $('#highest_degree').css("border", "1px solid #DD4B39");
+                            $('#highest_degree').focus();
+                            return false;
+                        }else if (edu_splization == "" || edu_splization == null || edu_splization == undefined){
+                            //alert("specialization check...")
+                            dhtmlx.alert({text:"Please select at least one education specialization for your profile.",type:"alert-error"});
+                            $('#education_specialization').css("border", "1px solid #DD4B39");
+                            $('#education_specialization').focus();
+                            return false;
+                        }else if(course_type == ""){
+                            dhtmlx.alert({text:"Please specify your education course type",type:"alert-error"});
+                            return false;
+                        }else if(marks_percentage == ""){
+                            dhtmlx.alert({text:"Please specify your marks percentage.",type:"alert-error"});
+                            return false;
+                        }else if(upload_resume == "" && existing_resume == undefined){
+                            dhtmlx.alert({text:"Please upload resume to complete your profile.",type:"alert-error"});
+                            return false;
+                        }else if(ext !="" && $.inArray(ext, ['pdf','doc','docx','rtf']) == -1) {
+                            dhtmlx.alert({text:"Please upload your resume in PDF, DOC, DOCX or RTF format.",type:"alert-error"});
+                            return false;
+                        }else if(job_status == "1"){
+                            var month = parseInt(experience_month);
+                            var year = parseInt(experience_year);
+                            var total_year = 0;
+                            var total_month = 0;
+                            if(!isNaN(month)){
+                                total_month = month;
+                            }
+                            if(!isNaN(year)){
+                                total_year = year * 12;
+                            }
+                            var total_experience_in_month = total_month + total_year;
+                            
+                            var cur_comp_month = parseInt(cur_company_month);
+                            var cur_comp_year = parseInt(cur_company_year);
+                            var cur_comp_total_year = 0;
+                            var cur_comp_total_month = 0;
+                            if(!isNaN(cur_comp_month)){
+                                cur_comp_total_month = cur_comp_month;
+                            }
+                            if(!isNaN(cur_comp_year)){
+                                cur_comp_total_year = cur_comp_year * 12;
+                            }
+                            var cur_comp_total_experience_in_month = cur_comp_total_month + cur_comp_total_year;
+                            
+                            
+                            if(exp_level == ""){
+                                dhtmlx.alert({text:"Please specify your experience level.",type:"alert-error"});
+                                return false;
+                            }else if(current_salaryL == "-1" && current_salaryK == "-1"){
+                                dhtmlx.alert({text:"Please specify your current salary as you are an experienced candidate.",type:"alert-error"});
+                                return false;
+                            }else if(isNaN(month) && isNaN(year)){
+                                dhtmlx.alert({text:"Please specify your total experience.",type:"alert-error"});
+                                return false;
+                            }else if(total_experience_in_month < 12){
+                                dhtmlx.alert({text:"Since your total experience is less than a year, you can not be considered as Experienced.",type:"alert-error"});
+                                return false;
+                            }else if(total_experience_in_month < cur_comp_total_experience_in_month){
+                                dhtmlx.alert({text:"Please correct your total and current company experience, Current company job duration can not more than your total experience.",type:"alert-error"});
+                                return false;
+                            }else if($("#cur_company_from_year").val() != "Till Date"){ 
+                                if(parseInt($("#cur_company_from_year").val()) > parseInt($("#cur_company_from_year").val())){
+                                    dhtmlx.alert({text:"Please correct your experience summary of company "+$("#current_comp_name").v+". Time period FROM YEAR can not be older than TO YEAR.",type:"alert-error"});
+                                    return false;
+                                }   
+                            }
+                        }else if(job_status == "0"){
+                            var month = parseInt(experience_month);
+                            var year = parseInt(experience_year);
+                            var total_year = 0;
+                            var total_month = 0;
+                            if(!isNaN(month)){
+                                total_month = month;
+                            }
+                            if(!isNaN(year)){
+                                total_year = year * 12;
+                            }
+                            var total_experience_in_month = total_month + total_year;   
+                            if(isNaN(month) && isNaN(year)){
+                                dhtmlx.alert({text:"Please specify your total experience.",type:"alert-error"});
+                                return false;
+                            }else if(total_experience_in_month > 12){
+                                dhtmlx.alert({text:"As a fresher, your experience should not be more than a year.",type:"alert-error"});
+                                return false;
+                            }
+                        }
+                        var loading_html = '<p align=\'center\'><B>Please Wait...</B><img src="/images/load2.gif" id="loading" alt="Loading" height="16px;" title="Loading"/></p>'; // just an loading image or we can put any texts here
+                        $("#submit_btn_profile").html(loading_html);
+                        return true;
+                    });
+                    $("input[id='job_status']").change(function() {
+                        var exper = $(this).val();
+                        if(exper == "1")
+                           $(".exper_portion").show();
+                        else
+                           $(".exper_portion").hide(); 
+                    }); 
+                });
+            
+            </script>
+			<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Job Profile"}%>
+			<div align="center" data-role="content" id="high">
+				<form name="cretaeJobProfile" id="cretaeJobProfile" method="post" action="/my_deals/save_job_profile" accept-charset="UTF-8" enctype="multipart/form-data" data-ajax="false">
+					<input type="hidden" id="user_id" name="user_id" value="">
+					<input type="hidden" id="job_profile_id" name="job_profile_id" value="">
+					<input type="hidden" id="auth_token" name="auth_token" value="">
+					<ul data-role="listview" data-inset="true">
+						<li id="msg_bar" class="ui-li ui-li-static ui-body-c"></li>
+					</ul>	
+					<div id="jobcontent_div">
+				   	</div>
+				   	<input type="hidden" name="user_uid" id="user_uid" value="">
+			    </form>
+			</div>
+		 	<script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+            <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css"/>
+            <script>
+                $(document).ready(function() {
+                    $("#cidate").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                        onSelect: function(selected) {
+                            $("#codate").datepicker("option","minDate", selected);
+                        }
+                    });
+                });
+            </script>
+       </div>
+	</body>
+</html>

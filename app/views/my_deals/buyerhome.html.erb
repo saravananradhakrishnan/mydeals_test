@@ -1,0 +1,86 @@
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.countdown.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" data-theme='b'>
+        	
+        	<script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+		        <script>
+		        $(document).ready(function()
+		        {
+		            <%if !params[:token].blank? -%>
+		              var token = '<%=params[:token].strip%>';
+		              token = token.trim();
+		              localStorage.setItem("auth", token);
+		            <%end -%>
+                    var auth = localStorage.getItem("auth");
+		            $.ajax({
+		                url: "/my_deals/user_info",
+		                dataType: 'json',
+		                timeout: 20000,
+		                data:{auth_token:auth},
+		                success: function(json, status)
+		                {
+		                    var user=json.user.user.fname;
+		                    $("#user").html("Hi "+user);
+		                    <%if !params[:token].blank? -%>
+    		                    localStorage.setItem("username", json.user.user.email);
+                                localStorage.setItem("usertyp", json.user.user.sub_type);
+                                localStorage.setItem("userid", json.user.user.id);
+                            <%end -%>
+                        }	  
+		            });
+		  
+		        });
+		      </script>
+		    <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Buyer Home"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Seller as Buyer"}%>
+			<%end -%>
+            <div data-role="content">
+            	
+            	<!-- <a href="/my_deals/rtmp" rel="external"><img src="/images/rtmp.png"></a>
+            	<a href="/my_deals/paid_ads" rel="external"><img src="/images/paid_ads.png"></a>
+            	<a href="/my_deals/volume_deals_list" rel="external"><img src="/images/volume_deals.png"></a>
+            	<a href="/my_deals/employee_home"><img src="/images/inner_jobs.png"></a> -->
+            	<div style="margin-top: 25%;margin-left: 15%;">
+					<div>
+						<a href="/my_deals/rtmp" rel="external">
+							<img name="bargain" src="/images/bargain_color.png" >
+							</a> 
+
+						<a href="/my_deals/paid_ads" rel="external">
+							<img name="paid" src="/images/paid_color.png" >
+							</a> 
+						
+						
+					</div>
+					<div style="margin-top: 4%">
+						<a href="/my_deals/volume_deals_list" rel="external">
+							<img name="volume" src="/images/volume_color.png" >
+							</a> 
+                                                <a href="/my_deals/employee_home" rel="external">
+							<img name="jobs" src="/images/jobs_color.png">
+							</a> 
+					</div>
+					</div>
+                
+            </div>
+        
+        </div>
+    </body>
+</html>
+

@@ -1,0 +1,23 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  user_id: 1
+  website_url: MyString
+  contact_person: MyString
+  account_no: 1
+  bank_name: MyString
+  branch: MyString
+  checking: MyString
+  routing: MyString
+  swift_code: MyString
+
+two:
+  user_id: 1
+  website_url: MyString
+  contact_person: MyString
+  account_no: 1
+  bank_name: MyString
+  branch: MyString
+  checking: MyString
+  routing: MyString
+  swift_code: MyString

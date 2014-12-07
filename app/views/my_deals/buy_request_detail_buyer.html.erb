@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+    		<style>
+    		
+			table {
+			overflow:hidden;
+			border:1px solid #d3d3d3;
+			background:rgba(255,255,255,0.1);
+			width:100%;
+			margin:5% auto 0;
+			-moz-border-radius:5px; /* FF1+ */
+			-webkit-border-radius:5px; /* Saf3-4 */
+			border-radius:5px;
+			-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+			-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+		}
+		
+	th, td {padding:5px 10px 5px 10px; text-align:center; }
+	
+	th {padding-top:22px; text-shadow: 1px 1px 1px #fff; background:#e8eaeb;}
+	
+	td {border: none;}
+	
+	tr.odd-row td {background:#f6f6f6;}
+	
+	td.first, th.first {text-align:left}
+	
+	td.last {border-right:none;}
+	
+	/*
+	Background gradients are completely unnecessary but a neat effect.
+	*/
+	
+	td {
+		background: -moz-linear-gradient(100% 25% 90deg, #fefefe, #f9f9f9);
+		background: -webkit-gradient(linear, 0% 0%, 0% 5%, from(#D1D1D1), to(rgba(255,255,255,0.2)));
+	}
+	
+	tr.odd-row td {
+		background: -moz-linear-gradient(100% 25% 90deg, #f6f6f6, #f1f1f1);
+		background: -webkit-gradient(linear, 0% 0%, 0% 25%, from(#8A0B00), to(#8A0B00));
+	}
+	
+	th {
+		background: -moz-linear-gradient(100% 20% 90deg, #e8eaeb, #ededed);
+		background: -webkit-gradient(linear, 0% 0%, 0% 20%, from(#ededed), to(#e8eaeb));
+	}
+	
+
+    	</style>
+        <div data-role="page" id="buyer_request_detail">
+        	<script>
+			    $(document).ready(function() {
+			        var id = getUrlVars()["id"];
+			        function getUrlVars() {
+			            var vars = {};
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        var quan = "";
+			        var red_amt = "";
+			        $.ajax({
+			            url: "/my_deals/buyer_request_detail",
+			            dataType: 'json',
+			            timeout: 25000,
+			            data: {id: id, auth_token: auth_token},
+			            success: function(json){
+			            	$('#lable_display').html('');
+			            	var request_detail = json.request_detail
+			            	var req_detail = "";
+			                var parent_category_name = request_detail.user_request.parent_category_name
+			                var sub_category_name = request_detail.user_request.category_name
+			                var my_offerId = ""
+			                var my_deals_commision_fee = json.mydeal_fee_percent
+			                if(json.my_offer != null && json.my_offer != ""){
+								ihave_offer = true;
+								my_offerId = json.my_offer.merchant_offer.id
+							}
+							$('#auth_token').val(auth_token);
+							$('#user_reqID').val(request_detail.user_request.id);
+							req_detail +=  "<h3>Request Detail</h3>";
+			                if(parent_category_name == "Flight Booking"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Item Category: </font><font size='-2'>" +sub_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Item Name: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>No. Of Items:</font><font size='-2'>"+request_detail.user_request.number_of_items+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Shipping Pref: </font><font size='-2'>" + request_detail.user_request.descision_factor +"</td>";
+			                	req_detail +=  "		<td>&nbsp;</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per day: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Car Rental"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Item Name: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>No. Of Items:</font><font size='-2'>"+request_detail.user_request.number_of_items+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Item: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	var pod = request_detail.user_request.pick_up_date.split('T');
+			                	var dod = request_detail.user_request.drop_off_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Pick Up Date: </font><font size='-2'>" + pod[0] +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Drop off Date: </font><font size='-2'>" + dod[0] + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "CAB OR TAXI Booking"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Booking Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Type of vehicle: </font><font size='-2'>" + request_detail.user_request.ac_non_ac + " " + request_detail.user_request.type_of_vehicle+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>No. of Person:</font><font size='-2'>"+request_detail.user_request.adult+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	var pod = request_detail.user_request.cab_start_datetime.split('T');
+			                	var dod = request_detail.user_request.cab_end_datetime.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Pickup Date/Time: </font><font size='-2'>" + pod[0] +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Drop-Off Date/Time: </font><font size='-2'>" + dod[0] + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Starting Point:<br/></font><font size='-2'>" + request_detail.user_request.cab_starting_point +"<br/><font size='-1'>";
+			                	req_detail +=  "			Landmark:<br/></font><font size='-2'>" + request_detail.user_request.landmark +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	if(sub_category_name == "Tour OR Long Distance Package"){
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Travel Details:<br/></font><font size='-2'>" + request_detail.user_request.cab_trip_details +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	}
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Total Bugdet: </font><font size='-2'>Rs. " +request_detail.user_request.grand_total + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>No. of Bags: </font><font size='-2'>"+request_detail.user_request.cab_bags+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Services OR Help Needed"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Service: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	var pod = request_detail.user_request.pick_up_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Start Date:</font><font size='-2'>"+pod[0]+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>" + request_detail.user_request.descision_factor + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Additional Details: </font><font size='-2'>" + request_detail.user_request.item_spec +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Hotel Booking"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><font size='-1'>Hotel Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	var cid = request_detail.user_request.check_in_date.split('T');
+			                	var cod = request_detail.user_request.check_out_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Check-in Date: </font><font size='-2'>" + cid[0] +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Check-out Date:</font><font size='-2'>"+ cod[0] +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>"+request_detail.user_request.descision_factor+"</font></td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Number of Rooms: </font><font size='-2'>" + request_detail.user_request.no_of_rooms +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Adult: </font><font size='-2'>" + request_detail.user_request.adult + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Children: </font><font size='-2'>" + request_detail.user_request.children +"</td>";
+			                	req_detail +=  "		<td>&nbsp;</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Night: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td colspan='2'><font size='-1'>Required Amenities:</font><br/>";
+			                	var req_amenities = "";
+			                	if(json.requested_hotel_amenities != null && json.requested_hotel_amenities != ""){
+									$.each(json.requested_hotel_amenities, function(i, item){
+			                			req_amenities += ", "+item.request_amenity.name
+			                		});
+								}
+								req_detail += req_amenities;
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Two Wheelers" || parent_category_name == "Cars"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Sub Category:: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Year of the model: </font><font size='-2'>" + request_detail.user_request.make_year + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Condition:</font><font size='-2'>"+request_detail.user_request.item_condition+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Color Preference:</font><font size='-2'>"+request_detail.user_request.color_pref+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>" + request_detail.user_request.descision_factor +"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Real Estate"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Sub Category:: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	var stDT = request_detail.user_request.from_date.split('T');
+			                	var edDT = request_detail.user_request.end_date.split('T');
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Start Date: </font><font size='-2'>" + stDT[0] + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>End Date:</font><font size='-2'>"+edDT[0]+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Number of Bed Room: </font><font size='-2'>" + request_detail.user_request.no_of_bed_rooms + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Sq.Ft:</font><font size='-2'>"+request_detail.user_request.sq_feet+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.price + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Educational Training"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Cource Name: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Decision Factor: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Course Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.price + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Trainee's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Insurance"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Looking For: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.price + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Bank Loans"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Looking For: </font><font size='-2'>"+request_detail.user_request.item_info+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Interest Rate:: </font><font size='-2'>Rs. " + request_detail.user_request.interest_rate + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Tenure: </font><font size='-2'>" + request_detail.user_request.tenure_term + "Years</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Loan Amount: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Car Services"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Service Type: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Car Brand Name: </font><font size='-2'>" + request_detail.user_request.color_pref + "</td>";
+			                	req_detail +=  "		<td><font size='-1'>Car Type: </font><font size='-2'>" + request_detail.user_request.tenure_term + "Years</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Total Budget: </font><font size='-2'>Rs. " + request_detail.user_request.grand_total + "</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "		<td><font size='-1'>Requester's Contact Details: </font><br/>";
+			                	if(request_detail.user_request.contact_pref == 'seller'){
+			                		req_detail +=  "		<font size='-1'>Name: </font><font size='-2'>"+request_detail.user_request.user_name+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Email: </font><font size='-2'>"+request_detail.user_request.user_email+"</font><br/>";
+			                		req_detail +=  "		<font size='-1'>Mobile: </font><font size='-2'>"+request_detail.user_request.requester_mobile+"</font><br/>";	
+			                	}else{
+			                		req_detail +=  "		<font size='-2'><strong>I will contact the Service Provider if I like the price and other details.</strong></font>";
+			                	}
+			                	req_detail +=  "		</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else if(parent_category_name == "Books"){
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +sub_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Shipping Preference: </font><font size='-2'>"+request_detail.user_request.descision_factor+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Book: </font><font size='-2'>Rs. " + request_detail.user_request.price +"</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Total Budget: </font><font size='-2'>Rs. "+request_detail.user_request.grand_total+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Number of Book(s): </font><font size='-2'>" +request_detail.user_request.number_of_items + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Book Condition: </font><font size='-2'>"+request_detail.user_request.item_condition+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Near by Area:</font><font size='-2'>"+request_detail.user_request.locality+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr><td colspan='2'><font size='-1'>Requested Book details: </font></br>";
+			                	req_detail +=  "	<div style='width: 20%;float:left'>";
+								req_detail +=  "	<div>";
+								req_detail +=  "	<img id='spn_img' src=" + request_detail.user_request.book_cover_url + " alt='cover' title='cover' width='60' height='80'/>";
+								req_detail +=  "	</div>";
+								req_detail +=  "	</div>";
+								req_detail +=  "	<div style='width: 75%;float:right'>";
+								req_detail +=  "	<h4><b><span>" + request_detail.user_request.item_info + "</span></b></h4>";
+								req_detail +=  "	<h4><span>" + request_detail.user_request.item_spec + "</span></h4>";
+								req_detail +=  "	<h4><b>ISBN Code:</b><span id='spn_isbn'>" + request_detail.user_request.item_code + "</span></h4>";	
+								req_detail +=  "	</div>";
+								req_detail +=  "	</td></tr>";
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }else{
+			                	req_detail +=  "<center>";
+			                	req_detail +=  "<table border=1>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Category: </font><font size='-2'>" +parent_category_name + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Sub Category: </font><font size='-2'>"+sub_category_name+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Item Name </font><font size='-2'>" + request_detail.user_request.item_info +"</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Number of Items: </font><font size='-2'>"+request_detail.user_request.number_of_items+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Shipping Prefernece: </font><font size='-2'>" +request_detail.user_request.descision_factor + "</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Item Condition: </font><font size='-2'>"+request_detail.user_request.item_condition+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>City: </font><font size='-2'>" + request_detail.user_request.city + ", " + request_detail.user_request.country+"</td>";
+			                	req_detail +=  "		<td><font size='-1'>Near by Area:</font><font size='-2'>"+request_detail.user_request.locality+"</td>";
+			                	req_detail +=  "	</tr>";
+			                	req_detail +=  "	<tr>";
+			                	req_detail +=  "		<td><font size='-1'>Budget Per Item:</font><font size='-2'>Rs. " + request_detail.user_request.price +"</font></td>";
+			                	req_detail +=  "		<td><b><font size='-1'>Total Budget: </font><font size='-2'>Rs. "+request_detail.user_request.grand_total+"</font> </td>";
+			                	req_detail +=  "	</tr>";
+			                	if(request_detail.user_request.item_spec != null){
+				                	req_detail +=  "	<tr><td colspan='2'>";
+				                	req_detail +=  "	<div style='width: 20%;float:left'>";
+									req_detail +=  "	<div>";
+									req_detail +=  "	"+request_detail.user_request.item_spec+"";
+									req_detail +=  "	</div>";
+									req_detail +=  "	</td></tr>";
+			                	}
+			                	req_detail +=  "</table>";
+			                	req_detail +=  "</center>";
+			                }
+			                var offers_added = false;
+			                var merchant_offers = "";
+			                if(json.top_five_live_offers != null && json.top_five_live_offers != ""){
+			                	merchant_offers += "<br/><center><table border=1 width='100%'><tr><td align='center' colspan='4'>Top 5 Live Offers</td></tr>";
+			                	merchant_offers += "<tr><td align='center'>Rank</td><td align='center'>Seller Offers<br/><font size='-2'>(Include Taxes)</font></td><td align='center'>Details</td><td align='center'>Action</td></tr>";
+								var counter = 1;
+								$.each(json.top_five_live_offers, function(i, item){
+									merchant_offers += "<tr><td align='center'>"+counter+"</td><td align='center'><span onclick='ShowMyOffer("+item.merchant_offer.id+", 1);' style='color:blue;cursor:pointer;'>Rs. "+item.merchant_offer.total_price_inr+"</span></td>";
+									merchant_offers += "	<td align='center'><img src='/images/viewdetail.png' alt='view details' title='view details' onclick='ShowMyOffer("+item.merchant_offer.id+",1);'></td>";
+									merchant_offers += "	<td align='center' id='action_"+counter+"'><img src='/images/buy.png' alt='Buy Now' title='Buy Now' onclick='buyOffer("+item.merchant_offer.id+", "+item.merchant_offer.total_price_inr+");'>&nbsp;<img src='/images/rejectlnk.png' alt='Reject' title='Reject' onclick='rejectOffer("+item.merchant_offer.id+", "+counter+");'>&nbsp;<img id='pbcash"+counter+"' src='/images/icons/paybycash.jpg' alt='pay by cash' title='pay by cash' onclick='pay_by_cash("+item.merchant_offer.id+", "+counter+");'></td>";
+									merchant_offers += "</tr>";
+									counter = counter + 1;
+								});
+								merchant_offers += "</table></center>";
+								offers_added = true;
+							}
+			                if(json.top_five_expired_offers != null && json.top_five_expired_offers != ""){
+			                	merchant_offers += "<br/><center><table border=1 width='100%'><tr><td align='center' colspan='4'>Top 5 Expired Offers</td></tr>";
+								merchant_offers += "<tr><td align='center'>Rank</td><td align='center'>Seller Offers<br/><font size='-2'>(Include Taxes)</font></td><td align='center'>Details</td><td align='center'>Action</td></tr>";
+								var counter = 1;
+								$.each(json.top_five_expired_offers, function(i, item){
+									merchant_offers += "<tr><td align='center'>"+counter+"</td><td align='center'><span onclick='ShowMyOffer("+item.merchant_offer.id+",0);' style='color:blue;cursor:pointer;'>Rs. "+item.merchant_offer.total_price_inr+"</span></td>";
+									merchant_offers += "	<td align='center'><img src='/images/viewdetail.png' alt='view details' title='view details' onclick='ShowMyOffer("+item.merchant_offer.id+",0);'></td>";
+									if(item.merchant_offer.is_extended_for == "1")
+										merchant_offers += "	<td align='center'><strong>Pending for merchant confirmation.</strong></td>";
+									else
+										merchant_offers += "	<td align='center' id='reconfirm_"+counter+"'><img src='/images/reconfirm_gray.png' alt='Reconfirm' title='Reconfirm' onclick='reconfirmOffer("+item.merchant_offer.id+", "+counter+");'></td>";
+									merchant_offers += "</tr>";
+									counter = counter + 1;
+								});
+								merchant_offers += "</table></center>";
+								offers_added = true;
+							}
+			               	if(!offers_added){
+			               		merchant_offers += "<br/><center><table border=1 width='100%'><tr><td align='center'><font color='red'>Sorry, No merchant(s) have offered yet.</font></td></tr>";
+			               		merchant_offers += "</table></center>";
+			               	}
+			                final_HTML_CONTENT = "<div id='rquest_detail_div'>"+req_detail+""+merchant_offers+"</div>"
+			                $("#contentLI").append(final_HTML_CONTENT); 
+			                $('[data-role="content"]').trigger('create');
+			            },
+						error : function() {
+							$('#lable_display').html("<font color='red'>Error occured while fetching request detail, Please try again.</font>");
+							return false;
+						}
+			        });
+			    });
+			    function pay_by_cash(value, counter){
+			        var auth_token = localStorage.getItem("auth");
+                    $("#lable_display").html("<div style='text-align:center'>Please wait... <img src='/images/load2.gif' id='loading' alt='Loading' title='Loading'/></div>");
+                    $.ajax({
+                        type : "GET",
+                        url : "/my_deals/pay_by_cash",
+                        data : {moid: value, auth_token: auth_token},
+                        dataType : "json",
+                        success : function(b) {
+                            if(b.success) {
+                                msg_bar = "<div class='success_div'>"+b.msg+"</div>";
+                                $("#lable_display").html(msg_bar)
+                                $("#pbcash"+counter).remove();
+                                return false
+                            } else {
+                                msg_bar = "<div class='error_div'>"+b.msg+"</div>";
+                                $("#lable_display").html(msg_bar);
+                                return false
+                            }
+                        },
+                        error : function() {
+                            msg_bar = "<div class='error_div'>There was an error submitting the request. Please try again.</div>";
+                            $("#lable_display").html(msg_bar);
+                        }
+                    });
+                    return false;
+                }
+			    function ShowMyOffer(jsonObj, mode){
+					var auth_token = localStorage.getItem("auth");
+					$('#lable_display').html('<center>Please wait, Loading offer detail... <img src="/images/load2.gif"></center>');
+					$.ajax({
+						url : "/my_deals/offer_details",
+						data : {moid: jsonObj, auth_token: auth_token},
+						dataType : "json",
+						timeout: 15000,
+						success : function(json) {
+							$('#lable_display').html('');
+							var offer_detail = json.offer.merchant_offer
+			                var category_name = offer_detail.category_name
+			                var sub_category_name = offer_detail.sub_category_name
+			                var offer_detailHTM = "";
+			                offer_detailHTM +=  "<h3>Offer Detail</h3>";
+			                offer_detailHTM +=  "<center>";
+			                offer_detailHTM +=  "<table border=1>";
+			                
+			                offer_detailHTM +=  "	<tr>";
+			                if(category_name == "Bank Loans")
+			                	offer_detailHTM +=  "		<td><font size='-1'>Offered Loan Amount: </font>";
+			                else if(category_name == "Insurance")
+			                	offer_detailHTM +=  "		<td><font size='-1'>Offered Insurance Cover: </font>";
+			                else
+			                	offer_detailHTM +=  "		<td><font size='-1'>Offer Price: </font>";
+			                offer_detailHTM +=  "		<font size='-2'><strong>Rs. " + offer_detail.total_price_inr + "(All Inclusive)</strong></font></td>";
+			                
+			                if(category_name == "Educational Training")
+								offer_detailHTM +=  "<td><font size='-1'>Course Name:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Car Services")
+								offer_detailHTM +=  "<td><font size='-1'>Service Name:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Insurance")
+								offer_detailHTM +=  "<td><font size='-1'>Service Name:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Hotel Booking")
+								offer_detailHTM +=  "<td><font size='-1'>Hotel Type:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "Bank Loans")
+								offer_detailHTM +=  "<td><font size='-1'>Loan Tenure:</font>&nbsp;<font size='-2'>"+offer_detail.tenure_term+"&nbsp; Years</font></td>";
+							else if(category_name == "<%=$cab_category%>")
+								offer_detailHTM +=  "<td><font size='-1'>Booking Type:</font>&nbsp;<font size='-2'>"+sub_category_name+"</font></td>";
+							else if(category_name == "<%=$service_category%>"){
+								offer_detailHTM +=  "<td><font size='-1'>Prefered Start Date:</font>&nbsp;<font size='-2'>Same as you requested.</font></td>";
+							}
+							else
+								offer_detailHTM +=  "<td><font size='-1'>Shipping Charge:</font>&nbsp;(Rs.)<font size='-2'>"+offer_detail.shipping_charge+"</font></td>";
+							offer_detailHTM +=  "	</tr>";
+							
+							if (category_name != "Hotel Booking" && category_name != "Real Estate" && category_name != "Cars" && category_name != "Two Wheelers" && category_name != "<%=$service_category%>" && category_name != "<%=$cab_category%>" && category_name != "Flight Booking" && category_name != "Car Rental" && category_name != "Bank Loans" && category_name != "Insurance" && category_name != "Books"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Warranty:</font>&nbsp;<font size='-2'>"+offer_detail.warranty+"&nbsp;"+offer_detail.warranty_tenure+"</font></td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							
+							if (category_name != "Hotel Booking" && category_name != "Real Estate" && category_name != "<%=$cab_category%>" && category_name != "Flight Booking" && category_name != "Car Rental" && category_name != "Bank Loans" && category_name != "Insurance" && category_name != "Cars" && category_name != "Two Wheelers"){   
+							offer_detailHTM +=  "	<tr>";
+								if (category_name == "Educational Training"){
+									offer_detailHTM +=  "<td><font size='-1'>Course Type:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+									offer_detailHTM +=  "<td>&nbsp;</td>";
+								}else if (category_name == "Car Services"){
+									offer_detailHTM +=  "<td><font size='-1'>Car Type:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+									offer_detailHTM +=  "<td><font size='-1'>Car Brand Name:</font>&nbsp;<font size='-2'>"+offer_detail.color_pref+"&nbsp;</font></td>";
+								}else if (category_name == "<%=$service_category%>"){
+									offer_detailHTM +=  "<td><font size='-1'>Service:</font>&nbsp;<font size='-2'>"+sub_category_name+"&nbsp;</font></td>";
+									offer_detailHTM +=  "<td>&nbsp;</td>";
+								}else{
+									if(category_name != "Books"){
+									offer_detailHTM +=  "<td><font size='-1'>Condition:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+									offer_detailHTM +=  "<td><font size='-1'>Mode Of Shipping:</font>&nbsp;<font size='-2'>"+offer_detail.mode_of_shipping+"&nbsp;</font></td>";
+									}else{
+										offer_detailHTM +=  "<td colspan='2'><font size='-1'>Mode Of Shipping:</font>&nbsp;<font size='-2'>"+offer_detail.mode_of_shipping+"&nbsp;</font></td>";	
+									}
+								}
+								offer_detailHTM +=  "	</tr>"; 
+							}	
+			                if (category_name == "Cars" || category_name == "Two Wheelers"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td><font size='-1'>Year of the Model:</font>&nbsp;<font size='-2'>"+offer_detail.make_year+"&nbsp; Years</font></td>";
+								offer_detailHTM +=  "		<td><font size='-1'>Color:</font>&nbsp;<font size='-2'>"+offer_detail.color_pref+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>"; 
+							}
+			                if (category_name == "Books"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td><font size='-1'>Condition:</font>&nbsp;<font size='-2'>"+offer_detail.condition+"</font></td>";
+								offer_detailHTM +=  "		<td><font size='-1'>MRP:</font>&nbsp;<font size='-2'>"+offer_detail.mrp+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							if (category_name == "Bank Loans"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td><font size='-1'>Interest Rate:</font>&nbsp;<font size='-2'>"+offer_detail.interest_rate+"&nbsp; %</font></td>";
+								offer_detailHTM +=  "		<td>&nbsp;</td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							var offerTime = offer_detail.offered_time.split('T');
+							var seller_details = offer_detail.seller_info.split("~");
+							offer_detailHTM +=  "	<tr>";
+							offer_detailHTM +=  "		<td><font size='-1'>Offered Time:</font>&nbsp;<font size='-2'>"+offerTime[0]+"&nbsp;</font></td>";
+							offer_detailHTM +=  "		<td><font size='-1'>City:</font>&nbsp;<font size='-2'>"+seller_details[3]+"&nbsp;</font></td>";
+							offer_detailHTM +=  "	</tr>";
+			               if (category_name != "Hotel Booking" && category_name != "Car Rental" && category_name != "<%=$cab_category%>" && category_name != "Insurance" && category_name != "Bank Loans" && category_name != "Real Estate" && category_name != "Flight Booking" && category_name != "Cars" && category_name != "Two Wheelers" && category_name != "Educational Training" && category_name != "Car Services"){
+								offer_detailHTM +=  "	<tr>";
+								if (category_name == "<%=$service_category%>")
+									offer_detailHTM +=  "<td colspan='2'><font size='-1'>Service Description from the Seller:</font>&nbsp;<br/>";
+								else
+									offer_detailHTM +=  "<td colspan='2'><font size='-1'>Specification from the Seller:</font>&nbsp;<br/>";
+									if (category_name == "Books"){	
+										offer_detailHTM +=  "<img id='spn_img' src='"+offer_detail.book_cover+"' alt='cover' title='cover'/>";
+										offer_detailHTM +=  "<h4>"+offer_detail.item_title+" &nbsp; <font color='blue'><b>ISBN Code:</b><span id='spn_isbn'>"+offer_detail.item_code+"</font></h4>";
+										offer_detailHTM +=  "<h3><b>Additional Offer(s):</b></h3>";
+										offer_detailHTM +=  "<hr />";
+										offer_detailHTM +=  "<h4><span id='spn_offerInfo'>"+offer_detail.item_info+"</span></h4>";	
+									}else{
+										var offer_img_url = offer_detail.offer_img_root+"/system/buysell_imgs/"+offer_detail.id+"/thumb/"+offer_detail.buysell_img_file_name;
+										if (offer_detail.buysell_img_file_name != null && offer_detail.buysell_img_file_name !="")
+											offer_detailHTM +=  "<img id='spn_img' src='"+offer_img_url+"' alt='cover' title='cover'/>";
+										
+										offer_detailHTM +=  "<h4><span id='spn_offerInfo'>"+offer_detail.item_info+"</span></h4>";	
+									}
+								
+								offer_detailHTM +=  "		</td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							if (category_name == "Cars" || category_name == "Two Wheelers" || category_name == "<%=$cab_category%>" || category_name == "Bank Loans" || category_name == "Insurance" || category_name == "Educational Training" || category_name == "Car Services"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Additional offer details:</font>&nbsp;<br/>";
+								var offer_img_url = offer_detail.offer_img_root+"/system/buysell_imgs/"+offer_detail.id+"/thumb/"+offer_detail.buysell_img_file_name;
+								if (offer_detail.buysell_img_file_name != null && offer_detail.buysell_img_file_name !="")
+									offer_detailHTM +=  "			<img id='spn_img' src='"+offer_img_url+"' alt='cover' title='cover'/>";
+								offer_detailHTM +=  "			<h4><span id='spn_offerInfo'>"+offer_detail.item_info+"</span></h4>";	
+								offer_detailHTM +=  "		</td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							if (category_name == "Hotel Booking"){
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Amenities:</font>&nbsp;<br/>";
+								offer_detailHTM +=  "		<font size='-2'>";
+								if(offer_detail.offered_amenity_name != null && offer_detail.offered_amenity_name != ""){
+								 	$.each(offer_detail.offered_amenity_name, function(i, item){
+								 		offer_detailHTM +=  ", "+item.offer_amenity.name;
+								 	});	
+								}
+								offer_detailHTM +=  "		</font>";		
+								offer_detailHTM +=  "	</td>";
+								offer_detailHTM +=  "	</tr>";
+								if (offer_detail.is_travel_agent == "1"){
+									offer_detailHTM +=  "	<tr>";
+									offer_detailHTM +=  "		<td><font size='-1'>Hotel Name:</font>&nbsp;<font size='-2'>"+offer_detail.onbehalf_hotel_name+"&nbsp;</font></td>";
+									offer_detailHTM +=  "		<td><font size='-1'>Hotel Address:</font>&nbsp;<font size='-2'>"+offer_detail.onbehalf_hotel_addr+"&nbsp;</font></td>";
+									offer_detailHTM +=  "	</tr>";
+								}
+							}
+							if (category_name == "Real Estate"){
+								offer_detailHTM +=  "	<thead>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<th colspan='2'>Contact Now</th>";
+								offer_detailHTM +=  "	</tr>";
+								offer_detailHTM +=  "	</thead>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Company Name:</font>&nbsp;<font size='-2'>"+offer_detail.company_name+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Contact Person:</font>&nbsp;<font size='-2'>"+offer_detail.contact_person+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+								offer_detailHTM +=  "	<tr>";
+								offer_detailHTM +=  "		<td colspan='2'><font size='-1'>Contact Number:</font>&nbsp;<font size='-2'>"+offer_detail.contact_number+"&nbsp;</font></td>";
+								offer_detailHTM +=  "	</tr>";
+							}
+							
+							if (offer_detail.is_B2B == "1" || category_name == "Cars" || category_name == "<%=$service_category%>" || category_name == "Two Wheelers" || category_name == "Educational Training" || category_name == "Car Services" || category_name == "Insurance" || category_name == "Bank Loans"){
+							offer_detailHTM +=  "	<tr>";
+							offer_detailHTM +=  "	<td colspan='2'><strong>Seller's Contact Details:</strong>&nbsp;<br/>";
+							offer_detailHTM +=  "		<p>Name: <strong>"+seller_details[0]+"</strong></p>";
+							offer_detailHTM +=  "		<p>Email: <strong>"+seller_details[1]+"</strong></p>";
+							offer_detailHTM +=  "		<p>Mobile: <strong>"+seller_details[2]+"</strong></p>";
+							offer_detailHTM +=  "	</td>";
+							offer_detailHTM +=  "	</tr>";	
+							}
+							
+			                offer_detailHTM +=  "</table>";
+			                offer_detailHTM +=  "</center>";
+			                
+			                var action_btns = '';
+			                action_btns += '            <div class="ui-grid-a">';
+							action_btns += '				<div class="ui-block-a">';
+							if(mode == "1"){
+								action_btns += '					<a href="#" data-role="button"  data-theme="b" onclick="buyOffer('+offer_detail.id+', '+offer_detail.total_price_inr+');">Buy Now</a>';
+							}else{
+								action_btns += '					<a href="#" data-role="button"  data-theme="b" onclick="reconfirmOffer('+offer_detail.id+');">Reconfirm Offer</a>';
+							}
+							
+							action_btns += '				</div>';
+							action_btns += '				<div class="ui-block-b">';
+							action_btns += '					<a href="#" data-role="button"  data-theme="c" onclick="backsummary();">Back</a>';
+							action_btns += '				</div>';
+							action_btns += '			</div>';	
+							offer_detailHTM += action_btns;
+			                $("#offer_details").html(offer_detailHTM);
+			                
+			                $("#contentLI").hide();
+			                $("#offer_details").show();
+			                $('[data-role="content"]').trigger('create');
+			            },
+						error : function() {
+							$('#lable_display').html('<center><font color="red">An error occured while loading the offer detail, Please try again.</font></center>');
+							return false;
+						}
+					});
+				}
+				function backsummary(){
+					$("#offer_details").hide();
+					$("#contentLI").show();
+				}
+				function reconfirmOffer(offerID, counter){
+					var auth_token = localStorage.getItem("auth");
+					$("#reconfirm_"+counter).html('<img src="/images/load2.gif">');
+					$.ajax({
+						 url: "/my_deals/buyer_reconfirm",
+						 dataType: 'json',
+						 timeout: 15000,
+						 data:{mid:offerID,auth_token:auth_token},
+						 success: function(json){
+							if(json.success){
+								$("#reconfirm_"+counter).html("Pending for merchant confirmation"); 
+								return false;
+							}else{
+								$('#lable_display').html('<center><font color="red">An error occured while reconfirming this offer, Please try again.</font></center>');
+								return false;
+							}
+						  },
+						error : function() {
+							$('#lable_display').html('<center><font color="red">An error occured while reconfirming this offer, Please try again.</font></center>');
+							return false;
+						}
+				  });
+				}
+				function buyOffer(offerID, price){
+					window.location.href="/my_deals/buy_now_offer?did="+offerID+"&qty=";
+				}
+				function rejectOffer(offerID, counter){
+					var retVal = confirm("Are you sure want to reject this offer ?");
+				   	if( retVal == true ){
+				      var auth_token = localStorage.getItem("auth");
+						$("#action_"+counter).html('<img src="/images/load2.gif">');
+						$('#lable_display').html('');
+						$.ajax({
+							 url: "/my_deals/reject_offer",
+							 dataType: 'json',
+							 timeout: 15000,
+							 data:{mid:offerID,auth_token:auth_token},
+							 success: function(json){
+								if(json.success){
+									$("#action_"+counter).html("Offer rejected"); 
+									return false;
+								}else{
+									$('#lable_display').html('<center><font color="red">An error occured while rejecting this offer, Please try again.</font></center>');
+									return false;
+								}
+							  },
+							error : function() {
+								$('#lable_display').html('<center><font color="red">An error occured while rejecting this offer, Please try again.</font></center>');
+								return false;
+							}
+					  });
+				   	}else{
+					  return false;
+				   	}
+				}
+			</script>
+        	<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Buy Request Detail"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Buy Request Detail"}%>
+			<%end -%>
+			<div align="center" data-role="content">
+				<ul data-role="listview" data-inset="true">
+					<li data-role="list-divider" id="lable_display">
+						<center>Please wait, Loading offer detail... <img src="/images/load2.gif"></center>
+					</li>
+					<li id="contentLI"></li>
+					<li id="offer_details"></li>
+					<input id="auth_token" name="auth_token" type="hidden" value="" />
+					<input id="user_reqID" name="user_reqID" type="hidden" value="" />
+				</ul>
+			</div>
+		</div>
+	</body>
+</html>

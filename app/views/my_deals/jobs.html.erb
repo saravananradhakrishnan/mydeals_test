@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+
+		<div data-role="page" data-theme='b'>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Jobs Home"}%>
+			<%else -%>
+				<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Jobs Home"}%>
+			<%end -%>
+			<div data-role="content" data-theme="b">
+				<div class="content-secondary">
+					<div data-role="collapsible" data-collapsed="false">
+						<h3>Create Job Profile</h3>
+						<div class='inset'>
+							<ul data-role="listview">
+								<li>
+									<div>Currently we re updating the server, Please use webseite to post the CV. Sorry for the inconvenience. We will update in 24 hours.</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<!-- ul data-role="listview" data-inset="true" data-theme="b" data-dividertheme="b" class="ui-listview ui-listview-inset ui-corner-all ui-shadow">
+						<li data-corners="false" data-shadow="false" data-iconshadow="true" data-wrapperels="div" data-icon="arrow-r" data-iconpos="right" data-theme="b" class="ui-btn ui-btn-icon-right ui-li-has-arrow ui-li ui-btn-up-c">
+							<div class="ui-btn-inner ui-li">
+								<div class="ui-btn-text">
+									<a href="my_job_profie" class="ui-link-inherit">My Profile</a>
+								</div><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span>
+							</div>
+						</li>
+						<li data-corners="false" data-shadow="false" data-iconshadow="true" data-wrapperels="div" data-icon="arrow-r" data-iconpos="right" data-theme="b" class="ui-btn ui-btn-icon-right ui-li-has-arrow ui-li ui-btn-up-c">
+							<div class="ui-btn-inner ui-li">
+								<div class="ui-btn-text">
+									<a href="my_matched_jobs" class="ui-link-inherit">Matched Jobs</a>
+								</div><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span>
+							</div>
+						</li>
+						<li data-corners="false" data-shadow="false" data-iconshadow="true" data-wrapperels="div" data-icon="arrow-r" data-iconpos="right" data-theme="b" class="ui-btn ui-btn-icon-right ui-li-has-arrow ui-li ui-btn-up-c">
+							<div class="ui-btn-inner ui-li">
+								<div class="ui-btn-text">
+									<a href="my_jobs_applied" rel="external" class="ui-link-inherit">Jobs Applied By Me</a>
+								</div><span class="ui-icon ui-icon-arrow-r ui-icon-shadow">&nbsp;</span>
+							</div>
+						</li>
+					</ul -->
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+

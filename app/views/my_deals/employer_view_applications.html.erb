@@ -1,0 +1,221 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+		<div data-role="page" id="my_profile" data-theme="b">
+			<script>
+				$(document).ready(function() {
+					var jb_id = getUrlVars()["jb_id"];
+			        function getUrlVars() {
+			            var vars = {};
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+					if(auth_token == null)
+		        		window.location.href = "login" 
+					$.ajax({
+						url : "/my_deals/list_job_applicants",
+						dataType : 'json',
+						timeout : 15000,
+						data : {auth_token : auth_token, posting_id : jb_id},
+						success : function(json) {
+							$("#error").html("");
+							var random_html = '';
+							var edumatch_count = parseInt(json.edu_matched_application_count);
+							//Get profiles for matched education preference
+							random_html += '<div data-role="collapsible" data-collapsed="false" id="with_degree_collapsible" style="border-bottom:1px solid black;">';
+		                    random_html += '    <h3>Profiles - With Degree Match('+edumatch_count+')</h3>';
+		                    random_html += '    <div class=\'inset\'>';
+		                    if(edumatch_count > 0){
+		                    random_html += '    				<table id="content" border=0 style="width: 100%;overflow-y: hidden;float: left;">';
+		                    random_html += '        				<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+		                    random_html += '            				<td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Profile ID </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Candidate </font></td>'; 
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Notice Period </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Experience</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Core Skill Match %</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Salary Expectation</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Action</font></td>';
+		                    random_html += '        				</tr>';
+		                    $.each(json.edu_matched_applications, function(i, item) {
+		                  		var jb_posting =  item.job_application;
+			                  	random_html += '					<tr style="height:9px;" align="center">';
+								random_html += '						<td><font size="-2">CNDT-' +jb_posting.profile_id+ '</font></td>';
+								random_html += '						<td align="left">';
+								random_html += '							<font size="-2"><strong>' + jb_posting.candidate_name + '</strong></font><br/>';
+								random_html += '							<font size="-1">Email:</font> &nbsp;<font size="-2" color="blue">' + jb_posting.candidate_email + '</font><br/>';
+								random_html += '							<font size="-1">Mobile:</font> &nbsp;<font size="-2"><u>+91 ' + jb_posting.candidate_mobile + '</u></font><br/>';
+								random_html += '						</td>';
+								random_html += '						<td><font size="-2">' + jb_posting.notice_period + '</font></td>';
+								random_html += '						<td><font size="-2">' + jb_posting.candidate_experience + '</font></td>';
+								random_html += '						<td><font size="-2">' + parseInt(jb_posting.skill_match_percent) + '%</font></td>';
+								random_html += '						<td><font size="-2">' + jb_posting.candidate_exp_salary + '</font></td>';
+								random_html += '						<td>';
+								random_html += '							<input type="button" value="View Profile" style="background-color:#FFFFFF;font-weight:bold;border-color:#FE9600;cursor:pointer;cursor:hand;margin-bottom:10px;" onclick="view_condidate_profile('+jb_posting.job_post_id+', '+jb_posting.id+', '+jb_posting.profile_id+');">';
+								random_html += '						</td>';
+								random_html += '					</tr>';
+		                  	});
+		                    random_html += '        			</table>';
+		                    }else{
+		                    	random_html += '        		<p><font color="red">No applicants matching required degree</font></p>';
+		                    }
+		                    random_html += '    </div>';
+		                    random_html += '</div>';
+							var edu_unmatch_count = parseInt(json.edu_unmatched_application_count);
+							//Get profiles for un matched education preference
+							random_html += '<div data-role="collapsible" data-collapsed="true" id="with_degree_collapsible" style="border-bottom:1px solid black;">';
+		                    random_html += '    <h3>Profiles - Without Degree Match('+edu_unmatch_count+')</h3>';
+		                    random_html += '    <div class=\'inset\'>';
+		                    if(edu_unmatch_count > 0){
+		                    random_html += '    				<table id="content" border=0 style="width: 100%;overflow-y: hidden;float: left;">';
+		                    random_html += '        				<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+		                    random_html += '            				<td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Profile ID </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Candidate </font></td>'; 
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Notice Period </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Experience</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Core Skill Match %</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Salary Expectation</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Action</font></td>';
+		                    random_html += '        				</tr>';
+		                    $.each(json.edu_unmatched_applications, function(i, item) {
+		                  		var jb_posting =  item.job_application;
+			                  	random_html += '		<tr style="height:9px;" align="center">';
+								random_html += '			<td><font size="-2">CNDT-' +jb_posting.profile_id+ '</font></td>';
+								random_html += '			<td align="left">';
+								random_html += '			<font size="-2"><strong>' + jb_posting.candidate_name + '</strong></font><br/>';
+								random_html += '			<font size="-1">Email:</font> &nbsp;<font size="-2" color="blue">' + jb_posting.candidate_email + '</font><br/>';
+								random_html += '			<font size="-1">Mobile:</font> &nbsp;<font size="-2"><u>+91 ' + jb_posting.candidate_mobile + '</u></font><br/>';
+								random_html += '			</td>';
+								random_html += '			<td><font size="-2">' + jb_posting.notice_period + '</font></td>';
+								random_html += '			<td><font size="-2">' + jb_posting.candidate_experience + '</font></td>';
+								random_html += '			<td><font size="-2">' + parseInt(jb_posting.skill_match_percent) + '%</font></td>';
+								random_html += '			<td><font size="-2">' + jb_posting.candidate_exp_salary + '</font></td>';
+								random_html += '			<td>';
+								random_html += '				<input type="button" value="View Profile" style="background-color:#FFFFFF;font-weight:bold;border-color:#FE9600;cursor:pointer;cursor:hand;margin-bottom:10px;" onclick="view_condidate_profile('+jb_posting.job_post_id+', '+jb_posting.id+', '+jb_posting.profile_id+');">';
+								random_html += '			</td>';
+								random_html += '		</tr>';
+		                  	});
+		                    random_html += '        			</table>';
+		                    }else{
+		                    	random_html += '        		<p><font color="red">No applicants in this category.</font></p>';
+		                    }
+		                    random_html += '    </div>';
+		                    random_html += '</div>';
+		                    var shortlist_count = parseInt(json.shortisted_application_count);
+		                    //Get profiles for shortlisted one
+		                    random_html += '<div data-role="collapsible" data-collapsed="true" id="with_degree_collapsible" style="border-bottom:1px solid black;">';
+		                    random_html += '    <h3>Shortlisted Profiles('+shortlist_count+')</h3>';
+		                    random_html += '    <div class=\'inset\'>';
+		                    if(shortlist_count > 0){
+		                    random_html += '    				<table id="content" border=0 style="width: 100%;overflow-y: hidden;float: left;">';
+		                    random_html += '        				<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+		                    random_html += '            				<td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Profile ID </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Candidate </font></td>'; 
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Notice Period </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Experience</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Core Skill Match %</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Salary Expectation</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Action</font></td>';
+		                    random_html += '        				</tr>';
+		                    $.each(json.shortisted_applications, function(i, item) {
+		                  		var jb_posting =  item.job_application;
+			                  	random_html += '		<tr style="height:9px;" align="center">';
+								random_html += '			<td><font size="-2">CNDT-' +jb_posting.profile_id+ '</font></td>';
+								random_html += '			<td align="left">';
+								random_html += '			<font size="-2"><strong>' + jb_posting.candidate_name + '</strong></font><br/>';
+								random_html += '			<font size="-1">Email: </font>&nbsp;<font size="-2" color="blue">' + jb_posting.candidate_email + '</font><br/>';
+								random_html += '			<font size="-1">Mobile:</font> &nbsp;<font size="-2"><u>+91 ' + jb_posting.candidate_mobile + '</u></font><br/>';
+								random_html += '			</td>';
+								random_html += '			<td><font size="-2">' + jb_posting.notice_period + '</font></td>';
+								random_html += '			<td><font size="-2">' + jb_posting.candidate_experience + '</font></td>';
+								random_html += '			<td><font size="-2">' + parseInt(jb_posting.skill_match_percent) + '%</font></td>';
+								random_html += '			<td><font size="-2">' + jb_posting.candidate_exp_salary + '</font></td>';
+								random_html += '			<td>';
+								random_html += '				<input type="button" value="View Profile" style="background-color:#FFFFFF;font-weight:bold;border-color:#FE9600;cursor:pointer;cursor:hand;margin-bottom:10px;" onclick="view_condidate_profile('+jb_posting.job_post_id+', '+jb_posting.id+', '+jb_posting.profile_id+');">';
+								random_html += '			</td>';
+								random_html += '		</tr>';
+		                  	});
+		                    random_html += '        			</table>';
+		                    }else{
+		                    	random_html += '        		<p><font color="red">You have not shortlisted any profile yet.</font></p>';
+		                    }
+		                    random_html += '    </div>';
+		                    random_html += '</div>';
+		                    //Get profiles for rejected one ...
+		                    var reject_count = parseInt(json.rejected_application_count);
+		                    random_html += '<div data-role="collapsible" data-collapsed="true" id="with_degree_collapsible" style="border-bottom:1px solid black;">';
+		                    random_html += '    <h3>Rejected Profiles('+reject_count+')</h3>';
+		                    random_html += '    <div class=\'inset\'>';
+		                    if(reject_count > 0){
+		                    random_html += '    				<table id="content" border=0 style="width: 100%;overflow-y: hidden;float: left;">';
+		                    random_html += '        				<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+		                    random_html += '            				<td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Profile ID </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Candidate </font></td>'; 
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Notice Period </font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Experience</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Core Skill Match %</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Salary Expectation</font></td>';
+		                    random_html += '            				<td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Action</font></td>';
+		                    random_html += '        				</tr>';
+		                    $.each(json.rejected_applications, function(i, item) {
+		                  		var jb_posting =  item.job_application;
+			                  	random_html += '		<tr style="height:9px;" align="center">';
+								random_html += '			<td><font size="-2">CNDT-' +jb_posting.profile_id+ '</font></td>';
+								random_html += '			<td align="left">';
+								random_html += '			<font size="-2"><strong>' + jb_posting.candidate_name + '</strong></font><br/>';
+								random_html += '			<font size="-1">Email:</font> &nbsp;<font size="-2" color="blue">' + jb_posting.candidate_email + '</font><br/>';
+								random_html += '			<font size="-1">Mobile:</font> &nbsp;<font size="-2"><u>+91 ' + jb_posting.candidate_mobile + '</u></font><br/>';
+								random_html += '			</td>';
+								random_html += '			<td><font size="-2">' + jb_posting.notice_period + '</font></td>';
+								random_html += '			<td><font size="-2">' + jb_posting.candidate_experience + '</font></td>';
+								random_html += '			<td><font size="-2">' + parseInt(jb_posting.skill_match_percent) + '%</font></td>';
+								random_html += '			<td><font size="-2">' + jb_posting.candidate_exp_salary + '</font></td>';
+								random_html += '			<td>';
+								random_html += '				<input type="button" value="View Profile" style="background-color:#FFFFFF;font-weight:bold;border-color:#FE9600;cursor:pointer;cursor:hand;margin-bottom:10px;" onclick="view_condidate_profile('+jb_posting.job_post_id+', '+jb_posting.id+', '+jb_posting.profile_id+');">';
+								random_html += '			</td>';
+								random_html += '		</tr>';
+		                  	});
+		                    random_html += '        			</table>';
+		                    }else{
+		                    	random_html += '        		<p><font color="red">You have not rejected any profile for this job.</font></p>';
+		                    }
+		                    random_html += '    </div>';
+		                    random_html += '</div>';    
+							$("#list_jb_applicants").html(random_html);
+							$('[data-role="content"]').trigger('create');
+		                    
+						}
+					});
+
+				});
+				function view_condidate_profile(posting_id, application_id, applicant_id){
+					window.location.href = "job_application_profile?posting_id="+posting_id+"&application_id="+application_id+"&applicant_id="+applicant_id;
+				}
+			</script>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "My Job Postings"}%>
+			<%else -%>
+				<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "My Job Postings"}%>
+			<%end -%>
+			<div data-role="content">
+				<div id="error"><img src='/images/load2.gif'></div>
+    			<div data-role="collapsible-set" data-theme="b" data-content-theme="b" id="list_jb_applicants">
+                    
+                </div>
+           </div> 
+	</body>
+</html>
+

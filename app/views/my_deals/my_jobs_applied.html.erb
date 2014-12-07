@@ -1,0 +1,82 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+		<div data-role="page" id="my_profile" data-theme="b">
+			<script>
+				$(document).ready(function() {
+					var auth_token = localStorage.getItem("auth");
+					if(auth_token == null)
+		        		window.location.href = "login" 
+					$.ajax({
+						url : "/my_deals/jobs_applied_by_me",
+						dataType : 'json',
+						timeout : 15000,
+						data : {auth_token : auth_token},
+						success : function(json) {
+							$("#error").html("");
+							var random_html = '';
+							if(parseInt(json.job_application_count) > 50)
+								random_html += '<h3>You have applied for <b>'+json.job_application_count+'</b> Job(s). Showing last 50.</h3>';
+							else
+								random_html += '<h3>You have applied for <b>'+json.job_application_count+'</b> Job(s).</h3>';
+								
+		                    random_html += '<div class=\'inset\'>';
+		                    random_html += '    <table id="content" border=1 style="width: 100%;overflow-y: hidden;float: left;">';
+		                    random_html += '        <tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+		                    random_html += '            <td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Job ID </font></td>';
+		                    random_html += '            <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Employer </font></td>'; 
+		                    random_html += '            <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Job Title </font></td>';
+		                    random_html += '            <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Location </font></td>'; 
+		                    random_html += '            <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Application Status </font></td></font>'; 
+		                    random_html += '        </tr>';
+		                    $.each(json.job_applications, function(i, item) {
+		                  	var jb_application =  item.job_application; 	
+							random_html += '		<tr style="height:9px;" align="center">';
+							random_html += '			<td><font size="-2">JBPOST-' +jb_application.job_post_id+ '</font></td>';
+							random_html += '			<td>';
+							if(jb_application.employer_image != "" && jb_application.employer_image != null && jb_application.employer_image != "null")
+								random_html += '			<img src="'+jb_application.employer_image+'"><br/>';
+								
+							random_html += '			<font size="-2">'+jb_application.employer_name+'</font></td>';
+							random_html += '			<td><font size="-2">' + jb_application.applic_job_title + '</font></td>';
+							random_html += '			<td><font size="-2">' + jb_application.job_aplic_locations + '</font></td>';
+							random_html += '			<td><font size="-2">' + jb_application.application_status + '</font></td>';
+							random_html += '		</tr>';
+															
+							});
+							random_html += '    </table>';
+		                    random_html += '</div>';
+		                    
+		                    $("#content_div").html(random_html);
+		                    
+						}
+					});
+
+				});
+			</script>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Jobs Applied by me"}%>
+			<%else -%>
+				<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Jobs Applied by me"}%>
+			<%end -%>
+			<div data-role="content">
+				<div id="error"><img src='/images/load2.gif'></div>
+				<div data-role="collapsible-set" data-theme="b" id="buyer_details" data-content-theme="b">
+	                <div data-role="collapsible" data-collapsed="false" id="content_div">
+	                </div>
+	            </div>
+           </div> 
+	</body>
+</html>
+

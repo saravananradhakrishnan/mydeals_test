@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+		<div data-role="page" id="mysettings_content" data-theme='b'>
+			<script>
+			    $(document).ready(function() {
+			        var auth_token = localStorage.getItem("auth");
+			        if (auth_token == null)
+			            window.location.href = "login"
+			        var user_type = localStorage.getItem("usertyp");
+			        var selected_deal_categs = [];
+			        var selected_buysell_categs = [];
+			        $('#lable_display').html('<center>Please wait, Loading preferences... <img src="/images/load2.gif"></center>');
+			        $.ajax({
+			            url: "/my_deals/mysettings_data",
+			            dataType: 'json',
+			            timeout: 20000,
+			            data: {auth_token: auth_token},
+			            success : function(json) {
+							if(json.success) {
+								var uType = json.user_info.user.sub_type
+								var uEntity = json.user_info.user.user_entity
+								var uLable = ""
+								var cutype = ""
+								var lead_preference = json.user_info.user.lead_preference
+								if (uType == "buyer" && uEntity == "regular_user"){
+									uLable = "Regular User";
+									cutype = "regular_user"
+								}	
+								else if (uType == "buyer" && uEntity == "buyer"){
+									uLable = "Buyer";
+									cutype = "buyer"
+								}	
+								else if (uType == "buyer" && uEntity == "job_seeker"){
+									uLable = "Job Seeker";
+									cutype = "job_seeker"
+								}
+									
+								else if (uType == "buysell" && uEntity == "buysell"){
+									uLable = "Seller / Merchant";
+									cutype = "buysell"
+								}	
+								else if (uType == "buysell" && uEntity == "jobs"){
+									uLable = "Employer (Post a Job)";
+									cutype = "job_employer"
+								}	
+								$("#iama").text(uLable);
+								$("#iama_li").show();
+								$("#user_type").val(cutype);
+								$("#auth_token").val(localStorage.getItem("auth"));
+								if(json.selected_deal_categs != null && json.selected_deal_categs != ""){
+									$.each(json.selected_deal_categs, function(i, item){
+			                			selected_deal_categs.push(item.user_interest.category_id);
+			                		});
+								}
+								if(json.selected_buysell_categs != null && json.selected_buysell_categs != ""){
+									$.each(json.selected_buysell_categs, function(i, item){
+			                			selected_buysell_categs.push(item.seller_interest.buysell_category_id);
+			                		});
+								}
+								
+								if(json.deal_categs != null && json.deal_categs != ""){
+									var deal_categHTM = "";
+									
+									if(json.user_info.user.sub_type == "buyer"){
+										deal_categHTM += "<li data-role='list-divider' style='display:none;'>Choose categories of your interest</li>";
+										deal_categHTM += "<li>";
+									}	
+									else{
+										deal_categHTM += "<li style='display:none;'>";
+									}	
+									deal_categHTM += "<div data-role='fieldcontain'>";
+									deal_categHTM += "<fieldset data-role='controlgroup' >";
+									deal_categHTM += "	<p align='left'><strong>Please select minimum 5 categories of your interest at this time</strong></p>";
+									$.each(json.deal_categs, function(i, item){
+										if(selected_deal_categs.length == 0){
+											deal_categHTM += "<div class='chkboxbg'>"
+				                			deal_categHTM += "<input type='checkbox' id='categ_id"+item.category.id+"' name='category_ids[]' class='deal_categs' data-role='none' data-theme='b' value='"+item.category.id+"' checked='true' />";
+											deal_categHTM += "<label for='categ_id"+item.category.id+"'>"+item.category.name+"</label>";
+											deal_categHTM += "</div>"
+											deal_categHTM += "<div class='clr'></div>";
+										}else{
+											deal_categHTM += "<div class='chkboxbg'>"
+				                			deal_categHTM += "<input type='checkbox' id='categ_id"+item.category.id+"' name='category_ids[]' class='deal_categs' data-role='none' data-theme='b' value='"+item.category.id+"'";
+				                			if(selected_deal_categs.indexOf(item.category.id) > -1)
+				                				deal_categHTM += " checked='true' />";
+											else
+												deal_categHTM += " />";
+											deal_categHTM += "<label for='categ_id"+item.category.id+"'>"+item.category.name+"</label>";
+											deal_categHTM += "</div>"
+											deal_categHTM += "<div class='clr'></div>";
+										}
+			                		});
+			                		deal_categHTM += "</fieldset>";
+									deal_categHTM += "<p align='center'><strong>You can always change your preferences any time as part of the settings. Otherwise system automatically reminds you for every 7 calendar days.</strong></p>";
+									deal_categHTM += "</div>";
+									deal_categHTM += "</li>";
+							
+			                		if(json.user_info.user.sub_type == "buyer"){
+			                			deal_categHTM += "<div class='ui-grid-a'>";
+										deal_categHTM += "	<div class='ui-block-a'>";
+										deal_categHTM += "		<a href='#' rel='external' onclick='buyersubmit();' style='background: rgb(203, 203, 203);' data-role='button' data-theme='b'>Submit</a>"; 
+										deal_categHTM += "	</div>";
+										deal_categHTM += "	<div class='ui-block-b'>";
+										deal_categHTM += "		<a href='buyerhome' rel='external' onclick='buyercancel();' style='background: rgb(203, 203, 203);' data-role='button' data-theme='c'>Cancel</a>";
+										deal_categHTM += "	</div>";
+										deal_categHTM += "</div>";
+			                		}else{
+			                			deal_categHTM += "<div class='ui-grid-a'>";
+										deal_categHTM += "	<div class='ui-block-a'>";
+										deal_categHTM += "		<a href='#' rel='external' onclick='sellerNxtI();' style='background: rgb(203, 203, 203);' data-role='button' data-theme='b'>Next</a>"; 
+										deal_categHTM += "	</div>";
+										deal_categHTM += "	<div class='ui-block-b'>";
+										deal_categHTM += "		<a href='sellerhome' rel='external' onclick='sellerBackI();' style='background: rgb(203, 203, 203);' data-role='button' data-theme='c'>Cancel</a>";
+										deal_categHTM += "	</div>";
+										deal_categHTM += "</div>";
+			                		}
+			                		$("#buyer_categs_section").html(deal_categHTM);
+			                	}
+			                	//Prepare seller tab
+			                	var business_name = "";
+			                	var website_url = "";
+			                	var seller_address = "";
+			                	var logo = "";
+			                	var bank_name = "";
+			                	var branch_location = "";
+			                	var current_chking_account = "";
+			                	var swift_code = "";
+			                	var routing_number = "";
+			                	if(json.merchant != null && json.merchant != ""){
+				                	business_name = json.merchant.merchant.business_name;
+				                	website_url = json.merchant.merchant.website_url;
+				                	seller_address = json.merchant.merchant.contact_detail;
+				                	if (json.merchant.merchant.merchant_img_file_name !="")
+				                		logo = json.merchant.merchant.logo_img_root+"/system/merchant_imgs/"+json.merchant.merchant.id+"/tiny/"+json.merchant.merchant.merchant_img_file_name;
+				                	bank_name = json.merchant.merchant.bank_name;
+				                	branch_location = json.merchant.merchant.bank_name;
+				                	current_chking_account = json.merchant.merchant.branch;
+				                	swift_code = json.merchant.merchant.swift_code;
+				                	routing_number = json.merchant.merchant.routing;	
+			                	}	
+			                	//
+								var lable = ""
+								var merchant_infoHTM = '';
+								if(uEntity == "buysell"){
+									lable = "Seller"
+									merchant_infoHTM += '<li>'; 
+	                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+	                                merchant_infoHTM += '<select id="merchant_lead_preference" name="lead_preference">';
+									merchant_infoHTM += '<option value="b2c">- Lead Preference -</option>';
+									merchant_infoHTM += '<option value="all"';
+									if (lead_preference == "all")
+										merchant_infoHTM += ' selected >';
+									else
+										merchant_infoHTM += '>';
+									merchant_infoHTM += 'All Orders</option>';
+									
+									merchant_infoHTM += '<option value="b2c"';
+									if (lead_preference == "b2c")
+										merchant_infoHTM += ' selected >';
+									else
+										merchant_infoHTM += '>';
+									merchant_infoHTM += 'Orders less than 10 quantity</option>';
+									
+									merchant_infoHTM += '<option value="b2b"';
+									if (lead_preference == "b2b")
+										merchant_infoHTM += ' selected >';
+									else
+										merchant_infoHTM += '>';
+									merchant_infoHTM += 'Orders more than 10 quantity</option>';
+									merchant_infoHTM += '</fieldset>';
+                            	}else{
+                            		lable = "Company"
+                            	}
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="business_name" id="business_name" placeholder="'+lable+' Name*"	value="'+business_name+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="contact_detail" id="contact_detail" placeholder="'+lable+' Address*" value="'+seller_address+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="website_url" id="website_url" placeholder="Website URL*" value="'+website_url+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	if(logo !=""){
+	                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+	                            	merchant_infoHTM += '<legend><strong>'+lable+' Logo:</strong></legend>';
+	                                merchant_infoHTM += '	<img src="'+logo+'" title="company_logo" alt="company_logo"/>';
+	                            	merchant_infoHTM += '</fieldset>';
+								}
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '<legend><strong>Choose a new '+lable+' Logo:</strong></legend>';
+                            	merchant_infoHTM += '	<input type="file" name="merchant_img" id="merchant_img">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="bank_name" id="bank_name" placeholder="Bank Name*" value="'+bank_name+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="branch" id="branch" placeholder="Brnach Location*" value="'+branch_location+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="checking" id="checking" placeholder="Checking/Current Account*" value="'+current_chking_account+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="swift_code" id="swift_code" placeholder="Swift Code*" value="'+swift_code+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	
+                            	merchant_infoHTM += '<fieldset data-role="controlgroup" >';
+                            	merchant_infoHTM += '	<input type="text" name="routing" id="routing" placeholder="Routing Number*" value="'+routing_number+'">';
+                            	merchant_infoHTM += '</fieldset>';
+                            	if(uEntity == "buysell"){
+	                            	merchant_infoHTM += '<div class="ui-grid-a">';
+		                            merchant_infoHTM += '    <div class="ui-block-a">';
+		                            merchant_infoHTM += '        <a href="#" rel="external" onclick="sellerNxtII();" style="background: rgb(203, 203, 203);" data-role="button" data-theme="b">Next</a>'; 
+		                            merchant_infoHTM += '    </div>';
+		                            merchant_infoHTM += '    <div class="ui-block-b">';
+		                            merchant_infoHTM += '        <a href="#" rel="external" onclick="sellerBackII();" style="background: rgb(203, 203, 203);" data-role="button" data-theme="c">Back</a>';
+		                            merchant_infoHTM += '    </div>';
+		                            merchant_infoHTM += '</div>';
+	                            }else{
+	                            	merchant_infoHTM += '<div class="ui-grid-a">';
+		                            merchant_infoHTM += '    <div class="ui-block-a">';
+		                            merchant_infoHTM += '        <a href="#" rel="external" onclick="employerSubmit();" style="background: rgb(203, 203, 203);" data-role="button" data-theme="b">Submit</a>'; 
+		                            merchant_infoHTM += '    </div>';
+		                            merchant_infoHTM += '    <div class="ui-block-b">';
+		                            merchant_infoHTM += '        <a href="#" rel="external" onclick="employerBackII();" style="background: rgb(203, 203, 203);" data-role="button" data-theme="c">Back</a>';
+		                            merchant_infoHTM += '    </div>';
+		                            merchant_infoHTM += '</div>';
+	                            }
+                            	$("#merchant_info_section").html(merchant_infoHTM);
+			                	
+								if(json.buysell_categs != null && json.buysell_categs != ""){
+									var buysell_categories = '<li>If you wish to sell any item, please expand and select the categories below.</li>';
+									buysell_categories += '<div data-role="collapsible-set" data-theme="b" data-content-theme="b">';
+									$.each(json.buysell_categs, function(i, item){
+										var categ_name = item.buysell_category.name;
+										buysell_categories += '<div data-role="collapsible" data-collapsed="true" class="buysell_cat" id="'+item.buysell_category.id+'" my_name="'+item.buysell_category.name+'">';
+					                    buysell_categories += '    <h3>'+categ_name+'</h3>';
+					                    buysell_categories += '    <div class="inset">';
+					                    buysell_categories += '        <ul data-role="listview" id="buysell_subcategUL'+item.buysell_category.id+'">';
+					                    if(item.buysell_category.child_categs != null && item.buysell_category.child_categs != ""){
+						                    var child_cat_source = '';
+						                    $.each(item.buysell_category.child_categs, function(i,item1){
+					                        	var val = item1.buysell_category.name;
+						                        var id  = item1.buysell_category.id;
+						                        child_cat_source += '<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><input type="checkbox" name="buysell_category_ids[]" class="buysellChkBX" data-role="none" data-theme="b" value="'+id+'"';
+						                        if(categ_name == "Hotel Booking"){
+						                        	child_cat_source += ' ref="hotel" onclick="prevent_more(this, \'hotel\')"';	
+						                        }else if(categ_name == "Books"){
+						                        	child_cat_source += ' ref="book" onclick="prevent_more(this, \'book\')"';
+						                        }	
+						                        if(selected_buysell_categs.indexOf(id) > -1)
+			                						child_cat_source += " checked='true'";
+										        child_cat_source += '>&nbsp;'+val+'</li>';
+					                        });
+				                       	}
+				                       	buysell_categories += child_cat_source;
+					                    buysell_categories += '        </ul>';
+					                    buysell_categories += '    </div>';
+					                    buysell_categories += '</div>';
+					                });
+									buysell_categories += '</div>';
+									
+									buysell_categories += '<div class="ui-grid-a">';
+		                            buysell_categories += '    <div class="ui-block-a">';
+		                            buysell_categories += '        <a href="#" rel="external" onclick="sellerSubmit();" style="background: rgb(203, 203, 203);" data-role="button" data-theme="b">Submit</a>'; 
+		                            buysell_categories += '    </div>';
+		                            buysell_categories += '    <div class="ui-block-b">';
+		                            buysell_categories += '        <a href="#" rel="external" onclick="sellerBackIII();" style="background: rgb(203, 203, 203);" data-role="button" data-theme="c">Back</a>';
+		                            buysell_categories += '    </div>';
+		                            buysell_categories += '</div>';
+		                            
+									$("#seller_categ_section").html(buysell_categories);
+			                	}
+								$('#lable_display').html('Basic Details');	
+								$('[data-role="content"]').trigger('create');
+								$("#buyer_categs_section").show();
+								
+								/* This is if we want to enable category refresh on expand of any parent category. 
+								$('.buysell_cat').bind('expand', function() {
+									if($(this).length < 10){
+			              				var categ_id = $(this).attr("id");
+			              				var categ_name =$(this).attr("my_name");
+			              				$('#buysell_subcategUL'+categ_id).html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><img src="/images/load2.gif"></li>');
+			              				$.ajax({
+						                    url: "/my_deals/buyer_subcat",
+						                    dataType: 'json',
+						                    timeout: 5000,
+						                    data:{category:categ_id},
+						                    success: function(json)
+						                    {
+						                        var random_source = '';
+						                        $.each(json, function(i,item){
+						                        	var val = item.buysell_category.name;
+							                        var id  = item.buysell_category.id;
+							                        random_source += '<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><input type="checkbox" name="buysell_category_ids[]" class="buysellChkBX" data-role="none" data-theme="b" value="'+id+'"';
+							                        if(categ_name == "Hotel Booking"){
+							                        	random_source += ' ref="hotel" onclick="prevent_more(this, \'hotel\')"';	
+							                        }else if(categ_name == "Books"){
+							                        	random_source += ' ref="book" onclick="prevent_more(this, \'book\')"';
+							                        }	
+							                        if(selected_buysell_categs.indexOf(id) > -1)
+				                						random_source += " checked='true'";
+											        random_source += '>&nbsp;'+val+'</li>';
+						                        });
+						                        $('#buysell_subcategUL'+categ_id).html(random_source);
+						                    },
+											error : function() {
+												$('#buysell_subcategUL'+categ_id).html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child">Error while fethcing caegories, Please refresh the page.</li>');
+												return false;
+											}
+					                	});
+					                	
+			              			}
+			              		}); */
+			                }else {
+								$('#lable_display').html('<center><font color="red">Error occured while fething your preferences, Please try again.</font></center>');
+								return false;
+							}
+						},
+						error : function() {
+							$('#lable_display').html('<center><font color="red">Error occured while fething your preferences, Please try again.</font></center>');
+							return false;
+						}
+			            
+			        });
+			        
+			        $('#post').click(function() {
+			            var val = [];
+			            var i = 0, x = 0;
+			            $('input:checkbox:checked').each(function() {
+			                val[i] = $(this).val();
+			                i++;
+			            });
+			            $.ajax({
+			                url: "http://mydeals247.mobi/php/mysetting.php",
+			                dataType: 'jsonp',
+			                jsonp: 'jsoncallback',
+			                timeout: 5000,
+			                data: {auth_token: auth_token, categ: val, user_type: user_type},
+			                success: function(json, status)
+			                {
+			                }
+			            });
+			        });
+			        $('#cancel').click(function() {
+			            var utype = localStorage.getItem("usertyp");
+			            if (utype == 'buysell')
+			                location.href = "SellerHome.html";
+			            else
+			                location.href = "BuyerHome.html";
+			
+			        });
+			    });
+			    function prevent_more(obj, ref){
+				    if(obj.checked == true){
+					    var group = "input:checkbox[ref='" + ref + "']";
+					  	$(group).attr("checked", false);
+					   	obj.checked = true;
+				   	}	
+			    }
+			    
+			    function buyersubmit(){
+			    	$("html, body").animate({ scrollTop: 0 }, "slow");
+			    	if($('.deal_categs:checked').size() < 5){
+			    		$('#valerror').html("Please select minimum 5 categories of your interest at this time.");
+			    		$('#valerror').show();
+			    		return false;
+			    	}else{
+			    		$('#valerror').hide();
+						$.ajax({
+							type : "POST",
+							url : "/my_deals/update_settings",
+							data : $("#mysettings_frm").serialize(),
+							dataType : "json",
+							success : function(b) {
+								if(b.success) {
+									document.getElementById('valerror').innerHTML = "<font color='green'>"+b.msg+"</font>";
+									$('#valerror').show();
+									window.location = "/my_deals/buyerhome";
+								} else {
+									$('#valerror').html(b.msg);
+									$('#valerror').show();
+									return false;
+								}
+							},
+							error : function() {
+								$('#valerror').html("Error occured while updating preference, Please try again.");
+								$('#valerror').show();
+								return false;
+							}
+						});
+			    	}
+			    }
+			    
+				function sellerNxtI(){
+					$("#lable_display").html("Seller/Business Details");
+					$("#iama_li").hide();
+					$('#buyer_categs_section').toggle("slide");
+					$('#merchant_info_section').toggle("slide");
+				}
+				function sellerNxtII(){
+					$('#valerror').hide();
+					$("#iama_li").hide();
+					if($("#business_name").val() == ""){
+						$('#valerror').html("Please fill out seller/business name.");
+			    		$('#valerror').show();
+			    		return false;
+					}else if($("#contact_detail").val() == ""){
+						$('#valerror').html("Please fill out seller/business address.");
+			    		$('#valerror').show();
+			    		return false;
+					}else if($("#website_url").val() == ""){
+						$('#valerror').html("Please fill out website address.");
+			    		$('#valerror').show();
+			    		return false;
+					}else{
+						$("#lable_display").html("Seller Categories");
+						$('#merchant_info_section').toggle("slide");
+						$('#seller_categ_section').toggle("slide");
+					}
+				}
+				function sellerBackII(){
+					$("#lable_display").html("Basic Details");
+					$("#iama_li").show();
+					$('#merchant_info_section').toggle("slide");
+					$('#buyer_categs_section').toggle("slide");
+				}
+				function employerSubmit(){
+					$("html, body").animate({ scrollTop: 0 }, "slow");
+			    	if($("#business_name").val() == ""){
+						$('#valerror').html("Please fill out the company name.");
+			    		$('#valerror').show();
+			    		return false;
+					}else if($("#contact_detail").val() == ""){
+						$('#valerror').html("Please fill out the company address.");
+			    		$('#valerror').show();
+			    		return false;
+					}else if($("#website_url").val() == ""){
+						$('#valerror').html("Please fill out the website address.");
+			    		$('#valerror').show();
+			    		return false;
+					}else{
+			    		$('#valerror').hide();
+						$.ajax({
+							type : "POST",
+							url : "/my_deals/update_settings",
+							data : $("#mysettings_frm").serialize(),
+							dataType : "json",
+							success : function(b) {
+								if(b.success) {
+									document.getElementById('valerror').innerHTML = "<font color='green'>"+b.msg+"</font>";
+									$('#valerror').show();
+									//change this to job home once it is ready...
+									window.location = "/my_deals/sellerhome";
+								} else {
+									$('#valerror').html(b.msg);
+									$('#valerror').show();
+									return false;
+								}
+							},
+							error : function() {
+								$('#valerror').html("Error occured while updating preference, Please try again.");
+								$('#valerror').show();
+								return false;
+							}
+						});
+			    	}
+				}
+				function employerBackII(){
+					$("#lable_display").html("Basic Details");
+					$("#iama_li").show();
+					$('#merchant_info_section').toggle("slide");
+					$('#buyer_categs_section').toggle("slide");
+				}
+				function sellerSubmit(){
+					$("html, body").animate({ scrollTop: 0 }, "slow");
+			    	if($('.buysellChkBX:checked').size() < 1){
+			    		$('#valerror').html("Please select minimum 1 categories of item you wish to sell.");
+			    		$('#valerror').show();
+			    		return false;
+			    	}else{
+			    		$('#valerror').hide();
+						$.ajax({
+							type : "POST",
+							url : "/my_deals/update_settings",
+							data : $("#mysettings_frm").serialize(),
+							dataType : "json",
+							success : function(b) {
+								if(b.success) {
+									document.getElementById('valerror').innerHTML = "<font color='green'>"+b.msg+"</font>";
+									$('#valerror').show();
+									window.location = "/my_deals/sellerhome";
+								} else {
+									$('#valerror').html(b.msg);
+									$('#valerror').show();
+									return false;
+								}
+							},
+							error : function() {
+								$('#valerror').html("Error occured while updating preference, Please try again.");
+								$('#valerror').show();
+								return false;
+							}
+						});
+			    	}
+				}
+				function sellerBackIII(){
+					$("#lable_display").html("Seller/Business Details");
+					$('#seller_categ_section').toggle("slide");
+					$('#merchant_info_section').toggle("slide");
+				}
+			</script>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "My Settings"}%>
+			<%else -%>
+				<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "My Settings"}%>
+			<%end -%>
+			<div data-role="content">
+				<form action="" method="post" id="mysettings_frm" enctype="multipart/form-data">
+					<ul data-role="listview" data-inset="true">
+						<li id="valerror" style="color:#F00; display:none;"></li>
+						<li data-role="list-divider" id="lable_display">
+							Basic Details
+						</li>
+						<li id="iama_li" style="display: none;">
+							<fieldset data-role="controlgroup">
+								<label for="select-choice-category" style="color:grey">I am a:&nbsp;&nbsp;<strong><span id="iama"></span></strong></label>
+								<input type="hidden" name="user_type" id="user_type" value=""/>
+								<input type="hidden" name="auth_token" id="auth_token" value=""/> 
+							</fieldset>
+						</li>
+						<div id="buyer_categs_section" style="display: none;"></div>
+						<div id="merchant_info_section" style="display: none;"></div>
+						<div id="seller_categ_section" style="display: none;"></div>								
+					</ul>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

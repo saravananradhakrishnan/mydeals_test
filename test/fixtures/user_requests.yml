@@ -1,0 +1,19 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  user_id: 1
+  category_id: 1
+  price: MyString
+  location: MyString
+  zipcode: MyString
+  radius: MyString
+  end_date: 2011-04-29 11:56:26
+
+two:
+  user_id: 1
+  category_id: 1
+  price: MyString
+  location: MyString
+  zipcode: MyString
+  radius: MyString
+  end_date: 2011-04-29 11:56:26

@@ -1,0 +1,252 @@
+<html> 
+     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.countdown.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+    	<div data-role="page" id="register"> 
+        <script>
+            $(document).ready(function() {
+                var user = window.localStorage.getItem("username");
+                var n = user.split("@");
+                $("#user").html("Hi " + n[0]);
+            });
+        </script>
+        <script>
+            var q = new Array();
+            var d = new Array();
+            var arp;
+            var avbl_quan;
+            $(document).ready(function() {
+                var discount;
+                var id = getUrlVars()["id"];
+                function getUrlVars() {
+                    var vars = {};
+                    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                        vars[key] = value;
+                    });
+                    return vars;
+                }
+                var auth_token = localStorage.getItem("auth");
+                if(auth_token == null)
+		        		window.location.href = "login" 
+                $.ajax({
+                    url : "/my_deals/volume_deal_login",
+                    dataType : 'json',
+                    timeout : 30000,
+                    data : {
+                        auth_token : auth_token
+                    },
+                    success : function(json, status) { 
+                        $.each(json.Deals_Posted, function(i, item) { 
+                            if (id == this.deal.id) {
+                                document.getElementById("name").innerHTML = "<b style='font-size:14px'><font color='green'>" + this.deal.name + "</font></b>";
+	
+                                document.getElementById("arp").innerHTML = "<font color='red' style='font-size:12px'>Actual Retail Price (per item): Rs " + this.deal.base_price + "</font>";
+                                arp = this.deal.base_price;
+                                document.getElementById("qan").innerHTML = " Available Quantity : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + this.deal.max_qty;
+                                avbl_quan = this.deal.max_qty;
+                                document.getElementById("about_deal").innerHTML = this.deal.description;
+                                document.getElementById("tc").innerHTML = this.deal.terms_conditions;
+                                document.getElementById('deal_img').innerHTML += "<img src='" + this.deal.deal_img_root + "/system/deal_imgs/" + this.deal.id + "/thumb/" + this.deal.deal_img_file_name + "' height='100' width='100' style='margin-top: 1%;'>"
+                                document.getElementById("end_date").innerHTML += "<div id='count" + this.deal.id + "'> </div>";
+                                var dt = new Date();
+                                dt = new Date(this.deal.end_date);
+                                $("#count" + this.deal.id + "").countdown({
+                                    until : dt,
+                                    compact : true,
+                                    format : 'DHMS'
+                                });
+	
+                                var randomsource = '<tr><td>Quantity</td>'
+                                var randomsource1 = '<tr><td>Discount</td>'
+                                var c = 0;
+                                $.each(this.deal.quatative_discounts, function(x, item1) {
+	
+                                    if (c <= 5) {
+                                        randomsource += "<td><font color='blue'> <b>" + this.quantitative_discount.quatity + "</font></td>";
+                                        randomsource1 += "<td><font color='green'>" + this.quantitative_discount.discount + "%</b></td>";
+	
+                                        q[c] = this.quantitative_discount.quatity;
+                                        d[c] = this.quantitative_discount.discount;
+                                        c++;
+                                    }
+	
+                                });
+                                randomsource += '</tr>'
+                                randomsource1 += '</tr>'
+                                var finalsource = randomsource + "" + randomsource1;
+                                $("#final").html(finalsource);
+                            }
+                            var quan = document.getElementById('quan').value = q[0];
+                            var off = document.getElementById("a_disc").innerHTML = d[0] + "% OFF";
+                            var maxdisc = (arp * d[0]) / 100;
+                            var lp = arp - maxdisc;
+                            var lp = Math.round(lp);
+                            document.getElementById("lrp").innerHTML = "<b>Lowest Price (per item): Rs " + lp;
+                            discount = d[0];
+                            cal_disc(q[0]);
+                        });
+                        $("#progress_bar").hide();
+                        $("#main_content").show();
+                        
+                    }
+                });
+                $('#buy').click(function() {
+                    if (document.getElementById('quan').value > avbl_quan) {
+                        alert("Enterd quantity is more then available quantity");
+                        return false;
+                    }else if (document.getElementById('quan').value < 1) {
+                        alert("Quantity should be more than 0");
+                        return false;
+                    }
+                    var quan = document.getElementById('actual_quan').value;
+                    var total_price = document.getElementById('total').value;
+                    window.location.href="/my_deals/buy_now_deal?did="+id+"&qty="+quan;
+                });
+            });
+	
+            function cal_disc(a) {
+                var dis;
+                if (document.getElementById('quan').value > avbl_quan) {
+                    alert("Enterd quantity is more then available quantity");
+                    return false;
+                }
+                document.getElementById('actual_quan').value = document.getElementById('quan').value;
+                var aqt = parseInt(document.getElementById('actual_quan').value);
+	
+                $.each(q, function(i, v) {
+                    if (aqt >= v) {
+                        dis = d[i];
+                        return false;
+                    }
+                });
+                var dis_p = (arp * dis) / 100;
+                var p_item = arp - dis_p;
+                document.getElementById('p_item').value = Math.round(p_item);
+                var total = Math.round(p_item * aqt);
+                document.getElementById('total').value = total;
+            }
+        </script>
+        <script>
+            function isNumber(evt) {
+                evt = (evt) ? evt : window.event;
+                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                    return false;
+                }
+                return true;
+            }
+        </script>
+               	<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+					<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Volume Deal"}%>
+				<%else -%>
+					<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Volume Deal"}%>
+				<%end -%>
+            <div align="center" data-role="content">
+            	<div id="progress_bar"><img src='/images/load2.gif'></div>
+            	<div id="main_content" style="display: none;"> 
+                <form method="post" id="buy_now_deal" name="buy_now_deal">
+                    <ul data-role="listview" data-inset="true">
+
+                        <li id="name" style="text-align: center;">
+                            <br>
+                        </li>
+                        <li id="lrp" style="color:green;font-size: 12px;margin-top: -1%;text-align: center;">
+                            <br>
+                        </li>
+                        <li id="arp" style="margin-top: -1%;text-align: center;">
+                            <font color="red"> </font>
+                        </li>
+                        <li data-role="list-divider" style="font-size: 12px;">
+                        <center>
+                            BUY MORE QUANTITY, SAVE BIG!!!
+                        </center>
+                        </li>
+                        <div>
+                            <span id="deal_img"></span>
+                            <table id="final"></table>
+                        </div>
+                        <li data-role="list-divider" style="font-size: 12px;">
+                        <center>
+                            HUGE DISCOUNT
+                        </center>
+                        </li>
+                        <li>
+                            <fieldset data-role="controlgroup" id="qan" style="color: grey;font-size: 12px"></fieldset>
+                            <fieldset data-role="controlgroup">
+                                <table>
+                                    <tr>
+                                        <td style="color: grey;font-size: 12px">Select Quantity</td><td>
+                                            <INPUT TYPE="text" NAME="quan" style="width: 50px;padding: 2px 10px;border: 1px solid orange;" id="quan" onkeypress="return isNumber(event)" onKeyUp="cal_disc(this.value);">
+                                        </td>
+                                    </tr>
+                                </table>
+                                <span id="iname_error"></span>
+                            </fieldset>
+                        </li>
+
+                        <li data-role="list-divider" id="a_disc" style="font-size: 12px;"></li>
+                        <li>
+
+                            <fieldset data-role="controlgroup" style="color: grey;font-size: 12px;" >
+                                Quantity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Per Item(RS)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total
+
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <INPUT TYPE="text" NAME="c" id="actual_quan" readonly style="width: 30px;border:none !important;" >
+                                        </td><td></td><td></td><td></td><td style="color: grey">X</td><td></td><td>
+                                            <INPUT TYPE="text" NAME="c" id="p_item" readonly style="width: 50px;border:none !important;">
+                                        </td><td></td><td></td><td></td><td></td><td style="color: grey">=</td><td></td><td>
+                                            <INPUT TYPE="text" NAME="c" id="total" readonly style="width: 60px;border:none !important;">
+                                        </td>
+                                    </tr>
+                                </table>
+                                <span id="iname_error"></span>
+                            </fieldset>
+                        </li>
+                    </ul>
+                    <span id="end_date" style="float: left;margin-top: 0%;">Time left:</span>
+                    <a href="#" id="buy"><img src="/images/buy.png" style="margin-left: 40%"/></a>
+                </form>
+                <div data-role="collapsible-set" data-theme="b" data-content-theme="b">
+                    <div data-role="collapsible">
+                        <h2>ABOUT DEAL</h2>
+                        <ul data-role="listview" data-inset="true">
+                            <li id="about_deal" style="color: grey;font-weight: normal">
+                            </li>
+                        </ul>
+                    </div>
+                    <div data-role="collapsible">
+                        <h2>TERMS AND CONDITIONS</h2>
+                        <ul data-role="listview" data-inset="true">
+                            <li id="tc" style="color: grey;font-weight: normal">
+
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div> 
+        </div>  
+        <script>
+            $(document).ready(function(){
+                $("#actual_quan").removeClass("ui-shadow-inset");
+                $("#p_item").removeClass("ui-shadow-inset");
+                $("#total").removeClass("ui-shadow-inset");
+                
+            });
+        </script>
+    </body> 
+</html> 

@@ -1,0 +1,23 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: MyString
+  start_date: 2011-04-28 11:09:18
+  end_date: 2011-04-28 11:09:18
+  publish: false
+  sponsor: MyString
+  target_url: MyString
+  user_id: 1
+  max_impression: 1
+  imp_count: 1
+
+two:
+  name: MyString
+  start_date: 2011-04-28 11:09:18
+  end_date: 2011-04-28 11:09:18
+  publish: false
+  sponsor: MyString
+  target_url: MyString
+  user_id: 1
+  max_impression: 1
+  imp_count: 1

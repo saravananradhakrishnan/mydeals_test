@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" data-theme='b'>
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Deal(s) Purchased"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Deal(s) Purchased"}%>
+			<%end -%>
+            <div data-role="content">
+                <div data-role="collapsible-set" data-theme="b" data-content-theme="b">
+
+                    <div data-role="collapsible-false">
+                        <table id="deal" border="0" >
+                            <tr bgcolor="#CCCCCC" style="color:#FFFFFF">
+                                <td style="padding: 2px 5px 5px 2px">Deal Name </td>
+                                <td style="padding: 2px 5px 5px 2px">Price</td>
+                                <td style="padding: 2px 5px 5px 2px">Discount</td>
+                                <td style="padding: 2px 5px 5px 2px">Sent Vouchers</td>
+                                <td style="padding: 2px 5px 5px 2px">Action</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+            <script>
+	            $(document).ready(function(){
+	            var auth_token=localStorage.getItem("auth");
+	            if(auth_token == null)
+		        	window.location.href = "login" 
+	            var c=0;
+	            $.ajax({
+	                url: "/my_deals/buyer_deals_purchased",
+	                dataType: 'json',
+	                timeout: 5000,
+	                data:{auth_token:auth_token},
+	                success: function(json)
+	                {		  		
+	                    $.each(json.Deals_Purchased, function(i,item){
+	                        c=1;
+	                        document.getElementById("deal").innerHTML += "<tr bgcolor='#FFF' style='color:#000000;'><td>" +this.bought_deal.deal_name+ "</td><td>" + this.bought_deal.bought_price + "</td><td>" + this.bought_deal.discount +"</td><td>"+this.bought_deal.sent_vouchers+"</td><td><input id="+item.bought_deal.id+" type='button' value='Voucher(s)' class='inputClass'/></td></tr>";
+	                        $(document).ready(function() {
+	                            $('.inputClass').each(function() {
+	                                $(this).click(function(){
+	                                    var id = $(this).attr('id');
+	                                    alert(id);
+	                                    window.location.href = 'deal_voucher_list?id='+id;
+	                                });
+	                            });
+	                        });
+	                    });
+	                    if(c==0){
+	                        document.getElementById("deal").innerHTML += "<tr align='center' bgcolor='#FFF'  style='color:#000000; font-size:12px'><td>-</td><td>0</td><td>0</td><td>NA</td><td>NA</td></tr>";
+	                    }
+	                }  
+	            });
+	        });
+	    </script>
+        </div>
+    </body>
+</html>
+

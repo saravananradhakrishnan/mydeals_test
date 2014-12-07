@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+	 <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+	<body>
+		<div data-role="page" data-theme='b'>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Voucher Details"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Voucher Details"}%>
+			<%end -%>
+			<div data-role="content">
+				<div data-role="collapsible-set" data-theme="b" data-content-theme="b">
+					<form action="" method="post" id="frm2">
+						<div data-role="collapsible-false">
+							<table id="voucher">
+								<tr>
+									<td>Nmae:</td>
+									<td>
+									<input type="text" id="name" name="name">
+									</td>
+								</tr>
+								<tr>
+									<td>Email:</td>
+									<td>
+									<input type="text" id="email" name="email">
+									</td>
+								</tr>
+								<tr>
+									<td>Item Specification</td>
+									<td>Quan.
+									<input type="text" id="quan" name="quan">
+									</td>
+								</tr>
+								<tr>
+									<td>Status:</td>
+									<td>Pending</td>
+								</tr>
+								<tr>
+									<td>Action:</td>
+									<td id="atd"><a href="" id="post">Email Voucher</a></td>
+								</tr>
+							</table>
+						</div>
+					</form>
+				</div>
+			</div>
+			<script>
+			    $(document).ready(function() {
+			        var id = getUrlVars()["id"];
+			        function getUrlVars() {
+			            var vars = {};
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        $.ajax({
+			            url: "/my_deals/voucher_list",
+			            dataType: 'json',
+			            timeout: 5000,
+			            data: {id: id, auth_token: auth_token},
+			            success: function(json)
+			            {
+			                var shared_vocher = 0;
+			                $.each(json.vouchers.bought_deal.shared_vouchers, function(i, item) {
+			                    document.getElementById('voucher').innerHTML += "<tr><td>Name:</td><td>" + this.purchase_deal.name + "</td></tr><tr><td>Email:</td><td>" + this.purchase_deal.email + "</td></tr><tr><td>Item Specification:(Quantity)</td><td>" + this.purchase_deal.quantity + "</td></tr><tr><td>Status:</td><td>" + this.purchase_deal.status + "</td></tr><tr><td>Action:</td><td>Email Sent</td></tr><br><br>";
+			                    shared_vocher = shared_vocher + this.purchase_deal.quantity;
+			                });
+			                var remaining_voucher = json.vouchers.bought_deal.quantity - shared_vocher;
+			                document.getElementById('quan').value = remaining_voucher;
+			            }
+			        });
+			    });
+			</script>
+		</div>
+	</body>
+</html>

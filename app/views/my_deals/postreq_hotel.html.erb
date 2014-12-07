@@ -1,0 +1,412 @@
+<%
+category = params[:category]
+scategory = params[:scategory]
+type = params[:type]
+
+%>
+<html> 
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="post_req_hotel_booking" data-theme='b'>
+            <script>
+                function validateForm()
+                {
+                    var valueis = '';
+                    
+                    var x=document.forms["hotel_request_frm"]["cidate"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please enter check in date";
+                        valueis=elementform;
+                        document.getElementById('cidate').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+			$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["hotel_request_frm"]["codate"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please enter check out date";
+                        valueis=elementform;
+                        document.getElementById('codate').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+			$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["hotel_request_frm"]["city"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please Enter City";
+                        valueis=elementform;
+                        document.getElementById('city').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["hotel_request_frm"]["narea"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please Enter Near by area ";
+                        valueis=elementform;
+                        document.getElementById('narea').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+		  
+                    
+	 
+                    var x=document.forms["hotel_request_frm"]["nroom"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please select no of rooms required";
+                        valueis=elementform;
+                        document.getElementById('nroom').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+		  
+                    var x=document.forms["hotel_request_frm"]["adult"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please select no of adults ";
+                        valueis=elementform;
+                        document.getElementById('adult').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+
+                    var x=document.forms["hotel_request_frm"]["children"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please select no of chilren";
+                        valueis=elementform;
+                        document.getElementById('children').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }	  
+		  
+                    var x=document.forms["hotel_request_frm"]["bnight"].value;
+                    if (x==null || x=="")
+                    {
+                        elementform="Please enter budget";
+                        valueis=elementform;
+                        document.getElementById('bnight').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var termAccepted = $("#checkbox-8").is(":checked");
+                    if (!termAccepted){
+                        elementform="Please accept terms & conditions, before you proceed.";
+                        valueis=elementform;
+                        document.getElementById('checkbox-8').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                }
+            </script>
+            <script>
+                $(document).ready(function(){
+                	$("#valerror").html("<font color='green'>Connecting server...</font>");
+                    $("#valerror").show();
+                    $.ajax({
+                        url: "/my_deals/list_amenities",
+                        dataType: 'json',
+                        timeout: 5000,
+                        success: function(json)
+                        {
+                            $("#valerror").hide();
+                            $.each(json, function(i,item)
+                            {
+                                var val = item.amenity.name;
+                                var id=item.amenity.id;
+                                var mydiv = document.getElementById("mydiv");
+                                var checkbox = document.createElement("input"); 
+                                checkbox.setAttribute("type", "checkbox");
+                                checkbox.setAttribute("name", "amenity_ids[]");
+                                checkbox.setAttribute("value", id);
+                                checkbox.setAttribute("id",id);
+						
+						
+                                var newlabel = document.createElement("Label");
+                                newlabel.setAttribute("for",id);
+                                newlabel.innerHTML = val;
+                                newlabel.style.color = 'rgb(86, 71, 71)';
+												
+                                //checkbox.checked = true; 
+                                mydiv.appendChild(checkbox); 
+                                mydiv.appendChild(newlabel);
+                                var br = document.createElement('br');
+                                mydiv.appendChild(br);
+					 
+                            });
+                        }
+                    });
+               	});
+            </script>
+            <script>
+	                function calc_total_budget(){
+				    	var total_price = 0;
+				    	var checkindate = $("#cidate").val();
+						var checkoutdate = $("#codate").val();
+						var user_per_night_price = $("#bnight").val();
+						var no_of_rooms =  $("#nroom").val();
+						
+				    	if (checkindate != "" && checkoutdate != "" && user_per_night_price != ""){
+				    		var ddA = "01"
+							var	mmA = "01"
+							var	yyyyA = "2012"
+							var ddB = "01"
+							var	mmB = "01"
+							var	yyyyB = "2012"
+							if(checkindate == "")
+								checkindate = 0;
+							else{	
+								mmA = checkindate.substring(0,2)
+								ddA = checkindate.substring(3,5)
+								yyyyA = checkindate.substring(6,10)
+							}	
+							if(checkoutdate == "")
+								checkoutdate = 0;
+							else{	
+								mmB = checkoutdate.substring(0,2)
+								ddB = checkoutdate.substring(3,5)
+								yyyyB = checkoutdate.substring(6,10)
+							}		
+							if(user_per_night_price == "")
+								user_per_night_price = 0;
+								
+							var start_dt = yyyyA+"-"+mmA+"-"+ddA;
+							var and_dt = yyyyB+"-"+mmB+"-"+ddB;
+							var start = new Date(start_dt);
+							var end = new Date(and_dt);
+							var diff = new Date(end - start);
+							var totaldays = diff/1000/60/60/24;
+							if (totaldays == 0)
+								totaldays = 1
+							var totalBudget = parseFloat(user_per_night_price) * totaldays * parseInt(no_of_rooms, 10);
+				    		$("#total_budget_para").html("<strong>Total Budget: RS. &nbsp;"+totalBudget+"</strong>");
+				    		$("#total_budget_para").show();
+				    		$("#total_budget_cost").val(totalBudget);
+				    	}else{
+				    		$("#total_budget_para").html("");
+				    		$("#total_budget_para").hide();
+				    		$("#total_budget_cost").val(0);
+				    	}
+				    }
+					function post_form(){
+						var auth_token = localStorage.getItem("auth");
+						$("#auth_token").val(auth_token);
+						if(validateForm() == false){
+							return false;
+						}else{
+							var a = '<img src="/images/load2.gif">';
+							document.getElementById('valerror').innerHTML = a;
+				            document.getElementById("valerror").style.display="block";
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							$.ajax({
+								type : "POST",
+								url : "/my_deals/hotel_post",
+								data : $("#hotel_request_frm").serialize(),
+								dataType : "json",
+								success : function(b) {
+									if(b.success) {
+										document.getElementById('valerror').innerHTML = "<font color='green'>"+b.msg+"</font>";
+										window.location = "/my_deals/buyer_request_list";
+									} else {
+										if(b.msg == "redirect"){
+											location.href="login"
+										}else{
+											document.getElementById('valerror').innerHTML = b.msg;
+											$("html, body").animate({ scrollTop: 0 }, "slow");
+											return false;
+										}
+									}
+								},
+								error : function() {
+									document.getElementById('valerror').innerHTML = b.msg;
+									$("html, body").animate({ scrollTop: 0 }, "slow");
+									return false;
+								}
+							});
+							
+						}
+					}
+                   
+            </script>
+            <script>
+                function isNumber(evt) {
+                    evt = (evt) ? evt : window.event;
+                    var charCode = (evt.which) ? evt.which : evt.keyCode;
+                    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                        return false;
+                    }
+                    return true;
+                }
+            </script>
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Post a Buy Request for #{type} Hotel"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Bargain for #{type} Hotel"}%>
+			<%end -%>
+            <div align="center" data-role="content"> 
+                <form action="" method="post" id="hotel_request_frm" name="hotel_request_frm"> 
+                    <ul data-role="listview" data-inset="true"> 
+                        <li id="valerror" style="color:#F00; display:none;"></li>
+                        <li> 
+                            
+                            <fieldset data-role="controlgroup">
+                                <input type="text" id="cidate" name="cidate" placeholder="Check-In Date*" value=""/>
+                                <span id="datepicker_error"></span>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" id="codate" name="codate" placeholder="Check-Out Date*" value=""/>
+                                <span id="datepicker_error"></span>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" name="city" id="city" placeholder="City*"> 
+                                <span id="email_error"></span> 
+                            </fieldset>
+                            <fieldset data-role="controlgroup">			
+                                <input type="text" name="narea" id="narea" placeholder="Near by Area Ex.M.G.Road*">
+                                <span id="narea_error"></span>
+                               </fieldset>         
+                            
+                            <fieldset data-role="controlgroup">
+                                <label for="select-choice-category" style="color:grey"><strong>Number of Room(s):</strong></label>            
+                                <select name="nroom" id="nroom" onchange="calc_total_budget();">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <label for="select-choice-category" style="color:grey"><strong>Adult(s):</strong></label>            
+                                <select name="adult" id="adult">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <label for="select-choice-category" style="color:grey"><strong>Children(s):</strong></label>  
+                                <select name="children" id="children">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                                (Below the age of 18)
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" name="bnight" id="bnight" placeholder="Budget Per Night (RS.)" onchange="calc_total_budget();" onkeypress="return isNumber(event)"> 
+                                <span id="bnight_error"></span>
+                                (Please give reasonable budget.)
+                            </fieldset>
+                            <fieldset data-role="controlgroup" id="total_budget_para" style="display: none;margin-left: 0.2%;"></fieldset>
+                            <fieldset data-role="controlgroup">  
+                                <input type="hidden" name="dfactor" disabled id="dfactor" value="Lowest Price"> 
+                                <span id="dfactor_error"></span> 
+                            </fieldset>
+                            <fieldset data-role="controlgroup" >
+                                <legend><strong style="color:grey">Amenities:</strong></legend>
+                                <div id="mydiv">
+                                </div>
+                            </fieldset>
+                            <div data-role="fieldcontain">
+							 	<fieldset data-role="controlgroup">
+									<input type="checkbox" name="checkbox-8" id="checkbox-8" class="custom" data-role="none" data-theme="b"/>
+                                                                        <label for="checkbox-8">By checking this box, you are agreeing to the </label><a href="/my_deals/cancellation"><font color="#2A3FFF"><u>Cancellation & Booking Policy</u></font></a>
+							    </fieldset>
+							</div>
+                            <div class="ui-grid-a">
+                                <div class="ui-block-a">
+                                    <a href="#"  id="post" onclick="post_form();"><img src="/images/post.png" style="width: 90%;"></a>
+                                </div>
+                                <div class="ui-block-b">
+                                    <a href="/my_deals/buyerhome" id="cancel" rel="external"><img src="/images/cancel.png" style="width: 90%;"></a>
+                                </div>
+                            </div>
+                    </ul>
+                    <input type="hidden" name="item_info" id="item_info" value="<%=type%>"/>
+		            <input type="hidden" name="category" id="category" value="<%=category%>"/>
+		            <input type="hidden" name="scategory" id="scategory" value="<%=scategory%>"/>
+		            <input type="hidden" name="auth_token" id="auth_token" value=""/>
+		            <input type="hidden" name="total_budget_cost" id="total_budget_cost" value=""/>
+                </form> 
+            </div>
+            <script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+            <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css"/>
+            <script>
+                $(document).ready(function() {
+                    $("#cidate").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                        onSelect: function(selected) {
+                            $("#codate").datepicker("option","minDate", selected);
+                            calc_total_budget();
+                        }
+                    });
+                    $("#codate").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                        onSelect: function(selected) {
+                            $("#cidate").datepicker("option","maxDate", selected);
+                            calc_total_budget();
+                        }
+                    });
+	
+                });
+            </script>
+            <script type="text/javascript">
+                function initialize() {
+                    var options = {
+                        types: ['(cities)'],
+                        componentRestrictions: {country: "IN"}
+                    };
+
+                    var input = document.getElementById('city');
+                    var autocomplete = new google.maps.places.Autocomplete(input, options); // To get the city name
+                }
+                google.maps.event.addDomListener(window, 'load', initialize);
+            </script>
+        </div>
+    </body>
+</html> 

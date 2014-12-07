@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+<body>
+	<div data-role="page" id="register">    
+	<script>
+	    $(document).ready(function() {
+	        var mid = getUrlVars()["did"];
+	        var quan = getUrlVars()["qty"];
+	        var red_amt = -1;
+	        $.ajax({
+	            url: "/my_deals/get_deal_cost",
+	            dataType: 'json',
+	            async: false,
+	            timeout: 15000,
+	            data: {auth_token: auth_token,mid:mid, qty:quan},
+	            success: function(json) {
+	               if(json.success){	
+	               	red_amt = json.total_cost
+	               	//alert("Total Cost: "+ red_amt);
+	               }else{
+	               	red_amt = -1;
+	               } 
+	            },
+				error : function() {
+					red_amt = -1;
+				}
+	        });
+	        if (red_amt == -1)
+	            window.location.href = "buyer_request_list"
+	        
+	        red_amt = Math.round(red_amt);
+	        $("#total_cost").text(red_amt);
+	        $("#act_amount").val(red_amt)
+	        $("#amount").val(red_amt)
+	        var auth_token = localStorage.getItem("auth");
+	        if (auth_token == null)
+	            window.location.href = "login"
+	        var email = localStorage.getItem("username");
+	        $("#progress_bar").html("<img src='/images/load2.gif'>");
+	        function getUrlVars() {
+	            var vars = {};
+	            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+	                vars[key] = value;
+	            });
+	            return vars;
+	        }
+	        $("#is_redeem").change(function() {
+	            if ($('#is_redeem').is(':checked')) {
+	                var deal_amt = parseFloat($("#act_amount").val());
+	                var redeem_amt = parseFloat($("#avail_redeem_amt").val());
+	                var remaining = deal_amt - redeem_amt;
+	                $("input[name=amount]").val(remaining);
+	                if (redeem_amt > deal_amt) {
+	                    $("#redeemed_amt").val(deal_amt);
+	                    $("#total_cost").text("0.0");
+	                }
+	                else {
+	                    $("#redeemed_amt").val(redeem_amt);
+	                    $("#total_cost").text(remaining);
+	                }
+	            } else {
+	                $("input[name=amount]").val($("input[name=act_amount]").val());
+	                $("#redeemed_amt").val(0);
+	                $("#total_cost").text($("input[name=act_amount]").val());
+	            }
+	        });
+	        $.ajax({
+	            url: "/my_deals/user_info",
+	            dataType: 'json',
+	            timeout: 5000,
+	            data: {auth_token: auth_token},
+	            success: function(json) {
+	                $("#user_name").text(json.user.user.display_name);
+	                $("#user_payout").text(json.user.user.ad_credit_payout);
+	                $("#avail_redeem_amt").val(json.user.user.ad_credit_payout);
+	                $("#email").val(json.user.user.email);
+	                if (parseFloat(json.user.user.ad_credit_payout) > 0) {
+	                    $("#msg_bar").show();
+	                    $("#redeem_chbx").show();
+	                }
+	                document.getElementById("bname").value = json.user.user.fname + " " + json.user.user.lname;
+	                document.getElementById("bcity").value = json.address.address.city;
+	                document.getElementById("bstate").value = json.address.address.state;
+	                document.getElementById("bzip").value = json.address.address.zip;
+	                document.getElementById("bcontact").value = json.address.address.mobile;
+	                document.getElementById("bb_addr").value = json.address.address.billing_addr;
+	                document.getElementById("bs_addr").value = json.address.address.shipping_addr;
+	                $("#progress_bar").hide();
+	            }
+	        });
+	
+	
+	
+	        document.getElementById('tc').innerHTML += red_amt;
+	        $('#create').click(function() {
+	            $("#progress_bar").html("<img src='/images/load2.gif'>");
+	            $("#progress_bar").show();
+	            var name = $('#bname').val();
+	            var b_addr = $('#bb_addr').val();
+	            var s_addr = $('#bs_addr').val();
+	            var city = $('#bcity').val();
+	            var state = $('#bstate').val();
+	            var zip = $('#bzip').val();
+	            var phone = $('#bcontact').val();
+	            var amount_to_redeem = $('#redeemed_amt').val();
+	            $.ajax({
+	                url: "/my_deals/prepare_buy",
+	                dataType: 'json'
+	                , timeout: 15000,
+	                data: {mid: mid,
+	                    name: name,
+	                    amt: amount_to_redeem,
+	                    qty: quan,
+	                    b_addr: b_addr,
+	                    s_addr: s_addr,
+	                    city: city,
+	                    state: state,
+	                    zip: zip,
+	                    auth_token: auth_token
+	                }, success: function(json) {
+	                    //alert(json.purchase_id);
+	                    if (json.success) {
+	                        if (json.online_pay) {
+	                            var url = "http://api.mydeals247.com/buyers/ebs_resonse/" + json.purchase_id + "/return.json?DR={DR}"
+	                            document.getElementById('name').value = name;
+	                            document.getElementById('return_url').value = url;
+	                            document.getElementById('reference_no').value = json.reference_no;
+	                            document.getElementById('address').value = b_addr;
+	                            document.getElementById('phone').value = phone;
+	                            document.getElementById('city').value = city;
+	                            document.getElementById('postal_code').value = zip;
+	                            tForm = document.getElementsByName("frmTransaction")[0];
+	                            tForm.action = "https://secure.ebs.in/pg/ma/sale/pay/";
+	                            tForm.submit();
+	
+	                        }else {
+		                        $.ajax({
+		                            url: "/my_deals/buy_deal_ad_credit/",
+		                            dataType: 'json',
+		                            timeout: 15000,
+		                            data: {auth_token: auth_token, purchase_id: json.purchase_id},
+		                            success: function(ajson) {
+		                                alert("Thank you for purchasing deals at MyDeals247.com. All the details are sent to your email.")
+		                            }
+		                        });
+	                    	}
+	                    } 
+	                }
+	            });
+	        });
+	    });
+	</script>
+
+  <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+	<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Buy Deal"}%>
+  <%else -%>
+	<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Buy Deal"}%>
+  <%end -%>
+  <div align="center" data-role="content">
+  	<form>
+  	  <ul data-role="listview" data-inset="true">
+       	<li class="ui-li ui-li-static ui-body-c ui-btn-up-c" style="text-align: center" id="progress_bar">
+	    </li>
+       	<li class="ui-li ui-li-static ui-body-c ui-btn-up-c" style="text-align: center">
+       		<font color="black">
+	       		<b>Total cost for this deal: &nbsp; RS. &nbsp;<span id="total_cost"></span></b>
+	       	</font>
+	    </li>
+       <li class="ui-li ui-li-static ui-body-c ui-btn-up-c ui-first-child" style="display: none;" id="msg_bar">
+	       	<font color="green">
+	       		<b>Congratulations! <span id="user_name"></span></b>, You are eligible to redeem ad balance <span><b>RS. <span id="user_payout"></span></b></span> with this purchase.
+	       	</font>
+       	</li>
+        <li>
+          <fieldset id="redeem_chbx" data-role="controlgroup" style="display: none;">
+            <label for="is_redeem" style="color:black;">Yes, I would like to redeem.</label>
+            <input type="checkbox" name="is_redeem" id="is_redeem" class="custom" />
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            Total cost:
+            <lable id="tc">Rs. </lable>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input name="bname" id="bname" type="text"  placeholder="Name">
+            <span id="bitme_error"></span>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input name="billing_address" id="bb_addr" type="text" placeholder="Bill Address"/>
+            <span id="email_error"></span>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input name="bship_address" id="bs_addr" type="text" placeholder="Ship Address"/>
+            <span id="mobile_error"></span>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input name="bcity" id="bcity" type="text" placeholder="City">
+            <span id="country_error"></span>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input name="bstate" id="bstate" type="text" placeholder="State/Province">
+            <span id="naria_error"></span>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input name="bpostal_code" id="bzip" type="text" placeholder="ZIP/Postal Code">
+            <span id="naria_error"></span>
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <input type="text" name="bphone" id="bcontact" placeholder="Phone No.">
+          </fieldset>
+          <!------------- EBS parameters ------------------->
+          <!-- <div class="ui-grid-a">
+            <div class="ui-block-a"> <a href="#" data-theme="c" data-role="button" id="create" style="background: none repeat scroll 0 0 #008000;color: white;"> > Proceed To Payment </a> </div>
+            <div class="ui-block-b"> <a href="#" data-role="button" data-theme="b" rel="external">Back</a> </div>
+          </div> -->
+          <div class="ui-grid-a">
+			<div class="ui-block-a">
+				<a href="#"  id="create" ><img src="/images/proceed.png" style="width: 100%;"></a>
+			</div>
+			<div class="ui-block-b">
+				<a href="/my_deals/volume_deals_list" id="cancel" rel="external"><img src="/images/back.png" style="width: 98%;margin-left: 2%;"></a>
+			</div>
+		</div>
+        </li>
+      </ul>
+    </form>
+    <form  method="post" name="frmTransaction" id="frmTransaction">
+    	<input id="redeemed_amt" name="redeemed_amt" size="30" maxlength="20" type="hidden" class="textFld" value="0"/>
+      	<input id="act_amount" name="act_amount" type="hidden" value=""/>
+  		<input id="avail_redeem_amt" name="avail_redeem_amt" type="hidden" value=""/>
+  		<input name="account_id" type="hidden" value="7715">
+	  	<input name="mode" type="hidden" value="LIVE">
+		<input name="description" type="hidden" value="Deal Purchase on MyDeal247"/>
+		
+		<input id="return_url" name="return_url" type="hidden" value="" />
+		<input id="amount" name="amount" type="hidden" value=""/>
+		<input id="reference_no" name="reference_no" type="hidden" value="">
+		<input id="email" name="email" type="hidden" value=""/>
+		<input id="name" name="name" type="hidden" value=""/>
+		<input name="city" id="city" type="hidden" value=""/>
+		<input name="phone" id="phone" type="hidden" value=""/>
+		<input name="postal_code" id="postal_code" type="hidden" value=""/>
+		<input name="address" id="address" type="hidden" value=""/>
+		<input id="country" name="country" size="30" type="hidden"  value="IN"/>
+    </form>
+  </div>
+</div>
+</body>
+</html>

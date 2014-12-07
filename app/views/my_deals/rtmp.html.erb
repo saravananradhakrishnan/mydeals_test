@@ -1,0 +1,406 @@
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.countdown.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" data-theme='b'>
+        	<script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+		        <script>
+		        $(document).ready(function()
+		        {
+		            <%if !params[:token].blank? -%>
+		              var token = '<%=params[:token].strip%>';
+		              token = token.trim();
+		              localStorage.setItem("auth", token);
+		            <%end -%>
+                    var auth = localStorage.getItem("auth");
+		            $.ajax({
+		                url: "/my_deals/user_info",
+		                dataType: 'json',
+		                timeout: 20000,
+		                data:{auth_token:auth},
+		                success: function(json, status)
+		                {
+		                    var user=json.user.user.fname;
+		                    $("#user").html("Hi "+user);
+		                    <%if !params[:token].blank? -%>
+    		                    localStorage.setItem("username", json.user.user.email);
+                                localStorage.setItem("usertyp", json.user.user.sub_type);
+                                localStorage.setItem("userid", json.user.user.id);
+                            <%end -%>
+                        }	  
+		            });
+		  
+		        });
+		      </script>
+		   <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Bargain Online"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Bargain Online"}%>
+			<%end -%>
+            <div data-role="content">
+            	
+                <div data-role="collapsible-set" data-theme="b" data-content-theme="b">
+                	
+                    <div data-role="collapsible" data-collapsed="<%if params[:mode] == "mobile"%>false<%else -%>true<%end -%>" id="mobile_collapsible">
+                        <h3><img style="float: left;position: absolute;right: 70px;" src="/images/mobile_home.png"/>Mobiles</h3>
+                        <div class='inset'>
+                            <ul data-role="listview" id="mobile_categories">
+                            </ul>
+                        </div>
+                    </div>
+                    <div data-role="collapsible" data-collapsed="<%if params[:mode] == "hotel"%>false<%else -%>true<%end -%>" id="hotel_collapsible">
+                        <h3><img style="float: left;position: absolute;right: 60px;" src="/images/hotel_home.png"/>Hotels</h3>
+                        <div class='inset'>
+                            <ul data-role="listview" id="hotel_categories">
+                            </ul>
+                        </div>
+                    </div>
+                    <div data-role="collapsible" data-collapsed="<%if params[:mode] == "book"%>false<%else -%>true<%end -%>">
+                        <h3><img style="float: left;position: absolute;right: 58px;" src="/images/books_home.png"/>Books</h3>
+                        <div class='inset'>
+                                <ul data-role="listview" data-inset="true">
+                                    <li data-role="fieldcontain">
+                                        <fieldset data-role="controlgroup">
+                                            <label for="name2b">Search on</label>
+                                            <select name="book_search_on" id="field_value">
+                                                <option value="title">Title</option>
+                                                <option value="author">Author</option>
+                                                <option value="publisher">Publisher</option>
+                                                <option value="isbn">ISBN Code</option>
+                                                <option value="subject">Subject</option>
+                                            </select>
+                                            <label for="name2b">Search Text</label>
+                                            <input type="text" name="search_book" id="search_book" value="" data-clear-btn="true" placeholder="Search keyword...">
+                                        </fieldset>
+                                        <div class="ui-grid-a">
+			                                    <a href="#"  data-theme="b" data-role="button" style="background: #68AFBD;" onclick="changeBookURL();">Search</a>
+			                            </div>
+                                    </li>
+                                </ul>
+                        </div>
+                    </div>
+                    <div data-role="collapsible" id="cabs_collapsible" data-collapsed="<%if params[:mode] == "cab"%>false<%else -%>true<%end -%>">
+                        <h3><img style="float: left;position: absolute;right: 50px;" src="/images/cab_home.png"/>Cabs</h3>
+                        <div class='inset'>
+                            <ul data-role="listview" id="cab_categories">
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div data-role="collapsible" id="restate_collapsible" data-collapsed="<%if params[:mode] == "realestate"%>false<%else -%>true<%end -%>">
+                        <h3><img style="float: left;position: absolute;right: 95px;" src="/images/realestate_home.png"/>Realestate</h3>
+                        <div class='inset'>
+                            <ul data-role="listview" id="realestate_categories">
+
+                            </ul>
+                        </div>
+                    </div> 
+                    <div data-role="collapsible">
+                        <h3>Others</h3>
+                        <div class='inset'>
+                            <ul data-role="listview" data-inset="true">
+                                <li data-role="fieldcontain">
+                                    <fieldset data-role="controlgroup">
+                                        <label for="srchBar_category">Select a Category</label>
+                                        <select name="srchBar_category" id="srchBar_category">
+                                            <option>Select a Category</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <label for="srchBar_subcategory">Select a Sub-Category</label>
+                                        <select name="srchBar_subcategory" id="srchBar_subcategory">
+                                           <option>Select a Sub-Category</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <input type="text" name="searh_catalog" id="searh_catalog" value="" data-clear-btn="true" placeholder="Search keyword...">
+                                    </fieldset>
+                                    <div data-theme="b" style="background: #68AFBD;">
+		                                <a href="#"  data-theme="b" data-role="button" onclick="changeURL();">Search</a>
+		                            </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div data-role="collapsible">
+                        <h3>Bulk Order</h3>
+                        <div class='inset'>
+                            <ul data-role="listview" data-inset="true">
+                                <li data-role="fieldcontain">
+                                    <fieldset data-role="controlgroup">
+                                        <label for="srchBar_category">Select a Category</label>
+                                        <select name="B2BsrchBar_category" id="B2BsrchBar_category">
+                                            <option>Select a Category</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <label for="srchBar_subcategory">Select a Sub-Category</label>
+                                        <select name="B2BsrchBar_subcategory" id="B2BsrchBar_subcategory">
+                                           <option>Select a Sub-Category</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <input type="text" name="B2Bsearh_catalog" id="B2Bsearh_catalog" value="" data-clear-btn="true" placeholder="Search keyword...">
+                                    </fieldset>
+                                    <div data-theme="b" style="background: #E7A382;">
+                                        <a href="#"  data-theme="b" data-role="button" onclick="changeURLB2B();">Search</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+        <script type="text/javascript">
+            function changeURL(){
+            	
+                var userInput = document.getElementById('srchBar_category').value;
+                var userInput2 = document.getElementById('srchBar_subcategory').value;
+                if(userInput =='Select a Category' || userInput2 == 'Select a Sub-Category'){
+                    alert('Please select your category');
+                    return false;
+                }
+                var userInput3 = $('#searh_catalog').val();
+                window.location.href = "catalog?cat_type=B2C&category=" + userInput+'&scategory='+userInput2+'&keyword='+userInput3;
+            }
+            function changeURLB2B(){
+                var userInput = document.getElementById('B2BsrchBar_category').value;
+                var userInput2 = document.getElementById('B2BsrchBar_subcategory').value;
+                var userInput3 = $('#B2Bsearh_catalog').val();
+                window.location.href = "catalog?cat_type=B2B&category=" + userInput+'&scategory='+userInput2+'&keyword='+userInput3;
+            }
+        </script>
+        <script type="text/javascript">
+            function changeBookURL(){
+                var field = document.getElementById('field_value').value;
+                var Keyword = document.getElementById('search_book').value;
+                if(Keyword ==''){
+                    alert('Please enter a keyword to search for Books.');
+                    return false;
+                }
+                window.location.href = "book?parent_id=51&field="+field+'&keyword='+Keyword;
+            }
+        </script>
+        <script>
+	        $('#mobile_collapsible').bind('expand', function () {
+	        	if($('#mobile_categories').html().length < 100){
+	            	$('#mobile_categories').html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><img src="/images/load2.gif"></li>');
+	                $.ajax({
+	                    url: "/my_deals/buyer_subcat",
+	                    dataType: 'json',
+	                    timeout: 5000,
+	                    data:{category:86},
+	                    success: function(json)
+	                    {
+	                        var random_source = '<li></li>';
+	                        $.each(json, function(i,item)
+	                        {
+	                            if(item.buysell_category.shown_to_user != "0"){
+		                            var val = item.buysell_category.name;
+		                            var id  = item.buysell_category.id;
+		                            random_source += '<li style="background: #E2E9FF;"><a style="color: #9E2C00;" class="ui-li ui-li-static ui-btn-up-b ui-first-child" href="catalog?category=86&scategory='+id+'&keyword=">'+val+'</a></li>'
+	                           	}
+	                        });
+	                        $('#mobile_categories').html(random_source);
+	                    }
+	                });
+               }
+			});
+        </script>
+        <script>
+            $('#hotel_collapsible').bind('expand', function () {
+            	if($('#hotel_categories').html().length < 100){
+	            	$('#hotel_categories').html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><img src="/images/load2.gif"></li>');
+	                $.ajax({
+	                    url: "/my_deals/buyer_subcat",
+	                    dataType: 'json',
+	                    timeout: 5000,
+	                    data:{category:95},
+	                    success: function(json, status)
+	                    {
+	                        var random_source = '<li></li>';
+	                        $.each(json, function(i,item)
+	                        {
+	                            if(item.buysell_category.shown_to_user != "0"){
+		                            var val = item.buysell_category.name;
+		                            var id  = item.buysell_category.id;
+		                            random_source += '<li style="background: #E2E9FF;"><a style="color: #9E2C00;" class="ui-li ui-li-static ui-btn-up-b ui-first-child" href="postreq_hotel?category=95&scategory='+id+'&type='+val+'" rel="external">'+val+'</a></li>'
+	                            }
+	
+	                        });
+	                        $('#hotel_categories').html(random_source);
+	                    }
+	                });
+               }
+            });
+        </script>
+        <script>
+            $('#cabs_collapsible').bind('expand', function () {
+            	if($('#cab_categories').html().length < 100){
+	            	$('#cab_categories').html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><img src="/images/load2.gif"></li>');
+	                $.ajax({
+	                    url: "/my_deals/buyer_subcat",
+	                    dataType: 'json',
+	                    timeout: 5000,
+	                    data:{category:1328},
+	                    success: function(json, status)
+	                    {
+	                        var random_source = '<li></li>';
+	                        $.each(json, function(i,item)
+	                        {
+	                            if(item.buysell_category.shown_to_user != "0"){
+		                            var val = item.buysell_category.name;
+		                            var id  = item.buysell_category.id;
+		                            if(id=="1330"){
+		                                random_source += '<li style="background: #E2E9FF;"><a style="color: #9E2C00;"  class="ui-li ui-li-static ui-btn-up-b ui-first-child" href="postreq_cab_pickup_drop?category=1328&scategory='+id+'&type='+val+'" rel="external">'+val+'</a></li>'
+		                            }
+		                            else {
+		                                random_source += '<li style="background: #E2E9FF;"><a style="color: #9E2C00;"  class="ui-li ui-li-static ui-btn-up-b ui-first-child" href="postreq_cab_tour?category=1328&scategory='+id+'&type='+val+'" rel="external">'+val+'</a></li>'
+		                           
+		                            }
+	                            }
+	                        });
+	                        $('#cab_categories').html(random_source);
+	                    }
+	                });
+               }
+            });
+        </script>
+        <script>
+            $('#restate_collapsible').bind('expand', function () {
+            	if($('#realestate_categories').html().length < 100){
+	            	$('#realestate_categories').html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child"><img src="/images/load2.gif"></li>');
+	                $.ajax({
+	                    url: "/my_deals/buyer_subcat",
+	                    dataType: 'json',
+	                    timeout: 5000,
+	                    data:{category:102},
+	                    success: function(json, status)
+	                    {
+	                        var random_source = '<li></li>';
+	                        $.each(json, function(i,item)
+	                        {
+	                            if(item.buysell_category.shown_to_user != "0"){
+		                            var val = item.buysell_category.name;
+		                            var id  = item.buysell_category.id;
+		                            random_source += '<li style="background: #E2E9FF;"><a style="color: #9E2C00;"  class="ui-li ui-li-static ui-btn-up-b ui-first-child" href="postreq_real_estate?category=102&scategory='+id+'&type='+val+'" rel="external">'+val+'</a></li>'
+	                            }
+	
+	                        });
+	                        $('#realestate_categories').html(random_source);
+	                    }
+	                });
+               }
+            });
+        </script>
+        <script>
+	        $.ajax({
+	            url: "/my_deals/buysell_cat",
+	            dataType: 'json',
+	            timeout: 5000,
+	            success: function(json)
+	            {
+	                $.each(json, function(i,item)
+	                {
+	                    var val = item.buysell_category.name;
+	                    var id=item.buysell_category.id;
+	                    var opt = document.createElement("option");
+	                    opt.text = val;
+	                    opt.value = id;
+	                    document.getElementById("srchBar_category").options.add(opt);
+	                });
+	            }
+	        });
+	         $.ajax({
+                url: "/my_deals/b2bbuysell_cat",
+                dataType: 'json',
+                timeout: 5000,
+                success: function(json)
+                {
+                    $.each(json, function(i,item)
+                    {
+                        var val = item.buysell_category.name;
+                        var id=item.buysell_category.id;
+                        var opt = document.createElement("option");
+                        opt.text = val;
+                        opt.value = id;
+                        document.getElementById("B2BsrchBar_category").options.add(opt);
+                    });
+                }
+            });
+	        $("#srchBar_category").change(function(){
+	            var category = $('#srchBar_category').val();
+	            if(category == 51){
+	                window.location="postreq_book";
+	            }else if(category == 95){
+	                window.location="postreq_hotel";
+	            }else if(category == 102){
+	                window.location="postreq_real_estate";
+	            }
+	            else{
+	                $('#srchBar_subcategory').html("<option>Select a Sub-Category</option>");
+	                $.ajax({
+	                    url: "/my_deals/buyer_subcat",
+	                    dataType: 'json',
+	                    timeout: 5000,
+	                    data:{category:category},
+	                    success: function(json)
+	                    {
+	                        $.each(json, function(i,item)
+	                        {
+	                            if(item.buysell_category.shown_to_user != "0"){
+	                                var val = item.buysell_category.name;
+	                                var id=item.buysell_category.id;
+	                                var opt = document.createElement("option");
+	                                opt.text = val;
+	                                opt.value = id;
+	                            }
+	           
+	                            document.getElementById("srchBar_subcategory").options.add(opt);
+	                        });
+	                    }
+	                });
+	            }
+	        });
+	        $("#B2BsrchBar_category").change(function(){
+                var category = $('#B2BsrchBar_category').val();
+                $('#B2BsrchBar_subcategory').html("<option>Select a Sub-Category</option>");
+                $.ajax({
+                    url: "/my_deals/buyer_subcat",
+                    dataType: 'json',
+                    timeout: 5000,
+                    data:{category:category},
+                    success: function(json)
+                    {
+                        $.each(json, function(i,item)
+                        {
+                            if(item.buysell_category.shown_to_user != "0"){
+                                var val = item.buysell_category.name;
+                                var id=item.buysell_category.id;
+                                var opt = document.createElement("option");
+                                opt.text = val;
+                                opt.value = id;
+                            }
+           
+                            document.getElementById("B2BsrchBar_subcategory").options.add(opt);
+                        });
+                    }
+                });
+            });
+        </script>
+        </div>
+    </body>
+</html>
+

@@ -1,0 +1,126 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+		<style>
+    		
+			table {
+			overflow:hidden;
+			border:1px solid #d3d3d3;
+			background:#fefefe;
+			width:100%;
+			margin:5% auto 0;
+			-moz-border-radius:5px; /* FF1+ */
+			-webkit-border-radius:5px; /* Saf3-4 */
+			border-radius:5px;
+			-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+			-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+		}
+		
+	th, td {padding:5px 10px 5px 10px; text-align:center; }
+	
+	th {padding-top:22px; text-shadow: 1px 1px 1px #fff; background:#e8eaeb;}
+	
+	td {border: none;}
+	
+	tr.odd-row td {background:#f6f6f6;}
+	
+	td.first, th.first {text-align:left}
+	
+	td.last {border-right:none;}
+	
+	/*
+	Background gradients are completely unnecessary but a neat effect.
+	*/
+	
+	td {
+		background: -moz-linear-gradient(100% 25% 90deg, #fefefe, #f9f9f9);
+		background: -webkit-gradient(linear, 0% 0%, 0% 5%, from(#D1D1D1), to(rgba(255,255,255,0.2)));
+	}
+	
+	tr.odd-row td {
+		background: -moz-linear-gradient(100% 25% 90deg, #f6f6f6, #f1f1f1);
+		background: -webkit-gradient(linear, 0% 0%, 0% 25%, from(#8A0B00), to(#8A0B00));
+	}
+	
+	th {
+		background: -moz-linear-gradient(100% 20% 90deg, #e8eaeb, #ededed);
+		background: -webkit-gradient(linear, 0% 0%, 0% 20%, from(#ededed), to(#e8eaeb));
+	}
+	
+
+    	</style>
+		<div data-role="page" data-theme='b'>
+		<script>
+            $(document).ready(function() {
+                var auth = localStorage.getItem("auth");
+                if(auth == null)
+		        	window.location.href = "login"
+		        $.ajax({
+                    url: "/my_deals/user_info",
+                    dataType: 'json',
+                    timeout: 10000,
+                    data:{auth_token:auth},
+                    success: function(json)
+                    {
+                        $('#lable_display').html('');	
+                        var street = json.address.address.street;
+                        var fax = json.address.address.fax;
+                        if(street == null)
+                            street="";
+                        if(fax == null)
+                        	fax = "";
+                        var dor=json.user.user.created_at;
+                        dor= dor.split('T');
+                       document.getElementById("content").innerHTML = "<tr><td><font size='-1'><b>Email:</font></td><td><font size='-3'> "+ json.user.user.email+"</td></tr><tr><td><font size='-1'><b>First Name:</td><td><font size='-1'>"+json.user.user.fname+"</td></tr><tr><td><font size='-1'><b>Last Name:</b></font></td><td><font size='-1'>"+json.user.user.lname+"</td></tr><tr><td><font size='-1'><b>State:</b></font></td><td><font size='-1'>"+json.address.address.state+"</td></tr><tr><td><font size='-1'><b>Fax:</b></font></td><td><font size='-1'>"+json.address.address.fax+"</font></td></tr><tr><td><font size='-1'><b>Mobile:</b></font></td><td><font size='-1'>"+json.address.address.mobile+" <a href='verify_numder.html'> [Change?]</a></font></td></tr><tr><td><font size='-1'> <b>Address: </td><td><font size='-1'>" + json.address.address.address + "</td></tr><tr><td><font size='-1'><b>Street: </td><td><font size='-1'>"+street+"</td></tr><tr><td><font size='-1'><b>City:</b></font></td><td><font size='-1'>"+json.address.address.city+"</td></tr><tr><td><font size='-1'><b>Zip:</b></font></td><td><font size='-1'>"+json.address.address.zip+"</font></td></tr><tr><td><font size='-1'><b>User Status:</b></font></td><td><font size='-1'>"+json.user.user.user_type+"</font></td></tr><tr><td><font size='-1'><b>D.O.R</b></font></td><td><font size='-1'>"+dor[0]+"</font></td></tr>";
+                        $('#editBTN').show();
+                        
+                    },
+					error : function() {
+						$('#lable_display').html("<font color='red'>Error occured while updating preference, Please try again.</font>");
+						return false;
+					}
+                });
+            });
+        </script>
+        <input type="hidden" name="swcategory" id="swcategory" value="<%=session[:user_type]%>"/>
+			<input type="hidden" name="swcategory" id="swcategory" value="<%=session[:uType]%>"/>
+
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "My Profile"}%>
+			<%else -%>
+				<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "My Profile"}%>
+			<%end -%>
+			<div align="center" data-role="content">
+				<ul data-role="listview" data-inset="true">
+					<li data-role="list-divider" id="lable_display">
+						<center>Please wait, Loading Profile... <img src="/images/load2.gif"></center>
+					</li>
+					<li >
+						<fieldset data-role="controlgroup">
+							<table id="content" border=1  width="100%"></table>
+						</fieldset>
+						<div class="ui-grid-a" style="display: none;" id="editBTN">
+                            <div class="ui-block-a">
+                                <a href="edit_profile" ><img src="/images/edit.png" style="width: 98%;"></a>
+                            </div>
+                            <div class="ui-block-b">
+                                <a href="profiles"><img src="/images/back.png" style="width: 98%;margin-left: 2%"></a>
+                            </div>
+                        </div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</body>
+</html>

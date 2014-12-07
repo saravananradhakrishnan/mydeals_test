@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+<script>
+ $(document).ready(function(){
+	var auth_token=localStorage.getItem("auth");
+	if(auth_token == null)
+		window.location.href = "login" 
+	var c=0
+         $.ajax({
+          url: "/my_deals/buyer_purchases_item",
+          dataType: 'json',
+          timeout: 5000,
+          data:{auth_token:auth_token},
+          success: function(json)
+          {	
+                        $.each(json.bought_offers, function(i,item){
+			c=1	
+			document.getElementById("item").innerHTML += "<tr align='center' bgcolor='#FFF'  style='color:#000000;' font-size:12px'><td>" +this.bought_offer.item_name+ "</td><td>" + this.bought_offer.own_price + "</td><td>" + this.bought_offer.bought_price +"</td><td>"+this.bought_offer.verified+"</td></tr>";
+			
+			});
+			if(c==0)
+			{
+		document.getElementById("item").innerHTML += "<tr align='center' bgcolor='#FFF'  style='color:#000000; font-size:12px'><td>-</td><td>0</td><td>0</td><td>NA</td></tr>";
+			}
+		  
+		      
+        }  
+    });
+});
+</script>
+<body>
+<div data-role="page" data-theme='b'>
+		<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Item(s) Purchased"}%>
+		<%else -%>
+			<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Item(s) Purchased"}%>
+		<%end -%>
+    <div data-role="content">
+        <div data-role="collapsible-set" data-theme="b" data-content-theme="b">
+             <div data-role="collapsible-false">
+                <table id="item" border="0" >
+		            <tr align="center"  bgcolor=" #CCCCCC" style="color:#FFF;">
+			            <td style="padding: 2px 5px 5px 2px">Item Name</td>
+			            <td style="padding: 2px 5px 5px 2px">Own Price</td>
+			            <td style="padding: 2px 5px 5px 2px">Offer Price</td>
+			            <td style="padding: 2px 5px 5px 2px">Delivery Status</td>
+		            </tr>
+            	</table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+

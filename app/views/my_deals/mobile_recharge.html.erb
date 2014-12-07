@@ -1,0 +1,301 @@
+
+<!DOCTYPE html> 
+<html> 
+ <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+<body> 
+	<div data-role="page" data-theme='b'> 
+ <script>
+function validateForm()
+	{
+		var valueis = '';
+		var x=document.forms["frm2"]["plantype"].value;
+		if (x==null || x=="")
+		  {
+		  		//alert('asd');
+				elementform="Please select plan type";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		  }
+		  
+		  
+		 var x=document.forms["frm2"]["mobnum"].value;
+		  if (x==null || x=="")
+		  {
+		  		//alert('asd');
+				 elementform="Please Enter Mobile No.";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		  }
+		   
+	
+		 var x=document.forms["frm2"]["mobnum"].value;
+		  if(x.length < 10)
+		  {
+				elementform="Mobile no must be more than or equal to 10 charcter";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		}
+		  
+		   var y=document.forms["frm2"]["cmobnum"].value;
+		  if (y==null || y=="")
+		  {
+		  		//alert('asd');
+				 elementform="Please Enter confirm Mobile No.";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		  }
+		   
+	
+		 var y=document.forms["frm2"]["cmobnum"].value;
+		  if(y.length < 10)
+		  {
+				elementform="confirm Mobile no must be more than or equal to 10 charcter";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		}
+		  
+		if (x!=y)
+		  {
+		  		  elementform="Mobile no. does not match";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		  }  
+		  
+		  
+		  
+		  var x=document.forms["frm2"]["operator"].value;
+		if (x==null || x=="")
+		  {
+		  		//alert('asd');
+				elementform="Please select operator";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		  }
+		  
+		  var x=document.forms["frm2"]["amt"].value;
+		if (x==null || x=="")
+		  {
+		  		//alert('asd');
+				elementform="Please enter amount";
+				 valueis=elementform+'<br>';
+				 document.getElementById('plantype').focus()
+				 document.getElementById('valerror1').innerHTML = valueis;
+				 document.getElementById("valerror1").style.display="block";
+				 
+		  return false;
+		  }
+	 }
+ 
+ </script>
+ <script>
+            $(document).ready(function(){
+                   var credit = localStorage.getItem("cp");
+                  document.getElementById('amt').value=credit;	
+                $("#plantype").change(function(){
+	 
+	                               var ptype = $('#plantype').val();
+                                           var div1=document.getElementById('pplan');
+                                           if(ptype=="Prepaid") 
+                                           {
+
+                                           div1.style.display = 'block';
+                                           }
+                                           else
+                                           {
+                                           document.getElementById('prefplan').value="";
+                                           div1.style.display = 'none';
+                                           }
+                                        });
+ 
+ 
+                $('#recharge').click(function(){
+                   if(validateForm() != false){
+                    var plantype = $('#plantype').val();
+                    var prefplan = $('#prefplan').val();
+                    var mobnum = $('#mobnum').val();
+                    var cmobnum = $('#cmobnum').val();
+                    var operator = $('#operator').val();
+                    var amt = $('#amt').val();
+                    var uid=localStorage.getItem("userid");
+                    var auth=localStorage.getItem("auth");
+                    if(auth == null)
+		        		window.location.href = "login" 
+		    $.ajax({
+		    url: "/my_deals/rechargemob",
+		    dataType: 'json',
+                    timeout: 20000,
+                    data:{plantype:plantype,prefplan:prefplan,mobnum:mobnum,cmobnum:cmobnum,operator:operator,amt:amt,uid:uid,auth:auth},
+                    success: function(json)
+                    {
+			   if(json.success==true)
+                        { 
+                		alert("Recharge Request Sent Successfully");
+				var user_typ=localStorage.getItem("usertyp");
+				 if(user_typ=='buysell')
+                              location.href="SellerHome.html";
+							  else
+							  location.href="buyerhome";
+                    	} 
+                     		if(json.success==false){
+					 		alert(json.msg);
+						}
+			  }	  
+				
+                  });
+	      }
+	});  
+ 
+                $('#cancel').click(function(){
+                               var utype=localStorage.getItem("usertyp");
+                                if(utype=='buysell')
+                                 location.href="sellerhome";
+                       else
+                             location.href="buyerhome";
+
+                       });
+
+                }); 
+ </script>
+      
+ <script>
+        
+            function isNumber(evt) {
+                evt = (evt) ? evt : window.event;
+                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                    return false;
+                }
+                return true;
+            }
+        </script>
+ 
+
+		<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Mobile Recharge"}%>
+		<%else -%>
+			<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Mobile Recharge"}%>
+		<%end -%>   
+<div align="center" data-role="content">
+				<form action="" method="post" id="frm2">
+					<ul data-role="listview" data-inset="true">
+
+						<li id="valerror1" style="color:#F00; display:none;"></li>
+						<li>
+
+								<div data-role="fieldcontain">
+									<label for="plantype" class="select">Choose You Plan:</label>
+									<select name="plantype" id="plantype">
+										<option value="">Plan</option>
+										<option value="Prepaid">Prepaid</option>
+										<option value="Postpaid">Postpaid</option>
+									</select>
+								</div>
+
+							<div style="display:none" id="pplan">
+								<INPUT TYPE="text" NAME="prefplan" id="prefplan" placeholder="Additional info about the plan:">
+							</div>
+							<fieldset data-role="controlgroup">
+								<span style="color: black"> Mobile Number </span>
+								<INPUT TYPE="text" NAME="mobnum" id="mobnum" maxlength="10" placeholder="10 digit Number*" onkeypress="return isNumber(event)">
+								<span id="email_error"></span>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+								<span style="color: black">Confirm mobile Number</span>
+								<INPUT TYPE="text" NAME="cmobnum" id="cmobnum" maxlength="10" placeholder="Same as above*" onkeypress="return isNumber(event)">
+								<span id="mobile_error"></span>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+								<span style="color: black"> Mobile operator*</span>
+								<select name="operator" id="operator">
+									<option value="">Select operator</option>
+									<option value="Aircel">Aircel</option>
+									<option value="Airtel">Airtel</option>
+									<option value="BSNL">BSNL</option>
+									<option value="Idea">Idea</option>
+									<option value="MTNL">MTNL</option>
+									<option value="MTS">MTS</option>
+									<option value="Loop Mobile">Loop Mobile</option>
+									<option value="Reliance CDMA">Reliance CDMA</option>
+									<option value="Reliance GSM">Reliance GSM</option>
+									<option value="S Tel">S Tel</option>
+									<option value="Tata DOCOMO">Tata Docomo GSM</option>
+									<option value="Tata Indicom">Tata Docomo CDMA</option>
+									<option value="Uninor">Uninor</option>
+									<option value="Videocon">Videocon</option>
+									<option value="Virgin GSM">Virgin GSM</option>
+									<option value="Virgin CDMA">Virgin CDMA</option>
+									<option value="Vodafone">Vodafone</option>
+									<option value="Cheers">Cheers</option>
+									<option value="Ping">Ping</option>
+
+								</select>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+
+								<INPUT TYPE="text" NAME="amt" id="amt" placeholder="Recharge Amount(Rs.)" onkeypress="return isNumber(event)">
+								<span id="narea_error"></span>
+
+							</fieldset>
+
+							<div class="ui-grid-a">
+								<div class="ui-block-a">
+									<a href="#" data-theme="b" data-role="button" id="recharge">Proceed</a>
+								</div>
+								<div class="ui-block-b">
+									<a href="#" data-role="button" data-theme="c" rel="external" id="cancel">Cancel</a>
+								</div>
+							</div>
+
+			</div>
+			</div>
+			</ul>
+
+			</form>
+
+			</div>
+</div> 
+
+<!---------------- Credit  Page Ends  --------------->
+
+
+</body> 
+</html> 

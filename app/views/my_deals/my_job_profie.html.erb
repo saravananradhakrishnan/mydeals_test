@@ -1,0 +1,232 @@
+<html>
+	<head>
+		<title>MyDeals247 </title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/message_skyblue.css" />
+		<link rel="stylesheet" href="/css/jobs.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="/js/message.js"></script>
+	</head>
+	<body>
+		<div data-role="page" id="job_details" data-theme="b">
+			<style>
+				.dhtmlx-myCss{
+					font-weight:bold !important;
+					color:white !important;
+					background-color:red !important;
+				}
+				.textellip{
+					text-overflow: ellipsis;
+					overflow: hidden;
+					white-space: nowrap;
+				}
+				.laln {
+				    text-align: left;
+				    padding-left: 1px;
+				}
+				.bld {
+				    font-weight: bold;
+				}
+				</style>
+			<script>
+			    $(document).ready(function() {
+			        var id = getUrlVars()["profile_id"];
+			        var mode = getUrlVars()["mode"];
+			        
+			        var que_count = 0;
+			        function getUrlVars() {
+			            var vars = {};
+			            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+			                vars[key] = value;
+			            });
+			            return vars;
+			        }
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        $("#auth_token").val(auth_token)
+			        $("#job_profile_id").val(id)
+			        $("#msg_bar").html("<img src='/images/load2.gif'>");
+			        $.ajax({
+			            url: "/my_deals/candidate_profile_data",
+			            dataType: 'json',
+			            timeout: 20000,
+			            data: {auth_token: auth_token},
+			            success: function(json)
+			            {
+			                var jb_profile = json.job_profile.job_profile
+			                var random_source = '';
+			                random_source += '<ul data-role="listview" data-inset="true" id="head_ul">';
+							random_source += '	<li>';
+							random_source += '		<div class="clear" style="border:1px solid #FE9600;auto;margin-top:15px;margin-left: 10px;box-shadow: 0 0 12px 5px #AAACAA;border-radius: 10px;">';
+						    random_source += '		<div align="center" style="background-color:#FE9600;color:#FFFFFF;font-size:20px;padding:5px 0 5px 0;border-top-right-radius: 8px;border-top-left-radius: 8px;">';
+						    random_source += '		    Preview - '+jb_profile.profile_name+'\'s Profile';
+						    random_source += '		</div>';
+						    random_source += '		<div style="margin-left: 10px;margin-right: 3px;margin-top: 20px;margin-bottom: 3px; ">';
+						    random_source += '		    <table style="width: 95%;margin-bottom: 20px;box-shadow: 0 0 12px 5px #AAACAA;margin-left: 15px;border-radius: 10px;">';
+						    random_source += '		        <tbody>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td class="laln bld textellip" colspan="3" style="border-bottom: 1px solid green;padding: 10px 10px 0px 10px;">';
+						    random_source += '		                <div style="width: 50%;float:left">';
+						    random_source += '		                    <strong style="font-size: 20px;">Profile</strong>';
+						    random_source += '		                </div>';
+						    random_source += '		                <div style="width: 95%;float:left;">';
+						    random_source += '		                    <div> <a style="cursor: pointer" href="http://mydeals247.com/jobs/download_resume/download?file_name='+jb_profile.resume_doc+'"> <img src="/images/icons/download_my_resume.png" border="0" alt="Download My Resume" title="Download My Resume"> </a> </div>';
+						    if(jb_profile.profile_video != ""){
+							    random_source += '		                    <div>';
+								random_source += '		                    	<a style="cursor: pointer" href="http://www.youtube.com/watch?v='+jb_profile.profile_video+'" target="_blank">';
+								random_source += '		                    		<img src="/images/icons/youtube.png" alt="YouTube Video" title="YouTube Video">';
+								random_source += '		                    	</a>';
+								random_source += '		                    </div>';
+							}
+						    random_source += '		                </div></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="50%" valign="top" align="left" style="padding: 20px 5px 5px 5px; margin-top: 5px;margin-right: 10px;"><span class="mdprofile_100" style="background-image: url(\''+jb_profile.profile_image+'\')"></span></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td style="padding: 20px 0px 0px 10px;" width="95%" class="textellip"><strong>Public profile URL:</strong><br/>';
+						    random_source += '		                <a href="'+jb_profile.profile_public_url+'" style="cursor: pointer;" trget="_blank">http://mydeals247.com/profile/Raj-b3f4</a></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td style="padding: 20px 0px 0px 10px;" width="35%" class="textellip"><strong>Name:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_name+'</td>';
+							random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		               <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Email:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_email+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Mobile:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_mobile+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Current Location:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_cur_loc+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Experience Level:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_exp_lvl+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Expected Anual Salary:</strong><br/>';
+						    random_source += '		                <span class="WebRupee">Rs</span>&nbsp;'+jb_profile.profile_expected_salary+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Desired Job Type:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_total_experience+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="textellip"><strong>Total Experience:</strong><br/>';
+						    random_source += '		                '+jb_profile.profile_total_experience+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		                </tbody>';
+						    random_source += '		        </table>';
+						    random_source += '		        <table style="margin-bottom: 20px;box-shadow: 0 0 12px 5px #AAACAA;margin-left: 15px;border-radius: 10px;width: 95%;">';
+						    random_source += '		           <tbody><tr>';
+						    random_source += '		                <td class="laln bld textellip" colspan="4" style="color: black;border-bottom: 1px solid green;padding: 10px 10px 0px 10px;font-size: 20px;"><strong>Job Detail(s)</strong></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="100%" colspan="4" class="laln bld textellip" style="min-width: 100%;height: 2px;">&nbsp;</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip"> Employer:</td>';
+						    random_source += '		                <td width="65%" class="laln">'+jb_profile.company_name+'</td>';
+						    random_source += '		            </tr><tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip">Current Job Duration:</td>';
+						    random_source += '		                <td width="65%" class="laln">';
+						    random_source += '		                '+jb_profile.cur_job_duration+' Year(s)</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip">Current Annual CTC:</td>';
+						    random_source += '		                <td width="65%" class="laln">';
+						    random_source += '		                <span class="WebRupee">Rs</span>&nbsp;'+jb_profile.profile_cur_sal+'</td>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" class="laln bld textellip">&nbsp;</td>';
+						    random_source += '		                <td width="65%" class="laln"><strong>&nbsp;</strong></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            </tbody>';
+						    random_source += '		         </table>';
+						    random_source += '		         <table style="margin-bottom: 20px;box-shadow: 0 0 12px 5px #AAACAA;margin-left: 15px;border-radius: 10px;width: 95%;">';
+						    random_source += '		         	<tbody>';
+						    random_source += '		         	<tr>';
+						    random_source += '		                <td class="laln bld textellip" colspan="4" style="color: black;border-bottom: 1px solid green;padding: 10px 10px 0px 10px;font-size: 20px;"><strong>Education</strong></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td style="padding: 0px 1px 0px 10px;" width="35%" class="laln bld textellip">Qualification Level:</td>';
+						    random_source += '		                <td style="padding: 0px 1px 0px 0px;" width="65%" class="laln">'+jb_profile.profile_qualification_level+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip">Educational Institute:</td>';
+						    random_source += '		              	<td width="65%" class="laln">'+jb_profile.institute_name+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip">% of Marks:</td>';
+						    random_source += '		                <td width="65%" class="laln">'+jb_profile.percentage+' </td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip">Course Type:</td>';
+						    random_source += '		                <td width="65%" class="laln">'+jb_profile.course_type+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip">Degree(s):</td>';
+						    random_source += '		                <td width="65%" class="laln">'+jb_profile.profile_degrees+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="35%" style="padding: 0px 1px 0px 10px;" class="laln bld textellip" valign="top">Specializations:</td>';
+						    random_source += '		                <td width="65%" class="laln" valign="top"> '+jb_profile.profile_specializations+'</td>';
+						    random_source += '		            </tr>';
+						    random_source += '		                </tbody>';
+						    random_source += '		         </table>';
+						    random_source += '		         <table style="margin-bottom: 20px;box-shadow: 0 0 12px 5px #AAACAA;margin-left: 15px;border-radius: 10px;width: 95%;">';
+						    random_source += '		            <tbody>';
+						    random_source += '		            <tr>';
+						    random_source += '		                <td width="100%" class="laln bld textellip" colspan="4" style="color: black;border-bottom: 1px solid green;padding: 10px 10px 0px 10px;font-size: 20px;"><strong>Preferred Locations</strong></td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            <tr style="border:1px solid #FE9600;">';
+						    random_source += '		                <td style="padding: 20px 0px 0px 10px;" width="100%" class="laln" colspan="4">';
+						    random_source += '		                '+jb_profile.profile_prefered_locations+'';
+						    random_source += '		                </td>';
+						    random_source += '		            </tr>';
+						    random_source += '		            </tbody>';
+						    random_source += '		         </table>';
+						    random_source += '		      </div>';
+						    random_source += '		      <div>';
+						    random_source += '		                <p style="text-align: right"><a style="cursor: pointer" href="http://mydeals247.com/jobs/download_resume/download?file_name='+jb_profile.resume_doc+'">';
+						    random_source += '		                <img src="/images/icons/download_my_resume.png" border="0" alt="Download My Resume" title="Download My Resume"></a>';
+						    random_source += '		                <input type="button" style="margin:0 0 10px 0px;background-color:#FE9600;font-weight:bold;border-color:#FE9600 ;border-radius: 6px;padding: 5px 5px 5px 5px;border: 0;cursor:pointer;color:white" value="Matched Jobs for Me >>" name="" onclick="window.location.href = \'/my_deals/list_matched_jobs\'">';
+						    random_source += '		                <input type="button" style="margin:0 0 10px 0px;background-color:#FE9600;font-weight:bold;border-color:#FE9600 ;border-radius: 6px;padding: 5px 5px 5px 5px;border: 0;cursor:pointer;color:white;" value="Edit Profile" name="" onclick="window.location.href = \'/my_deals/create_job_profile\'">';
+						    random_source += '		                </p>';
+						    random_source += '		      </div>';
+							random_source += '			</div>';
+							random_source += '	</li>';
+							random_source += '</ul>';
+							$("#profile_details").html(random_source);
+							$('[data-role="content"]').trigger('create');
+							$("#msg_bar").html("");
+					    }
+			        });
+			 	});
+			 </script>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Candidate Profile"}%>
+			<%else -%>
+			<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Candidate Profile"}%>
+			<%end -%>
+			<div align="center" data-role="content" id="high">
+				<ul data-role="listview" data-inset="true">
+					<li id="msg_bar" class="ui-li ui-li-static ui-body-c"></li>
+				</ul>
+					<div id="profile_details"></div>
+					<input type="hidden" name="job_profile_id" id="job_profile_id" value="">
+					<input type="hidden" name="auth_token" id="auth_token" value="">
+			</div>
+		</div>
+	</body>
+</html>

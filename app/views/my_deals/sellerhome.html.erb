@@ -1,0 +1,245 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.countdown.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+    	<style>
+    		#my_offer_requests,.othercity_accord{
+    			width: 100%;
+                overflow-y: hidden;
+                float: left;
+    		}
+		    #my_offer_requests::-webkit-scrollbar ,.othercity_accord::-webkit-scrollbar{
+		            height: 5px;
+            }
+             #my_offer_requests::-webkit-scrollbar-track, .othercity_accord::-webkit-scrollbar-track {
+					    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+					    border-radius: 10px;
+					    border:1px grey solid;
+					    border-radius:10px;
+
+            }
+ 
+			#my_offer_requests::-webkit-scrollbar-thumb, .othercity_accord::-webkit-scrollbar-thumb {
+			    border-radius: 10px;
+			    -webkit-box-shadow: inset 0 0 6px green; 
+			}
+    	</style>
+        <div data-role="page" data-theme='b'>
+		<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Seller Home"}%>
+        <script>
+		    $(document).ready(function() {
+		        var auth_token = localStorage.getItem("auth");
+		        if (auth_token == null)
+		            window.location.href = "login"
+		        var user_type = localStorage.getItem("usertyp");
+		        var selected_deal_categs = [];
+		        var selected_buysell_categs = [];
+		        $('#lable_display').html('<center>Please wait, Loading Buyer Requests... <img src="/images/load2.gif"></center>');
+		        $.ajax({
+		            url: "/my_deals/seller_user_requests",
+		            dataType: 'json',
+		            timeout: 20000,
+		            data: {auth_token: auth_token},
+		            success: function(json) {
+		            	var is_anything_open = false;
+		                var sellerHome_content = '';
+		                if (json.my_offered_requests_count == 0 && json.my_requests_not_offered_count == 0 && json.book_requests_count == 0 && json.requests_in_other_cities_count == 0){
+		                	$('#lable_display').html('');
+		                	$('#sellerHomeContent').html("<h3>There are no buyer requests at this time. Please visit us after some time or check categories of preference in your settings.</h3>");
+		                }else{
+		                sellerHome_content += '<div data-role="collapsible-set" data-theme="b" data-content-theme="b">';
+		                if (json.my_offered_requests != null && json.my_offered_requests != "" && parseInt(json.my_offered_requests_count) > 0) {
+		                    sellerHome_content += '<div data-role="collapsible" data-collapsed="'+is_anything_open+'" id="my_offer_requests" my_action="none">';
+	                        sellerHome_content += '    <h3>My Offered Requests (' + json.my_offered_requests_count + ')</h3>';
+	                        sellerHome_content += '    <div class="inset">';
+	                        sellerHome_content += '        <ul data-role="listview">';
+	                        sellerHome_content += '			<li>';
+	                        sellerHome_content += '			<table id="content" border=1 style="max-height:400px;max-width:380px;overflow-y:auto;margin-left:-1%">';
+	                        sellerHome_content += '			<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+                            sellerHome_content += '			    <td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;"><b>Category </font></td>';
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Item Name </font></td>';
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Budget </font></td>';
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Your Offer </font></td>'; 
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Action </font></td></font>'; 
+                            sellerHome_content += '			</tr>';
+	                        $.each(json.my_offered_requests, function(i, item) {
+	                        	var locality = item.user_request.locality;
+                                if(locality == null || locality == "")
+                                    locality="-";
+                                var low_ofr = item.user_request.my_offer_rank;
+                                var total_budget = item.user_request.grand_total;
+                                if (total_budget == null || total_budget == "null" || total_budget == "")
+                                	total_budget = "Seeking best bid offer";    
+                                	    
+			                    sellerHome_content += '			<tr style="height:9px;" align="center"><td><font size="-2" style="font-size: 14px;">' +item.user_request.category_name+ '</font></td>';
+			                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">'+item.user_request.item_info+' (near by '+locality+')</font></td>';
+			                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">' + total_budget + '</font></td>';
+			                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">' + low_ofr + '</font></td>';
+			                    sellerHome_content += '				<td><input id="'+item.user_request.id+'" type="image" src="/images/view_details.png" class="inputClass"/> </td>';
+			                    sellerHome_content += '			</tr>';
+		                    });
+		                    sellerHome_content += '			</table>';
+	                        sellerHome_content += '			</li>';
+	                        sellerHome_content += '        </ul>';
+	                        sellerHome_content += '    </div>';
+	                        sellerHome_content += '</div>';
+	                        is_anything_open = true;
+	                    
+		                }
+		                if (json.my_requests_not_offered != null && json.my_requests_not_offered != "" && parseInt(json.my_requests_not_offered_count) > 0) {
+		                    sellerHome_content += '<div data-role="collapsible" data-collapsed="'+is_anything_open+'" id="my_offer_requests" my_action="none">';
+	                        sellerHome_content += '    <h3>Buyer Requests in <strong>'+ json.my_city + '</strong> (' + json.my_requests_not_offered_count + ')</h3>';
+	                        sellerHome_content += '    <div class="inset">';
+	                        sellerHome_content += '        <ul data-role="listview">';
+	                        sellerHome_content += '			<li>';
+	                        sellerHome_content += '			<table id="content" border=1 style="max-height:400px;max-width:380px;overflow-y:auto;margin-left:-1%">';
+	                        sellerHome_content += '			<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+                            sellerHome_content += '			    <td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;"><b>Category </font></td>';
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Item Name </font></td>';
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Budget </font></td>';
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Your Offer </font></td>'; 
+                            sellerHome_content += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Action </font></td></font>'; 
+                            sellerHome_content += '			</tr>';
+	                        $.each(json.my_requests_not_offered, function(i, item) {
+	                        	var locality = item.user_request.locality;
+                                if(locality == null || locality == "")
+                                    locality="-";
+                                var low_ofr = item.user_request.my_offer_rank;
+                                var total_budget = item.user_request.grand_total;
+                                if (total_budget == null || total_budget == "null" || total_budget == "")
+                                	total_budget = "Seeking best bid offer";    
+			                    sellerHome_content += '			<tr style="height:9px;" align="center"><td><font size="-2" style="font-size: 14px;">' +item.user_request.category_name+ '</font></td>';
+			                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">'+item.user_request.item_info+' (near by '+locality+')</font></td>';
+			                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">' + total_budget + '</font></td>';
+			                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">' + low_ofr + '</font></td>';
+			                    sellerHome_content += '				<td><input id="'+item.user_request.id+'" type="image" src="/images/view_details.png" class="inputClass"/> </td>';
+			                    sellerHome_content += '			</tr>';
+		                    });
+		                    if (json.book_requests != null && json.book_requests != "" && parseInt(json.book_requests_count) > 0) {
+			                    $.each(json.book_requests, function(i, item) {
+		                        	var low_ofr = item.user_request.my_offer_rank;
+	                                var total_budget = item.user_request.grand_total;
+                                	if (total_budget == null || total_budget == "null" || total_budget == "")
+                                		total_budget = "Seeking best bid offer";        
+				                    
+				                    sellerHome_content += '			<tr style="height:9px;" align="center"><td><font size="-2" style="font-size: 14px;">' +item.user_request.category_name+ '</font></td>';
+				                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">'+item.user_request.item_info+'</font></td>';
+				                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">' + total_budget + '</font></td>';
+				                    sellerHome_content += '				<td><font size="-2" style="font-size: 14px;">' + low_ofr + '</font></td>';
+				                    sellerHome_content += '				<td><input id="'+item.user_request.id+'" type="image" src="/images/view_details.png" class="inputClass"/> </td>';
+				                    sellerHome_content += '			</tr>';
+			                    });
+		                    }	
+		                    sellerHome_content += '			</table>';
+	                        sellerHome_content += '			</li>';
+	                        sellerHome_content += '        </ul>';
+	                        sellerHome_content += '    </div>';
+	                        sellerHome_content += '</div>';
+	                        is_anything_open = true;
+	                    
+		                }
+		                if (json.requests_in_other_cities != null && json.requests_in_other_cities != "" && parseInt(json.requests_in_other_cities_count) > 0) {
+		                    $.each(json.requests_in_other_cities, function(i, item) {
+	                        	sellerHome_content += '<div data-role="collapsible" data-collapsed="'+is_anything_open+'" id="' + item.user_request.city + '" my_action="get_CityRequests" class="othercity_accord">';
+		                        sellerHome_content += '    <h3>Buyer Requests in <strong>' + item.user_request.city + '</strong> (' + item.user_request.count + ')</h3>';
+		                        sellerHome_content += '    <div class="inset">';
+		                        sellerHome_content += '        <ul data-role="listview" id="cityUL_'+item.user_request.city+'"></ul>';
+		                    	sellerHome_content += '    </div>';
+		                        sellerHome_content += '</div>';
+		                        is_anything_open = true;    
+		                    });
+		                    
+		                }
+		                sellerHome_content += '</div>';
+		                $('#sellerHomeContent').html(sellerHome_content);
+		                $('#lable_display').html('Buyer requests for you');
+		                $('[data-role="content"]').trigger('create');
+		                $('.othercity_accord').bind('expand', function() {
+							if($(this).html().length < 800){
+	              				var city = $(this).attr("id");
+	              				var action =$(this).attr("my_action");
+	              				if(action == "get_CityRequests"){
+	              				$('#cityUL_'+city).html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child">Loading... <img src="/images/load2.gif"></li>');
+	              				$.ajax({
+				                    url: "/my_deals/buyer_request_city",
+				                    dataType: 'json',
+				                    timeout: 15000,
+				                    data:{auth_token:auth_token, acityn:city},
+				                    success: function(json)
+				                    {
+				                        var random_source = '';
+				                        if (json.requests_in_other_cities != null && json.requests_in_other_cities != "" && parseInt(json.total_count) > 0) {
+				                        	random_source += '			<li>';
+				                        	random_source += '			<table id="content" border=1 style="max-height:400px;max-width:380px;overflow-y:auto;margin-left:-1%">';
+					                        random_source += '			<tr bgcolor="#CCCCCC" style="background: rgba(0, 0, 0, 0.6);" height="10px" align="center">';
+				                            random_source += '			    <td><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;"><b>Category </font></td>';
+				                            random_source += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Item Name </font></td>';
+				                            random_source += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Budget </font></td>';
+				                            random_source += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;font-size: 16px;">Your Offer </font></td>'; 
+				                            random_source += '			    <td><b><font size="-1" style="color: white;padding: 5px 10px 10px 5px;">Action </font></td></font>'; 
+				                            random_source += '			</tr>';
+					                        $.each(json.requests_in_other_cities, function(i,item){
+					                        	var locality = item.user_request.locality;
+				                                if(locality == null || locality == "")
+				                                    locality="-";
+				                                var low_ofr = item.user_request.my_offer_rank;
+				                                var total_budget = item.user_request.grand_total;
+				                                if (total_budget == null || total_budget == "null" || total_budget == "")
+				                                	total_budget = "Seeking best bid offer";
+				                                    
+							                    random_source += '			<tr style="height:9px;" align="center"><td><font size="-2" style="font-size: 14px;">' +item.user_request.category_name+ '</font></td>';
+							                    random_source += '				<td><font size="-2" style="font-size: 14px;">'+item.user_request.item_info+' (near by '+locality+')</font></td>';
+							                    random_source += '				<td><font size="-2" style="font-size: 14px;">' + total_budget + '</font></td>';
+							                    random_source += '				<td><font size="-2" style="font-size: 14px;">' + low_ofr + '</font></td>';
+							                    random_source += '				<td><input id="'+item.user_request.id+'" type="image" src="/images/view_details.png" class="inputClass" onclick="view_detail('+item.user_request.id+');"/> </td>';
+							                    random_source += '			</tr>';
+					                        });
+					                        random_source += '			</table>';
+	                        				random_source += '			</li>';
+				                        }
+				                        $('#cityUL_'+city).html(random_source);
+				                    },
+									error : function() {
+										$('#buysell_subcategUL'+categ_id).html('<li class="ui-li ui-li-static ui-btn-up-b ui-first-child">Error while fethcing caegories, Please refresh the page.</li>');
+										return false;
+									}
+			                	});
+			                	}
+			      			}
+	              		});
+              		    $('.inputClass').click(function(){
+              		    	var id = $(this).attr('id');
+                            window.location.href = '/my_deals/buy_request_detail_seller?id='+id;
+                        });
+                       }
+                    },
+		            error: function() {
+		                $('#lable_display').html('<center><font color="red">Error occured while fething buyer requests, Please try again.</font></center>');
+		                return false;
+		            }
+		        });
+		    });
+		    function view_detail(id){
+		    	window.location.href = '/my_deals/buy_request_detail_seller?id='+id;
+		    }
+		</script>       
+            <div data-role="content">
+            	<ul data-role="listview" data-inset="true"><li data-role="list-divider" id="lable_display"></li></ul>
+                <div id="sellerHomeContent"></div>
+            </div>
+        </div>
+    </body>
+</html>
+

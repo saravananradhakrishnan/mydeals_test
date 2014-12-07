@@ -1,0 +1,254 @@
+<%
+  category=params[:cat_id]
+  scategory=params[:scat_id]
+  catalog_id=params[:catalog_id]
+  item_name=params[:item_name]
+  categ_type = params[:categ_type]
+%>
+<html>
+<head>
+       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.countdown.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+	<body>
+		<div data-role="page" id="post_req_from" data-theme='b'>
+        	<script>
+			    function validateForm()
+			    {
+			        var valueis = '';
+			        var items=document.forms["user_rqst_form"]["number_of_items"].value;
+			        if (items == null || items=="")
+			        {
+			            elementform="Please enter number of items ";
+			            valueis=elementform+'<br>';
+			            document.getElementById('number_of_items').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+			        if (items == "1" || items=="01"  || items=="02" || items == "2" || items=="03"|| items == "3" || items=="04"
+			        || items == "4" || items=="05"|| items == "5" || items=="06"|| items == "6" || items=="07"|| items == "7" || items=="08"
+			        || items == "8" || items=="09"|| items == "9")
+			        {
+			            elementform="Minimun quantity should not less than 10 items ";
+			            valueis=elementform+'<br>';
+			            document.getElementById('number_of_items').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+				            
+			        var x=document.forms["user_rqst_form"]["price"].value;
+			        if (x==null || x=="")
+			        {
+			            elementform="Please enter budget per amount";
+			            valueis=elementform+'<br>';
+			            document.getElementById('price').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+				            
+			        var x=document.forms["user_rqst_form"]["city"].value;
+			        if (x==null || x=="")
+			        {
+			            elementform="Please Enter City";
+			            valueis=elementform+'<br>';
+			            document.getElementById('city').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+			        var x=document.forms["user_rqst_form"]["locality"].value;
+			        if (x==null || x=="")
+			        {
+			            elementform="Please enter near by area";
+			            valueis=elementform+'<br>';
+			            document.getElementById('locality').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+			        var x=document.forms["user_rqst_form"]["descision_factor"].value;
+			        if (x==null || x=="")
+			        {
+			            elementform="Please select your shipping preference";
+			            valueis=elementform+'<br>';
+			            document.getElementById('descision_factor').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+				              
+			        var x=document.forms["user_rqst_form"]["item_condition"].value;
+			        if (x==null || x=="")
+			        {
+			            elementform="Please select Item Condition you are looking for ";
+			            valueis=elementform+'<br>';
+			            document.getElementById('item_condition').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display="block";
+			            $("html, body").animate({ scrollTop: 0 }, "slow");
+			            return false;
+			        }
+			    }
+			</script>
+			<script type="text/javascript">
+			    function initialize() {
+			        var options = {
+			            types: ['(cities)'],
+			            componentRestrictions: {country: "IN"}
+			        };
+			        var input = document.getElementById('city');
+			        var autocomplete = new google.maps.places.Autocomplete(input, options); // To get the city name
+			    }
+			    google.maps.event.addDomListener(window, 'load', initialize);
+			</script>
+			<script>
+			    function isNumber(evt) {
+			        evt = (evt) ? evt : window.event;
+			        var charCode = (evt.which) ? evt.which : evt.keyCode;
+			        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+			            return false;
+			        }
+			        return true;
+			    }
+			    function calc_total_budget(){
+			    	var total_price = 0;
+			    	var price = document.forms["user_rqst_form"]["price"].value;
+			    	var no_ofitems = document.forms["user_rqst_form"]["number_of_items"].value;
+			    	if (price != "" && no_ofitems != ""){
+			    		total_price = price * no_ofitems;
+			    		$("#total_budget_para").html("<strong>Total Budget: RS. &nbsp;"+total_price+"</strong>");
+			    		$("#total_budget_para").show();
+			    	}else{
+			    		$("#total_budget_para").html("");
+			    		$("#total_budget_para").hide();
+			    	}
+			    }
+				function post_form(){
+					var auth_token = localStorage.getItem("auth");
+					if(auth_token == ""){
+						document.getElementById('valerror').innerHTML = "You are not logged in. Please login to post buy request.";
+						return false;
+					}
+					$("#auth_token").val(auth_token);
+					if(validateForm() == false){
+						return false;
+					}else{
+						var a = '<img src="/images/load2.gif">';
+						document.getElementById('valerror').innerHTML = a;
+			            document.getElementById("valerror").style.display="block";
+						$("html, body").animate({ scrollTop: 0 }, "slow");
+						$.ajax({
+							type : "POST",
+							url : "/my_deals/post_apple_buy",
+							data : $("#user_rqst_form").serialize(),
+							dataType : "json",
+							success : function(b) {
+								if(b.success) {
+									document.getElementById('valerror').innerHTML = "<font color='green'>"+b.msg+"</font>";
+									window.location = "/my_deals/buyer_request_list";
+								} else {
+									if(b.msg == "redirect"){
+										location.href="login"
+									}else{
+										document.getElementById('valerror').innerHTML = b.msg;
+										$("html, body").animate({ scrollTop: 0 }, "slow");
+										return false;
+									}
+								}
+							},
+							error : function() {
+								document.getElementById('valerror').innerHTML = b.msg;
+								$("html, body").animate({ scrollTop: 0 }, "slow");
+								return false;
+							}
+						});
+						
+					}
+				}
+			</script>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Post a Buy Request for #{item_name}"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Post a Buy Request for #{item_name}"}%>
+			<%end -%>
+			<div align="center" data-role="content">
+				<form action="" id="user_rqst_form" name="user_rqst_form">
+					<input type="hidden" name="cat_id" id="cat_id" value="<%= category %>"/>
+					<input type="hidden" name="scat_id" id="scat_id" value="<%= scategory %>"/>
+					<input type="hidden" name="catalog_id" id="catalog_id" value="<%= catalog_id %>"/>
+					<input type="hidden" name="item_name" id="item_name" value="<%= item_name %>"/>
+					<input type="hidden" name="request_pref_type" id="request_pref_type" value="<%= categ_type %>"/>
+					<input type="hidden" name="auth_token" id="auth_token" value=""/>
+					<ul data-role="listview" data-inset="true">
+						<li id="valerror" style="color:#F00; display:none;"></li>
+						<li>
+							<fieldset data-role="controlgroup">
+								<INPUT TYPE="text" NAME="number_of_items" id="number_of_items" maxlength="5" value="10" placeholder="Number Of Item(s)"  onkeypress="return isNumber(event)" onchange="calc_total_budget();">
+								<span id="number_of_items_error"></span>
+								<span id="minimum" style="font-size: 12px;">A minimum quantity of 10 required</span>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+								<INPUT TYPE="text" NAME="price" id="price" maxlength="6" placeholder="Budget Per Item (Rs)" onkeypress="return isNumber(event)" onchange="calc_total_budget();">
+								<span id="price_error"></span>
+							</fieldset>
+							<fieldset data-role="controlgroup" id="total_budget_para" style="display: none;margin-left: 0.2%;"></fieldset>
+							<fieldset data-role="controlgroup">
+								<INPUT TYPE="text"  name="city" id="city" placeholder="City*">
+								<span id="email_error"></span>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+								<INPUT TYPE="text" NAME="locality"  id="locality" placeholder="Near By Area">
+								<span id="locality_error"></span>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+								<select name="descision_factor" id="descision_factor">
+									<option value="">---Shipping Preference---</option>
+									<option value="Person to Person">Person to Person ( Store Pickup )</option>
+									<option value="Courier/Shipping">Courier/Shipping</option>
+								</select>
+							</fieldset>
+							<fieldset data-role="controlgroup">
+								<select name="item_condition" id="item_condition">
+									<option value="">------- item condition -------</option>
+									<option value="New">New</option>
+									<option value="Used">Used</option>
+									<option value="New/Used">New/Used</option>
+								</select>
+							</fieldset>
+							<%if category == "2539" || category == "2574"%>
+							<fieldset data-role="controlgroup">
+                                <textarea style="height:80px;" maxlength="3000" placeholder="Please provide all the details about your request such as brand name, specification, model number(if any). It will help the sellers to get you the lowest prices possible at this time." style="width:570px;resize:none;" class="textFld" required="" name="item_spec" id="item_spec" ></textarea>
+                            </fieldset>
+							<%end -%>
+							<div class="ui-grid-a">
+								<div class="ui-block-a">
+									<a href="#"  id="post" onclick="post_form();"><img src="/images/post.png" style="width: 98%;"></a>
+								</div>
+								<div class="ui-block-b">
+									<a href="/my_deals/buyerhome" id="cancel" rel="external"><img src="/images/cancel.png" style="width: 98%;margin-left: 2%;"></a>
+								</div>
+							</div>
+						</ul>
+					</form>
+				</div>
+			</div>
+		</body>
+	</html>

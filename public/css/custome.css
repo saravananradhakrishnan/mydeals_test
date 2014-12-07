@@ -1,0 +1,69 @@
+/*
+*  Off Canvas 
+*/
+/*.buyers-home{background-color:#C434FF !important;}
+.buyers-home h1{color: white !important}
+.buyers-home a i{color: white !important}
+
+.active a{color: white !important}
+
+.paid-ads{background-color: #2FA9E8 !important;}
+.paid-ads h1{color: white !important}
+.paid-ads a i{color: white !important}
+
+
+.book-catlog {background-color: #A7D700 !important}
+
+.mobile-recharge {background-color: #FF2B18 !important}
+
+.account-statement {background-color: #FF6E00 !important}
+
+.volume-deals {background-color: #FFEB2C !important}
+.jobs {background-color: #A7D700 !important}*/
+.profile{
+    width: 100%;
+    float: left;
+    border-bottom: 1px solid green;
+
+}
+.pro_image{
+    width: 30%;
+    float: left;
+}
+.pro_info{
+    width: 70%;
+    float: left;
+}
+.job_details{
+    width: 100%;
+    float: left;
+    border-bottom: 1px solid green;
+
+}
+
+.job_info{
+    width: 100%;
+    float: left;
+}
+.education{
+    width: 100%;
+    float: left;
+    border-bottom: 1px solid green;
+
+}
+
+.edu_info{
+    width: 100%;
+    float: left;
+}
+.location{
+    width: 100%;
+    float: left;
+    border-bottom: 1px solid green;
+
+}
+
+.location_info{
+    width: 100%;
+    float: left;
+}

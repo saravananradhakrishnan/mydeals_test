@@ -1,0 +1,155 @@
+<html> 
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+    	<div data-role="page" id="register"> 
+        <script>
+            $(document).ready(function() {
+                $('#post').click(function(){
+                    var scode = $('#scode').val();
+                    var auth_token=localStorage.getItem("auth");
+                    if(auth_token == null)
+		        		window.location.href = "login"
+                    $.ajax({
+                        url: "http://mydeals247.mobi/php/voucher_detail_purchase.php",
+                        dataType: 'jsonp',
+                        jsonp: 'jsoncallback',
+                        timeout: 10000,
+                        data:{scode:scode,auth_token:auth_token},
+                        success: function(json, status)
+                        {
+                            if(json.success==true)
+                            {
+                            }
+		
+                        }  
+                    });
+	
+                });
+            });
+        </script>
+        <script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#from").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                    onSelect: function(selected) {
+                        $("#to").datepicker("option","minDate", selected)
+                    }
+                });
+                $("#to").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                    onSelect: function(selected) {
+                        $("#from").datepicker("option","maxDate", selected)
+                    }
+                });
+	
+            });
+        </script> 
+        
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Purchase Record"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Purchase Record"}%>
+			<%end -%>
+            <div align="center" data-role="content"> 
+                <form action="" method="post" id="frm2"> 
+                    <ul data-role="listview" data-inset="true"> 
+                        <li data-role="list-divider">Purchase Record(Voucher Code)</li> 
+                        <li> 
+                            <fieldset data-role="controlgroup">
+                                <INPUT TYPE="text" NAME="c" id="iname" placeholder="Voucher/Invoice Code*"> 
+                                <span id="iname_error"></span>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <div class="ui-block-a">
+                                    <a href="#" data-theme="c" data-role="button" id="post">Submit</a>
+                                </div>
+                            </fieldset>        
+                            <fieldset data-role="controlgroup">
+                                <INPUT TYPE="text" NAME="c" id="iname" placeholder="Deal Name*"> 
+                                <span id="iname_error"></span>
+                            </fieldset>     
+
+                            <fieldset data-role="controlgroup">
+                                <INPUT TYPE="text" NAME="ispecification" id="ispecification" placeholder="Security Code*"> 
+                                <span id="ispecification_error"></span> 
+                            </fieldset>
+
+                            <fieldset data-role="controlgroup"> 
+                                <INPUT TYPE="text" NAME="nitems" id="nitems" placeholder="Name*"> 
+                                <span id="nitems_error"></span> 
+                            </fieldset>
+
+                            <fieldset data-role="controlgroup"> 
+                                <INPUT TYPE="text" NAME="bitme" id="bitme" placeholder="Email ID*"> 
+                                <span id="bitme_error"></span> 
+                            </fieldset> 
+
+                            <fieldset data-role="controlgroup">
+                                <INPUT TYPE="text"  NAME="city" id="city" placeholder="Quantity*"> 
+                                <span id="email_error"></span> 
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <INPUT TYPE="text" readonly NAME="state" id="state" placeholder="Redeem Status*">
+                                <span id="mobile_error"></span>
+                            </fieldset>
+
+                        </li>
+
+                    </ul> 
+
+                </form> 
+
+                <form action="" method="post" id="frm2">
+                    <div data-role="collapsible" data-theme="b" data-content-theme="c">
+                        <h2>Search</h2>
+                        <ul data-role="listview" data-inset="true">
+                            <li> 
+                                <div data-role="fieldcontain">
+                                    <fieldset data-role="controlgroup">  
+                                        <INPUT TYPE="text" placeholder="Deal Name" id="rcity">
+                                        <span id="rcity_error"></span> 
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <input type="text" readonly id="from" placeholder="Deal Start Date*" />
+                                        <span id="datepicker_error"></span>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <input type="text" readonly id="to" placeholder="Deal End Date*" />
+                                        <span id="datepicker_error"></span>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <select name="select-choice-category" id="select-choice-category">
+                                            <option>Deal Type*</option>
+                                        </select>
+                                    </fieldset>
+                                    <fieldset data-role="controlgroup">
+                                        <select name="select-choice-scategory" id="select-choice-scategory">
+                                            <option>Category*</option>
+                                        </select>
+                                    </fieldset>
+                                </div></li>
+                            <div class="ui-grid-a">
+
+                                <div class="ui-block-a">
+                                    <a href="#" data-theme="c" data-role="button" onClick="post();">Go</a>
+                                </div>
+                                <div class="ui-block-b">
+                                    <a href="sellerhome" data-role="button" data-theme="b" rel="external">Cancel</a>
+                                </div>
+                            </div>
+                        </ul> 
+                    </div> 
+                </form>
+            </div> 
+    </body> 
+</html> 

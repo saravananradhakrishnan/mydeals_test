@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="jobs_listing">
+            <script>
+                $(document).ready(function(){
+                	var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login"
+		        		
+                    $("#jobs_list_accordion").html("<img src='/images/load2.gif'>");
+                    $.ajax({
+                        url: "/my_deals/list_matched_jobs_data",
+                        dataType: 'json',
+                        timeout: 120000,
+                        data: {auth_token: auth_token},
+                        success: function(json)
+                        {	 
+                        	if(json.total_count == 0){
+                               $("#jobs_list_accordion").html("<font color='red'>There are no jobs matching your profile. Please make your profile up to date or visit us after some time!</font>");  
+                            }else{
+                            	
+	                            var random_source = '<ul data-role="listview" data-inset="false" data-icon="false" data-divider-theme="b" class="ui-listview" >';
+	                            $.each(json.job_postings, function(i, jbposting){
+	                            	var item = jbposting.job_posting;
+	                            	random_source +=   '<table style="border: 1px solid orange;  border-radius: 10px; width:100%;  margin-top: 1%;"><tbody><tr><td rowspan="2">';
+		                            if(item.employer_image == ''){
+		                            	random_source +=   '<strong>'+item.employer_name+'</strong>';
+		                            }else{
+		                            	random_source +=   '<img src="'+item.employer_image+'" height="100" width="100" style="float: left;margin-left: 1%;">';
+		                            }	
+		                            random_source +=   '</td>';
+		                            random_source +=   '<td colspan="3" style="color: black;">Looking for <strong>'+item.looking_for_job_title+'</strong> in the <strong>'+item.looking_for_job_industry+'</strong> industry';
+		                            random_source +=   '<br/>Location(s): '+item.job_locations;
+		                            random_source +=   '<br/>Last Date: '+item.last_date;
+		                            random_source +=   '<br/>(Hiring <strong>'+item.no_of_position+'</strong> people)';
+		                            random_source +=   '</td>';
+		                            random_source +=   '<td align="right"><a href="apply_job?job_id='+item.id+'&mode=apply_dialog" rel="external"><img src="/images/view_details.png"/></a></td>';
+		                            random_source +=   '</tr></tbody></table>';
+			                	});
+	                            random_source += '</ul>';
+	                            $("#jobs_list_accordion").html(random_source); 
+                        	}
+                      }  
+                    });
+                });
+            </script>
+            <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Matched Job(s) for you"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Matched Job(s) for you"}%>
+			<%end -%>
+            <div data-role="content" id="jobs_list_accordion">
+                <ul data-role="listview" data-inset="false" data-icon="false" data-divider-theme="b" >
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>

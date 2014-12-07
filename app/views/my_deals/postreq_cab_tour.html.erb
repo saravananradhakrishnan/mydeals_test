@@ -1,0 +1,368 @@
+<%
+category = params[:category] 
+scategory = params[:scategory]
+type = params[:type]
+%>
+<html> 
+  <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="post_req_cab_tour" data-theme='b'>
+            <script type="text/javascript">
+                function initialize() {
+                    var options = {
+                        types: ['(cities)'],
+                        componentRestrictions: {country: "IN"}
+                    };
+
+                    var input = document.getElementById('city');
+                    var autocomplete = new google.maps.places.Autocomplete(input, options); // To get the city name
+                }
+                google.maps.event.addDomListener(window, 'load', initialize);
+            </script>
+            <script>
+                function validateForm()
+                {
+                    var valueis = '';
+                    var x = document.forms["cabtour_request_frm"]["cab_starting_point"].value;
+                    if (x  ==  null || x  ==  "")
+                    {
+                        elementform="Please enter strating point Address ";
+                        valueis=elementform+'<br>';
+                        document.getElementById('cab_starting_point').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["landmark"].value;
+                    if (x  ==  null || x  ==  "")
+                    {
+                        elementform="Please enter landmark ";
+                        valueis=elementform+'<br>';
+                        document.getElementById('landmark').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+						 $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x = document.forms["cabtour_request_frm"]["city"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please Enter City";
+                        valueis=elementform+'<br>';
+                        document.getElementById('city').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+		   
+                    var x=document.forms["cabtour_request_frm"]["pickup_day"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter pick up date";
+                        valueis=elementform+'<br>';
+                        document.getElementById('pickup_day').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+						 $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false; return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["pickup_hh"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter pick up time hour(s)";
+                        valueis=elementform+'<br>';
+                        document.getElementById('pickup_hh').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false; return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["pickup_mm"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter pick up time minute(s)";
+                        valueis=elementform+'<br>';
+                        document.getElementById('pickup_mm').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+				 		$("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false; return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["pickup_end_day"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter check out date";
+                        valueis=elementform+'<br>';
+                        document.getElementById('pickup_end_day').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["adult"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter number of passengers";
+                        valueis=elementform+'<br>';
+                        document.getElementById('adult').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["type_of_vehicle"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter vehicle type";
+                        valueis=elementform+'<br>';
+                        document.getElementById('type_of_vehicle').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["ac_non_ac"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please select AC/nonAC";
+                        valueis=elementform+'<br>';
+                        document.getElementById('ac_non_ac').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["price"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter price";
+                        valueis=elementform+'<br>';
+                        document.getElementById('price').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x=document.forms["cabtour_request_frm"]["cab_trip_details"].value;
+                    if (x == null || x == "")
+                    {
+                        elementform="Please enter trip Details";
+                        valueis=elementform+'<br>';
+                        document.getElementById('cab_trip_details').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                    var x = document.forms["cabtour_request_frm"]["term_agreement_decision"].checked;
+                    if(x == false){
+                        elementform="Please check the Cancelation Policy";
+				
+                        valueis=elementform+'<br>';
+                        document.getElementById('term_agreement_decision').focus()
+                        document.getElementById('valerror').innerHTML = valueis;
+                        document.getElementById("valerror").style.display="block";
+                        $("html, body").animate({ scrollTop: 0 }, "slow");
+                        return false;
+                    }
+                }
+            </script> 
+            <script>
+                function post_form(){
+						var auth_token = localStorage.getItem("auth");
+						$("#auth_token").val(auth_token);
+						if(validateForm() == false){
+							return false;
+						}else{
+							var a = '<img src="/images/load2.gif">';
+							document.getElementById('valerror').innerHTML = a;
+				            document.getElementById("valerror").style.display="block";
+							$("html, body").animate({ scrollTop: 0 }, "slow");
+							$.ajax({
+								type : "POST",
+								url : "/my_deals/cab_tour_post",
+								data : $("#cabtour_request_frm").serialize(),
+								dataType : "json",
+								success : function(b) {
+									if(b.success) {
+										document.getElementById('valerror').innerHTML = "<font color='green'>"+b.msg+"</font>";
+										window.location = "/my_deals/buyer_request_list";
+									} else {
+										if(b.msg == "redirect"){
+											location.href="login"
+										}else{
+											document.getElementById('valerror').innerHTML = b.msg;
+											$("html, body").animate({ scrollTop: 0 }, "slow");
+											return false;
+										}
+									}
+								},
+								error : function() {
+									document.getElementById('valerror').innerHTML = b.msg;
+									$("html, body").animate({ scrollTop: 0 }, "slow");
+									return false;
+								}
+							});
+							
+						}
+					}
+            </script>
+            <script type="text/javascript" src="/js/jquery-ui.custom.min.js"></script>
+            <link href="/css/jquery-ui.css" rel="stylesheet" type="text/css"/>
+            <script>
+                $(document).ready(function() {
+                    $("#pickup_day").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                        onSelect: function(selected) {
+                            $("#pickup_end_day").datepicker("option","minDate", selected)
+                        }
+                    });
+                    $("#pickup_end_day").datepicker({dateFormat: 'mm-dd-yy',minDate: 0,
+                        onSelect: function(selected) {
+                            $("#pickup_day").datepicker("option","maxDate", selected)
+                        }
+                    });
+                });
+            </script>
+            <script>
+                function isNumber(evt) {
+                    evt = (evt) ? evt : window.event;
+                    var charCode = (evt.which) ? evt.which : evt.keyCode;
+                    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                        return false;
+                    }
+                    return true;
+                }
+            </script>
+           <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Post a Buy Request for #{type}"}%>
+			<%else -%>
+				<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Bargain for #{type}"}%>
+			<%end -%>
+            <div align="center" data-role="content"> 
+                <form action="" method="post" id="cabtour_request_frm" name="cabtour_request_frm">
+                	<input type="hidden" name="category" id="category" value="<%=category %>">
+		            <input type="hidden" name="scategory" id="scategory" value="<%=scategory %>">
+		            <input type="hidden" name="item_info" id="item_info" value="<%=type%>">
+		            <input type="hidden" name="auth_token" id="auth_token" value="">  
+                    <ul data-role="listview" data-inset="true"> 
+                        <li id="valerror" style="color:#F00; display:none;"></li>
+                        <li> 
+                            <fieldset data-role="controlgroup">
+                                <input type="text" name="cab_starting_point" id="cab_starting_point" placeholder="Starting Point (Full Address)" class="required"> 
+                            </fieldset>  
+                            <fieldset data-role="controlgroup">			
+                                <input type="text" name="landmark" id="landmark" placeholder="Land Mark*">
+                            </fieldset> 
+
+                            <fieldset data-role="controlgroup">
+                                <input type="text" name="city" id="city" placeholder="your City*"> 
+                            </fieldset>
+
+                            <fieldset data-role="controlgroup">
+                                <input type="text" id="pickup_day" name="pickup_day" placeholder="Starting date*" />
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <select  id="pickup_hh" name="pickup_hh" >
+                                    <option value="">Starting Time Hour(s)</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                </select>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <select  id="pickup_mm" name="pickup_mm" >
+                                    <option value="">Starting time minute(s)</option>
+                                    <option value="00">00</option>
+                                    <option value="05">05</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="25">25</option>
+                                    <option value="30">30</option>
+                                    <option value="35">35</option>
+                                    <option value="40">40</option>
+                                    <option value="45">45</option>
+                                    <option value="50">50</option>
+                                    <option value="55">55</option>
+                                </select>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" id="pickup_end_day" name="pickup_end_day" placeholder="Coming Back on*"/>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" id="adult" maxlength="2" name="adult" placeholder="Number of Passengers*" onkeypress="return isNumber(event)"/>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" id="luggage" maxlength="2" name="luggage" placeholder="Number of Bags*" onkeypress="return isNumber(event)"/>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <select name="type_of_vehicle" id="type_of_vehicle">
+                                    <option>type of vehicle</option>
+                                    <option value="Car">Car</option>
+                                    <option value="Van/SUV">Van/SUV</option>
+                                </select>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <select name="ac_non_ac" id="ac_non_ac">
+                                    <option> AC / non AC  </option>
+                                    <option value="AC">AC</option>
+                                    <option value="Non-AC">Non AC</option>
+                                </select>
+                            </fieldset>
+                            <fieldset data-role="controlgroup">
+                                <input type="text" name="price" maxlength="5" id="price" placeholder="Budget Per Day" onkeypress="return isNumber(event)"> 
+                            </fieldset>
+                            <fieldset data-role="controlgroup">  
+                                <input type="text" name="cab_trip_details" id="cab_trip_details" placeholder="Please provide the entire trip details which helps the CAB companies to get you the best offer"> 
+                            </fieldset>
+                            <fieldset data-role="controlgroup"> 
+                                <input type="checkbox" name="term_agreement_decision" id="term_agreement_decision" value="on" style="margin: 0.4%;" data-role="none" data-theme="b" />
+                                <label for="checkbox-8" style="color: grey;margin-left: 3%">By checking this box, you are agreeing to the </label><a href="/my_deals/cancellation"><font color="#2A3FFF"><u>Cancellation & Booking Policy</u></font></a>
+                            </fieldset> 
+                            <div class="ui-grid-a">
+                                <div class="ui-block-a">
+                                    <a href="#"  id="post" onclick="post_form();"><img src="/images/post.png" style="width: 90%;"></a>
+                                </div>
+                                <div class="ui-block-b">
+                                    <a href="/my_deals/buyerhome" id="cancel" rel="external"><img src="/images/cancel.png" style="width: 90%;"></a>
+                                </div>
+                            </div>
+                    </ul> 
+                </form> 
+            </div>
+        </div>
+    </body>
+</html> 

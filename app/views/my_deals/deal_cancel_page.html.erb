@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="/css/custome.css" />
+        <link rel="stylesheet" href="/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+        <link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+        <script src="/js/jquery-1.9.1.js"></script>
+        <script src="/js/jquery.mobile-1.3.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+    </head>
+<body>
+	<div data-role="page" data-theme='b'>
+	    <%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			<%=render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "Transaction Cancel"}%>
+		<%else -%>
+			<%=render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "Transaction Cancel"}%>
+		<%end -%>
+		<div align="center" data-role="content"> 
+	        <ul data-role="listview" data-inset="true"> 
+	            <li>
+	                <div data-role="fieldcontain"   id="image" align="center" style="color: grey;text-align: left;"> 
+	                    <strong>Sorry <%=params[:user_name]%>,your payment to purchase <%=params[:item_name]%> was Canceled. Please try again.</strong></br></br>
+						If you have any quesitons regarding the offer/product, plesae contact us or write to support@mydeals247.com.</br></br>
+						Regards</br> MyDeals247.com Team</br>
+	                </div> 
+	            </li>
+	        </ul> 
+	    </div> 
+	</div>
+</body>
+</html>

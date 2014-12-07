@@ -1,0 +1,2 @@
+require 'cache_fu'
+

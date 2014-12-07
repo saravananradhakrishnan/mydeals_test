@@ -1,0 +1,484 @@
+<html>
+	<head>
+		<title>MyDeals247 </title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/progress_bar.css" />
+		<link rel="stylesheet" href="/css/message_skyblue.css" />
+		<link rel="stylesheet" href="/css/rating.css">
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="/js/message.js"></script>
+		<script src="/js/jquery.countdown.js"></script>
+		<script src="/js/jquery.progressTimer.js"></script>
+	</head>
+	<body>
+		<div data-role="page" id="ad_details" data-theme="b">
+			<style>
+				.VideoBox {
+				    display: block;
+				    height: 193px;
+				    padding: 10px;
+				    border-radius: 8px;
+				    text-align: center;
+				}
+				.style3 {
+					color: #000000;
+					font-weight: bold;
+					font-size: 16px;
+				}
+				.style4 {
+					color: #000000;
+					font-size: 12px;
+					font-weight: bold;
+				}
+				.style5 {color: #000000}
+				.style7 {color: #FFFFFF; font-weight: bold; }
+				.style8 {color: #000000; font-size: 12px; }
+				.style9 {color: #FFFFFF}
+				a
+				{
+				text-decoration:none;
+				}
+				.style10 {
+					font-size: 14px;
+					font-weight: bold;
+					color: #000000;
+				}
+				.style11 {font-size: 14px}
+				.style1{width: 50px;}
+				</style>
+			<script>
+		        var minutes = "";
+                var id = getUrlVars()["id"];
+                var que_count = 0;
+                function getUrlVars() {
+                    var vars = {};
+                    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                        vars[key] = value;
+                    });
+                    return vars;
+                }
+                $(document).ready(function() {
+			        var auth_token = localStorage.getItem("auth");
+			        if(auth_token == null)
+		        		window.location.href = "login" 
+			        $("#ad_id").val(id)
+			        $("#auth_token").val(auth_token)
+			        $("#msg_bar").html("<img src='/images/load2.gif'>");
+			        $.ajax({
+			            url: "/my_deals/quiz_status",
+			            dataType: 'json',
+			            timeout: 20000,
+			            data: {id: id, auth_token: auth_token},
+			            success: function(json)
+			            {
+			                if(json.success) {
+			                	$("#msg_bar").hide();
+			                    $("#proceed_btn").html('<a href=""  onclick="getTOQuestions(\''+json.user_name+'\');"> <img src="/images/proceed.png" style="width: 90%;margin-top:5%;"></a>');
+			                }else{
+			                	document.getElementById("msg_bar").innerHTML = "<font color='red'>" + json.msg + "</font>";
+			                	$("#msg_bar").show();
+			                }
+			            }
+			        });
+			        $.ajax({
+			            url: "/my_deals/ad_info",
+			            dataType: 'json',
+			            timeout: 20000,
+			            data: {id: id, auth_token: auth_token},
+			            success: function(json)
+			            {
+			                $.each(json.ad_info, function(i, item)
+			                {
+			                    minutes = this.minutes;
+			                    $("#minutes_for_ad").val(minutes);
+			                    var val = this.name;
+			                    var id = this.id;
+			                    var desc = this.description;
+			                    var f_name = this.ad_detail_field_name;
+			                    if (desc == null)
+			                        desc = "";
+			                    if (f_name == null)
+			                        f_name = "";
+			                        
+			                    var img = this.coupon_img_file_name;
+			                    var mydiv1 = document.getElementById("image");
+			                    mydiv1.innerHTML = "<font size='+1' color='red'><b>" + this.name + "</font></b><br/> <strong><a href='" + this.target_url + "' style='color:blue;' rel='external' target='_blank'>" + this.target_url + " &nbsp;</a></strong> <br><br/>" + this.ad_detail_field_name + "<br/><br>" + this.ad_quiz_info + "";
+			                    var mydiv2 = document.getElementById("vurl");
+			                    mydiv2.innerHTML = "<center><iframe src='" + this.video_url + "' width='230' height='190'></iframe></center>";
+			                });
+			                var mydiv3 = document.getElementById("qdetail");
+			                var questr = "	<table width='100%'>";
+			                var questr = "	<tr>";
+							questr += "			<td style='width:15px;' align='right'>";
+							questr += "				<div align='center' class='style5 style11 style1'>";
+							questr += "					<strong>Q. No.</strong>";
+							questr += "				</div></td>";
+							questr += "			<td style='width:80%'>";
+							questr += "				<div align='center' class='style11 style5'>";
+							questr += "					<strong>Please answer following questions</strong>";
+							questr += "				</div>";
+							questr += "			</td>";
+							questr += "		</tr>";
+							questr += "		</table>";
+							que_count = 1;
+			                $.each(json.ad_questionaires, function(i, item){
+				                 questr += "   <table width='100%'>";
+				                 questr += "   <tr>";
+								 questr += "		<td style='width:15px;' align='right'>";
+								 questr += "          <div align='center' class='style5 style11'>";
+								 questr += "			<strong>"+que_count+".</strong>";
+								 questr += "		  </div>";
+								 questr += "		  <input type='hidden' name='que_id"+que_count+"' id='que_id"+que_count+"' value='"+item.ad_questionnaire.id+"' />";
+								 questr += "		</td>";
+								 questr += "		<td style='width:80%'><span class='style5 style11'><strong><em>"+item.ad_questionnaire.question+"</em></strong></span></td>";
+								 questr += "	</tr>";
+								 questr += "	</table>";
+			                    var ans = item.ad_questionnaire.answers;
+			                    var answer = ans.split('~');
+			                    questr += "   <table width='100%'>";
+			                    for (var i=0; i < answer.length; i++) {
+									questr += "   		<tr>";
+									questr += "   		<td style='width:15px;' algn='right'>";
+									if (answer[i].trim() == item.ad_questionnaire.correct_answer.trim()){
+										questr += "			<span rel='right_ans' style='color:green;display:none;'><img src='/images/icons/accept.png' border='0' /></span>";
+									}
+									questr += "				<span rel='wrong_ans' id='spn"+que_count+""+i+"' style='color:red;display:none;'></span>";
+									questr += "  		</td>";
+									questr += "   		<td width='90%' align='left'>";
+									params = "\""+answer[i].trim()+"\"";
+									params += ",\""+item.ad_questionnaire.correct_answer.trim()+"\"";
+									params += ",\"spn"+que_count+""+i+"\"";
+									questr += "   		<input type='radio' onclick='check_answer("+params+");' name='group"+que_count+"' value='"+answer[i].trim()+"'>";
+									questr += "   		<span class='style5 style11'>"+answer[i].trim()+"</span>";
+									questr += "   		</td>";
+									questr += "   		</tr>";
+								}
+								questr += "   </table>";
+						       que_count += 1; 
+			                });
+			                 mydiv3.innerHTML += questr;
+			                 $("#details_ul").show();
+			            }
+			        });
+			
+			        $('#result').click(function() {
+			           if(!$('[name="accept_disclaimer"]').is(':checked')){
+							alert("Please accept the disclaimer agreement in order to proceed further!");
+							return false;
+						}
+						var total_questions = parseInt(que_count) - 1;
+						$("#total_questions").val(total_questions);
+						for (var i=1; i <= total_questions; i++) {
+						  var name = "group"+i;	
+						  if(!$('[name="'+name+'"]').is(':checked')){
+						  	alert("Please answer Question#"+i+". All Questions are mandatory.");
+						  	return false;
+						  }	
+						}
+						$("#show_resultDiv").html('<img src="/images/load2.gif" id="loading" alt="Loading" title="Loading"/>');
+						$('html, body').animate({scrollTop:0}, 'slow');
+						$.ajax({
+							type : "POST",
+							url : "/my_deals/validate_quiz",
+							data : $("#questionaireForm").serialize(),
+							dataType : "json",
+							success : function(b) {
+								if(b.success) {
+									$("#final_response").html("<font color='green'>Congratulations! You have Answered the questions correctly. Amount has been credited to your account.</font>");
+									$("#que_ul").toggle("slide");
+									$("#finalresult_ul").toggle("slide");
+									$("#ad_progresser_div").hide();
+                                    $("#response").hide();
+									//$("#show_resultDiv").html('<a href="paid_ads" data-role="button"  data-theme="b" rel="external"> Back To ADs </a>');
+									//$('[data-role="content"]').trigger('create');
+									if(b.url == "")
+									   $("#proceed_further").attr("ref", "/my_deals/paid_ads");
+									else
+									   $("#proceed_further").attr("ref", b.url);
+									      
+									return false;
+								} else { 
+									$("#final_response").html("<font color='red'>Sorry! you didn\'t answer all the questions correctly.<b>Please see the correct answers as shown below. Please try another Ad.</font>");
+									//$("#show_resultDiv").html('<a href="paid_ads" data-role="button"  data-theme="b" style="background: #c7c7c7;" rel="external"> Back To ADs </a>');
+									$('span[rel="right_ans"]').show();
+									$('span[rel="wrong_ans"]').show();
+									$("#show_resultDiv").html("")
+									$("#finalresult_ul").toggle("slide");
+									$("#ad_progresser_div").hide();
+                                    $("#response").hide();
+									if(b.url == "")
+                                       $("#proceed_further").attr("ref", "/my_deals/paid_ads");
+                                    else
+                                       $("#proceed_further").attr("ref", b.url);
+									return false;
+								}
+							},
+							error : function() {
+								$("#response").html("<font color='red'>There was an error submitting the form. Please close this window and try again.</font>");
+								$("#show_resultDiv").html('<a href="paid_ads" data-role="button"  data-theme="b" style="background: #c7c7c7;" rel="external"> Back To ADs </a>');
+								$('[data-role="content"]').trigger('create');
+								$('span[rel="right_ans"]').show();
+								$('span[rel="wrong_ans"]').show();
+								return false;
+							}
+						});
+					});
+					$('#proceed_further').click(function() {
+                        $("#btn_finalDiv").html('<img src="/images/load2.gif" id="loading" alt="Loading" title="Loading"/>');
+                        $('html, body').animate({scrollTop:0}, 'slow');
+                        var rating_input = $('input[name=rating_val]:radio:checked').val();
+                        //var rating_input = $("#rating_val").val();
+                        var time_period = $("#purchase_when").val();
+                        var adv_id = $("#ad_id").val();
+                        var ath_token = $("#auth_token").val();
+                        var href = $('#proceed_further').attr('ref');
+                        if (href == "" || href == undefined)
+                            href = "/my_deals/paid_ads"
+                        $.ajax({
+                            url: "/my_deals/update_feedback",
+                            dataType: 'json',
+                            timeout: 20000,
+                            async: false,
+                            data: {rating_input: rating_input, time_period: time_period, ad_id: adv_id, auth_token: ath_token},
+                            success: function(json)
+                            {
+                              return true;
+                            }
+                        });  
+                        window.location.href = href;
+                    });
+			 	});
+			</script>
+			<script>
+			function changeLabel(period) {
+                var cur_tm_unit = $("#time_txt").text();
+                if(cur_tm_unit == " Minute(s)"){
+                    if ($.countdown.periodsToSeconds(period) < 60) {
+                        $("#time_txt").text(" Second(s)");
+                    }
+                }
+            }
+			function ad_timeOut(){
+			    $("#msg_bar").html("Sorry, "+minutes+" Minutes of your time for the questionnaire is Over!");
+                $("#msg_bar").show();
+                var adv_id = $("#ad_id").val();
+                var ath_token = $("#auth_token").val();
+                var mins_for_ad = $("#minutes_for_ad").val();
+                $.ajax({
+                    type : "POST",
+                    url : "/my_deals/timeout_quiz",
+                    timeout: 20000,
+                    data: {ad_id: adv_id, auth_token: ath_token},
+                    dataType : "json",
+                    success : function(b) {
+                        $("#msg_bar").hide();
+                        $("#ad_progresser_div").hide();
+                        $("#response").html('<div style="color:#D8000C">Sorry! you didn\'t answer all the questions within the time of '+mins_for_ad+' Minutes.<b>Please see the correct answers as shown below. Please try another Ad.</b></div>');
+                        $('span[rel="right_ans"]').show();
+                        $('span[rel="wrong_ans"]').show();
+                        $("#show_resultDiv").html('<a href="paid_ads" data-role="button"  data-theme="b" rel="external"> Back To ADs </a>');
+                        $('[data-role="content"]').trigger('create');
+                        return false
+                    },
+                    error : function() {
+                        $("#msg_bar").hide();
+                        dhtmlx.alert("An internal server error occured, Please try again.");
+                    }
+                });
+            }
+				function seeVedio(){
+			    	$("#details_ul").toggle("slide");;
+			    	$("#video_ul").toggle("slide");
+			    }
+			    function show_questionaire(){
+			    	$("#video_ul").toggle("slide");
+			    	$("#que_ul").toggle("slide");
+			    }
+			    function check_answer(ans, correct_answer, spn){
+					var htm = '<img src="/images/icons/error.png" border="0" />'
+					if(ans != correct_answer){
+						$('#'+spn).html(htm);
+					}	
+				}
+				function getTOQuestions(user_name){
+				    $('html, body').animate({scrollTop:0}, 'slow'); 
+                    dhtmlx.confirm({
+                        title: "Important - Must Read",
+                        type:"confirm-warning",
+                        ok: "Proceed",
+                        cancel: "No, not now",
+                        width: "250px",
+                        text: "Dear <b>"+user_name+"</b>, <br/>The following questionnaire is time sensitive. You need to answer the questions within the time period of <b>"+minutes+" Minutes</b>(being shown on the Ad). Once you agree with the terms and proceed, you will not be allowed to check the Ad one more time. <b>Please do not close or refresh the page</b><br/><br/> <b>Do you want to proceed?</b>",
+                        callback: function(result) {
+                            if (result){
+                                $("#msg_bar").html("Just a moment...");
+                                $("#msg_bar").show();
+                                do_call_initiate();
+                            }else{
+                                return false;   
+                            }
+                        }
+                    });
+                }
+                function do_call_initiate(){
+                    var adv_id = $("#ad_id").val();
+                    var ath_token = $("#auth_token").val();
+                    var mins_for_ad = $("#minutes_for_ad").val();
+                    mins_for_ad = parseInt(mins_for_ad) * 60;
+                    $.ajax({
+                        url: "/my_deals/initiate_quiz",
+                        dataType: 'json',
+                        timeout: 20000,
+                        data: {ad_id: adv_id, auth_token: ath_token},
+                        success: function(json)
+                        {
+                            if(json.success) {
+                                $("#msg_bar").html("");
+                                $("#video_ul").toggle("slide");
+                                $("#que_ul").toggle("slide");
+                                $("#ad_progresser_div").show();
+                                jQuery('#ad_timer').countdown({until: mins_for_ad , compact: true, format:'MS',  onExpiry: ad_timeOut,  onTick: changeLabel});
+                                $("#ad_progressbar").progressTimer({
+                                    timeLimit: parseInt(minutes) * 60,
+                                    warningThreshold: 30,
+                                    baseStyle: 'progress-bar-info',
+                                    warningStyle: 'progress-bar-warning',
+                                    completeStyle: 'progress-bar-danger'
+                                });
+                            }else{
+                                $("#msg_bar").html("");
+                                $("#ad_progresser_div").hide();
+                                return false;
+                            }
+                        }
+                    });
+                }
+			</script>
+			<input type="hidden" name="swcategory" id="swcategory" value="<%=session[:user_type]%>"/>
+			<input type="hidden" name="swcategory" id="swcategory" value="<%=session[:uType]%>"/>
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+			 <%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "AD Questionnaire"}%>
+			<%else -%>
+			 <%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "AD Questionnaire"}%>
+			<%end -%>
+			<div align="center" data-role="content" id="high">
+				<ul data-role="listview" data-inset="true">
+					<li id="msg_bar" class="ui-li ui-li-static ui-body-c"></li>
+				</ul>
+				<ul data-role="listview" data-inset="true" style="display: none;" id="details_ul">
+					<li id="details_ul">
+						<div data-role="fieldcontain" id="image" align="center" style="color: grey;text-align: left;">
+							<span id="error"></span>
+						</div>
+						<div class="ui-grid-a">
+							<div class="ui-block-a" >
+								<a href="#" onclick="seeVedio();"><img src="/images/see_video.png" style="width: 90%;"></a>
+							</div>
+						</div>
+					</li>
+				</ul>
+				<ul data-role="listview" data-inset="true" id="video_ul" style="display: none;">
+					<li data-role="list-divider">
+						Ad Video
+					</li>
+					<li>
+						<div data-role="fieldcontain"  class="VideoBox" id="vurl"></div>
+						<div class="ui-grid-a">
+							<div class="ui-block-a" id="proceed_btn">
+								
+							</div>
+							<div class="ui-block-b">
+								<a href="paid_ads"  id="cancel"><img src="/images/back_to_ads.png" style="width: 90%;margin-top: 5%;"></a>
+							</div>
+						</div>
+					</li>
+				</ul>
+				<ul data-role="listview" data-inset="true" id="que_ul" style="display: none;">
+					<li style="height: 32px;">
+					    <div id="ad_progresser_div" style="width: 100%;text-align: center;margin-bottom: 10px;display: none;">
+                            <div style="width:25%;float: left;margin-right: 10px;"><span style="font-size: 16px;"><strong>Time left to answer</strong></span><br/><span id="ad_timer" style="font-size: 14px;"></span><span id="time_txt" style="font-size: 14px;font-weight: bold"> Minute(s)</span></div>
+                            <div id="ad_progressbar" style="width:72%;float: left"></div>
+                        </div>
+					</li>
+					<li>
+						<div id="response"></div>
+					</li>
+					<li>
+						<form action="" method="post" id="questionaireForm" name="questionaireForm">
+						<div style="color: black">
+							<table style="width: 100%" id="qdetail"></table>
+						</div>
+						<input type="checkbox" id="accept_disclaimer" name="accept_disclaimer" value="chk" checked data-role="none">
+						<input type="hidden" name="auth_token" id="auth_token" value="">
+						<input type="hidden" name="ad_id" id="ad_id" value="">
+						<input type="hidden" name="total_questions" id="total_questions" value="">
+						<input type="hidden" name="minutes_for_ad" id="minutes_for_ad" value="">
+						
+						<label for="disc">I agree that my personal information will be shared with the Advertiser, if I answer all of the aforementioned questions correctly. </label>
+						<div data-theme="a" id="show_resultDiv">
+							<a href="#" data-role="button" id="result" data-theme="b"> Show me the result </a>
+						</div>
+						</form>
+					</li>
+				</ul>
+				<ul data-role="listview" data-inset="true" id="finalresult_ul" style="display: none;">
+                    <li>
+                        <div id="final_response"></div>
+                    </li>
+                    <li>
+                        <form action="" method="post" id="final_result_frm" name="final_result_frm">
+                        	<div>
+                        		<div class="product_rating">
+                        			<div>
+                        				<span>
+                        					How do you rate <span class="campaign_name"></span>?
+                        				</span>
+                        				</div>
+                        				<div class="rating">
+                                            <input type="radio" id="star5" name="rating_val" value="5" /><label for="star5" title="Rocks!">5 stars</label>
+                                            <input type="radio" id="star4" name="rating_val" value="4" /><label for="star4" title="Pretty good">4 stars</label>
+                                            <input type="radio" id="star3" name="rating_val" value="3" /><label for="star3" title="Meh">3 stars</label>
+                                            <input type="radio" id="star2" name="rating_val" value="2" /><label for="star2" title="Kinda bad">2 stars</label>
+                                            <input type="radio" id="star1" name="rating_val" value="1" /><label for="star1" title="big time">1 star</label>
+                                        </div>
+                        		</div>
+                        		<div class="product_interset">
+                        			<div>
+                        			<span></span>Are you interested in purchasing the <span class="campaign_name"></span>?</span>
+                        			</div>
+                        			<div>
+                        				<select id="purchase_when" name="purchase_when" class="textFld">
+                                        <option value="Yes, Immediately">Yes, Immediately</option>
+                                        <option value="After 1 Week">After 1 Week</option>
+                                        <option value="After 1 Month">After 1 Month</option>
+                                        <option value="Not interested now">Not interested now</option>
+                                    </select>
+                        			</div>
+                        		</div>
+                        		<div>
+                        			<span>Share with your friends?</span>
+                        			<div>
+                                        <div>
+                                            &nbsp;<span style="color:#4C35E5;font-weight:bold;float: left;margin-top: 2%vertical-align: middle">SHARE@</span>&nbsp;
+                                            <%= link_to(image_tag("/images/icons/fb-icon.png", :width=> 20, :height => 20, :border => 0, :alt => "Share on Facebook", :title => "Share on Facebook"), "http://www.facebook.com/dialog/feed?app_id=#{Facebook.config[:client_id]}&link=http://mydeals247.com/my_deals/paid_ads_home/home?mode=buyer&picture=http://mydeals247.com/images/toolbar/paid_ads.png&name=Paid Ads&description=Hey%2C+I+just+made+some+money+for+learning+about++ad_name++at+MyDeals247.+You+may+try+too!&redirect_uri=http://mydeals247.com/my_deals/paid_ads_home/home?mode=buyer", :target => "_blank") %>
+                                            <a href="http://twitter.com/home?status=Hey%2C+I+just+made+some+money+for+learning+about++ad_name++at+MyDeals247.+You+may+try+too!" title="Share to Twitter" target="_blank"> <img src="/images/icons/twt-icon.png" alt="Share on Twitter"  border="0" align="absmiddle"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                        	</div>
+                        <div data-theme="a" id="btn_finalDiv" style="margin-top 20px;">
+                            <a href="" data-role="button" id="proceed_further" data-theme="b" ref=""> Proceed </a>
+                        </div>
+                        </form>
+                    </li>
+                </ul>
+			</div>
+		</div>
+	</body>
+</html>

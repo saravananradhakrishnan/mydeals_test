@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="/css/custome.css" />
+		<link rel="stylesheet" href="/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.css" />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.light.css"  id='jQMnDTheme' />
+		<link rel="stylesheet" href="/css/jquerymobile.nativedroid.color.yellow.css" id='jQMnDColor' />
+		<script src="/js/jquery-1.9.1.js"></script>
+		<script src="/js/jquery.mobile-1.3.1.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>
+	</head>
+	<body>
+		<div data-role="page" id="verify_mobile" data-theme='b'>
+			<script>
+			    function validateLogin() {
+			        var x = document.forms["frm2"]["mob"].value;
+			        if (x == null || x == "") {
+			            elementform = "Please Enter Mobile No.";
+			            valueis = elementform + '<br>';
+			            document.getElementById('valerror').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display = "block";
+			            return false;
+			        }
+			        var x = document.forms["frm2"]["mob"].value;
+			        if (isNaN(x) == true){
+			            elementform = "Please Enter Numeric Digits in Mobile No.";
+			            valueis = elementform + '<br>';
+			            document.getElementById('valerror').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display = "block";
+			            return false;
+			        }
+			        var x = document.forms["frm2"]["mob"].value;
+			        if (x.length < 10){
+			            elementform = "Mobile no must be more than or equal to 10 charcter";
+			            valueis = elementform + '<br>';
+			            document.getElementById('valerror').focus()
+			            document.getElementById('valerror').innerHTML = valueis;
+			            document.getElementById("valerror").style.display = "block";
+			            return false;
+			        }
+			    }
+			</script>
+			<script>
+			    $(document).ready(function() {
+			        $('#update').click(function() {
+			            if (validateLogin() != false) {
+			                $("#error").html("Please wait... <img src='/images/load2.gif'>");
+			                var mob = $('#mob').val();
+			                var auth_token = localStorage.getItem("auth");
+			                if (auth_token == null)
+			                    window.location.href = "login"
+			                $.ajax({
+			                    url: "/my_deals/send_code",
+			                    dataType: 'json',
+			                    timeout: 20000,
+			                    data: {mob: mob, auth_token: auth_token},
+			                    success: function(json){
+			                        if (json.success){
+			                            $("#error").html("");
+			                            location.href = "verification_code?msg=" + json.msg;
+			                        }else{
+			                        	$("#error").html("<font color='red'>"+json.msg+"</font>");
+			                        	return false;
+			                        }
+			                        
+			                    },
+								error : function() {
+									$('#error').html("<font color='red'>Error occured while sending code as SMS, Please try again.</font>");
+									return false;
+								}
+			                });
+			            }
+			        });
+			
+			    });
+			</script>      	
+			<%if !session[:uType].blank? && session[:uType] == "buyer" %>
+				<%= render :partial => "my_deals/buyer_sub_menu" , :locals => {:header => "My Profile"}%>
+			<%else -%>
+				<%= render :partial => "my_deals/seller_sub_menu" , :locals => {:header => "My Profile"}%>
+			<%end -%>
+			<div align="center" data-role="content">
+				<span id="error"></span>
+				<form action="" method="post" id="frm2">
+					<ul data-role="listview" data-inset="true">
+						<li data-role="list-divider">
+							Verify your account
+						</li>
+						<li id="valerror" style="display:block;"><b>You're almost done! We just need to verify your mobile number to be able to get benifit of paid Ads.<b></li>
+						<li>
+							<fieldset data-role="controlgroup">
+								Mobile Number:
+								<input type="text" name="mob" id="mob" value="<%=params[:mnumber]%>" />
+								<span id="iname_error"></span>
+							</fieldset>
+							<div class="ui-grid-a">
+								<div class="">
+									<a href="#" data-theme="c" data-role="button" id="update">Send Verification Code</a>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

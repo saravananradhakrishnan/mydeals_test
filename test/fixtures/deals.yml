@@ -1,0 +1,31 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: MyString
+  category_id: 1
+  start_date: 2011-04-25 17:57:40
+  end_date: 2011-04-25 17:57:40
+  actual_price: MyString
+  base_price: MyString
+  shipping: MyString
+  discount: MyString
+  max_qty: 1
+  location: MyString
+  zipcode: MyString
+  bought_count: 1
+  addl_disc_offr: MyString
+
+two:
+  name: MyString
+  category_id: 1
+  start_date: 2011-04-25 17:57:40
+  end_date: 2011-04-25 17:57:40
+  actual_price: MyString
+  base_price: MyString
+  shipping: MyString
+  discount: MyString
+  max_qty: 1
+  location: MyString
+  zipcode: MyString
+  bought_count: 1
+  addl_disc_offr: MyString
